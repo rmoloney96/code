@@ -1,0 +1,9 @@
+digraph G {
+     Industrial -> Housing [dir="both"]
+     Industrial -> Childcare
+     Industrial -> Transport
+     Industrial -> Health
+     Industrial -> Education [dir="both"]
+     Housing -> Transport
+     Housing -> Childcare
+}
