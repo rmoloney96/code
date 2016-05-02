@@ -1,0 +1,17 @@
+#!/usr/bin/env python
+import random
+
+WF = "/home/francoisbabeuf/lib/google-10000-english/google-10000-english-4+.txt"
+SIZE = 8906
+password = ""
+
+for i in range(0,4):
+    fp = open(WF)
+    num = random.randint(0,SIZE)
+    for i, line in enumerate(fp):
+        if i == num:
+            password += line.strip() + " "
+            break
+    fp.close()
+
+print password
