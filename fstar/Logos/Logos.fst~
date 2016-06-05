@@ -1,0 +1,21 @@
+
+module Prolog
+
+open FStar.List
+open FStar.Nat
+
+type list 'a = 
+  | Nil : list 'a 
+  | Cons : hd : 'a -> tl : list 'a -> list 'a 
+
+val hd : list 'a 
+let hd x = match x with
+| Nil -> raise "Halt" 
+| Cons h t -> t
+
+  (* 
+	 let rec plus x y = 
+	 match x with
+	 | 0 -> y 
+	 | n -> plus (n - 1) (1 + y)
+	 *)

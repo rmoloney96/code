@@ -1,0 +1,44 @@
+@prefix : <http://dacura.cs.tcd.ie/data/seshat#> .
+@prefix cio: <http://www.w3.org/2015/rdfcio#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+
+:Entity a owl:Class.
+
+:Pizza a owl:Class ;
+	   rdfs:label "Pizza".
+
+:Steak a owl:Class ;
+	   rdfs:label "Steak" .
+
+:Order a owl:Class ;
+	   rdfs:label "Order" ;
+	   owl:unionOf ([ owl:disjointUnionOf ( :Pizza :Steak ) ]
+	   			    :Entity).
+
+:topping a owl:ObjectProperty ;
+   rdfs:label "topping" ;
+   rdfs:domain :Pizza ;
+   rdfs:range :Topping .
+
+:sauce a owl:ObjectProperty ;
+   rdfs:label "sauce" ;
+   rdfs:domain :Sauce ;
+   rdfs:range xsd:nonNegativeInteger .
+
+:SauceRestriction a owl:Restriction ;
+	      owl:onProperty :sauce ;
+	      owl:cardinality "1"^^xsd:nonNegativeInteger .
+
+:ToppingRestriction a owl:Restriction ;
+	      owl:onProperty :topping ;
+	      owl:minCardinality "1"^^xsd:nonNegativeInteger .
+
+:Sauce a owl:Class ;
+	   rdfs:label "Sauce" .
+
+:Topping a owl:Class ;
+		 rdfs:label "Topping" .

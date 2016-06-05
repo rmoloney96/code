@@ -1,0 +1,2031 @@
+@prefix seshat: <http://dacura.cs.tcd.ie/data/seshat#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix dc11: <http://purl.org/dc/elements/1.1/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dacura: <http://dacura.cs.tcd.ie/data/dacura#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix ns0: <http://localhost/all/ontology/seshat/> .
+
+
+  seshat: [
+    a owl:Ontology ;
+    dc11:title "Seshat Global History Databank Ontology" ;
+    rdfs:comment "The Seshat Global History Databank ontology is designed to describe human societies throughout time." ;
+    rdfs:label "Seshat Global History Databank Ontology" ;
+    owl:versionInfo "0.1.16" ;
+    dc11:date "2015-11-10" ;
+    dc11:creator "Rob Brennan", "Kevin Feeney", "Gavin Mendel-Gleason" ;
+    dc11:contributor "Odhran Gavin", "Bojan Bozic", "Pieter Francois", "Harvey Whitehouse", "Arkadiusz Marciniak", "Thomas E. Currie", "Christopher Chase-Dunn", "Jack A. Goldstone", "J. G. Manning", "Peter N. Peregrine", "Frances Reynolds", "Peter J. Richerson", "Enrico Spolaore", "Romain Wacziarg", "Douglas R. White", "David S. Wilson", "Andrey Korotayev", "David Baker", "Johannes Preiser-Kapeller", "Nikolay Kradin", "Daniel Hoyer", "Peter Turchin" ;
+    dc11:rights "This ontology is distributed under a Creative Commons Attribution License - http://creativecommons.org/licenses/by/3.0" ;
+    dc11:description "This ontology will be used by the Evolution Institute and its partners to describe time series data collected about all human societies."
+  ] ;
+  seshat:ImageVariable [
+    a owl:Class ;
+    rdfs:subClassOf dacura:UncertainTemporalAnyURIDataVariable ;
+    rdfs:label "Image" ;
+    rdfs:comment "A reference to an image file."
+  ] ;
+  seshat:LinearDimension [
+    a owl:Class ;
+    rdfs:subClassOf dacura:UncertainTemporalNonNegativeIntegerDataVariable ;
+    rdfs:label "Linear dimension" ;
+    rdfs:comment "A datatype object used to specify a height, length, width or other linear distance measured in metres."
+  ] ;
+  seshat:HumanEffort [
+    a owl:Class ;
+    rdfs:subClassOf dacura:UncertainTemporalNonNegativeIntegerDataVariable ;
+    rdfs:label "Human Effort" ;
+    rdfs:comment "A datatype object used to specify a number of years of human effort, for example to express a cost."
+  ] ;
+  seshat:NameVariable [
+    a owl:Class ;
+    rdfs:subClassOf dacura:UncertainTemporalStringDataVariable ;
+    rdfs:label "Name Variable" ;
+    rdfs:comment "A variable holding a name of a seshat entity."
+  ] ;
+  seshat:TimeDaysVariable [
+    a owl:Class ;
+    rdfs:subClassOf dacura:UncertainTemporalFloatDataVariable ;
+    rdfs:label "Time Days Variable", "Seshat variable for recoding a time in days as a measure of speed." ;
+    dacura:unitOfMeasure seshat:day
+  ] ;
+  seshat:TimeYearsVariable [
+    a owl:Class ;
+    rdfs:subClassOf dacura:UncertainTemporalNonNegativeIntegerDataVariable ;
+    rdfs:label "Time Years Variable", "Seshat variable for recoding a time in years." ;
+    seshat:unitOfMeasure seshat:year
+  ] ;
+  seshat:TemporalInstantValueRestriction [
+    a owl:Restriction ;
+    rdfs:label "Temporal Instant Value Restriction" ;
+    rdfs:comment "Assures that TemporalInstant value is a proper dacura:Instant." ;
+    owl:onProperty dacura:definiteValue ;
+    owl:allValuesFrom dacura:Instant
+  ] ;
+  seshat:TemporalInstantRangeMinValueRestriction [
+    a owl:Restriction ;
+    rdfs:label "Temporal Instant Min Value Restriction" ;
+    rdfs:comment "Assures that TemporalInstant min value is a proper dacura:Instant." ;
+    owl:onProperty dacura:minValue ;
+    owl:allValuesFrom dacura:Instant
+  ] ;
+  seshat:TemporalInstantRangeMaxValueRestriction [
+    a owl:Restriction ;
+    rdfs:label "Temporal Instant Max Value Restriction" ;
+    rdfs:comment "Assures that TemporalInstant max value is a proper dacura:Instant." ;
+    owl:onProperty dacura:maxValue ;
+    owl:allValuesFrom dacura:Instant
+  ] ;
+  seshat:TemporalInstantBagOfValuesRestriction [
+    a owl:Restriction ;
+    rdfs:label "Temporal Instant Bag of Values Restriction" ;
+    rdfs:comment "Assures that TemporalInstant bag value has all elements of type dacura:Instant." ;
+    owl:onProperty dacura:valuesFrom ;
+    owl:allValuesFrom dacura:Instant
+  ] ;
+  seshat:TemporalInstantVariable [
+    a owl:Class ;
+    rdfs:subClassOf dacura:UncertainTemporalVariable ;
+    rdfs:label "Temporal Instant Variable" ;
+    rdfs:comment "A variable holding a date or time associated with a seshat entity." ;
+    owl:intersectionOf <http://localhost/all/ontology/seshat/seshat1>
+  ] ;
+  seshat:DurationValueRestriction [
+    a owl:Restriction ;
+    rdfs:label "Duration Value Restriction" ;
+    rdfs:comment "Assures that Duration value is a proper dacura:Interval." ;
+    owl:onProperty dacura:definiteValue ;
+    owl:allValuesFrom dacura:Interval
+  ] ;
+  seshat:DurationRangeMinValueRestriction [
+    a owl:Restriction ;
+    rdfs:label "Duration Min Value Restriction" ;
+    rdfs:comment "Assures that Duration min value is a proper dacura:Interval." ;
+    owl:onProperty dacura:minValue ;
+    owl:allValuesFrom dacura:Interval
+  ] ;
+  seshat:DurationRangeMaxValueRestriction [
+    a owl:Restriction ;
+    rdfs:label "Duration Max Value Restriction" ;
+    rdfs:comment "Assures that Duration max value is a proper dacura:Interval." ;
+    owl:onProperty dacura:maxValue ;
+    owl:allValuesFrom dacura:Interval
+  ] ;
+  seshat:DurationBagOfValuesRestriction [
+    a owl:Restriction ;
+    rdfs:label "Duration Bag of Values Restriction" ;
+    rdfs:comment "Assures that Duration bag value has all elements of type dacura:Interval." ;
+    owl:onProperty dacura:valuesFrom ;
+    owl:allValuesFrom dacura:Interval
+  ] ;
+  seshat:DurationVariable [
+    a owl:Class ;
+    rdfs:subClassOf dacura:UncertainTemporalVariable ;
+    rdfs:label "Duration Variable" ;
+    rdfs:comment "Seshat variable to hold the duration of a seshat:Temporal Entity." ;
+    owl:intersectionOf <http://localhost/all/ontology/seshat/seshat6>
+  ] ;
+  seshat:PoliticalAuthorityValueRestriction [
+    a owl:Restriction ;
+    rdfs:label "Political Authority Value Restriction" ;
+    rdfs:comment "Assures that PoliticalAuthority value is a proper seshat:PoliticalAuthority." ;
+    owl:onProperty dacura:definiteValue ;
+    owl:allValuesFrom seshat:PoliticalAuthority
+  ] ;
+  seshat:PoliticalAuthorityRangeMinValueRestriction [
+    a owl:Restriction ;
+    rdfs:label "Political Authority Min Value Restriction" ;
+    rdfs:comment "Assures that PoliticalAuthority min value is a proper seshat:PoliticalAuthority." ;
+    owl:onProperty dacura:minValue ;
+    owl:allValuesFrom seshat:PoliticalAuthority
+  ] ;
+  seshat:PoliticalAuthorityRangeMaxValueRestriction [
+    a owl:Restriction ;
+    rdfs:label "Political Authority Max Value Restriction" ;
+    rdfs:comment "Assures that PoliticalAuthority max value is a proper seshat:PoliticalAuthority." ;
+    owl:onProperty dacura:maxValue ;
+    owl:allValuesFrom seshat:PoliticalAuthority
+  ] ;
+  seshat:PoliticalAuthorityBagOfValuesRestriction [
+    a owl:Restriction ;
+    rdfs:label "Political Authority Bag of Values Restriction" ;
+    rdfs:comment "Assures that PoliticalAuthority bag value has all elements of type seshat:PoliticalAuthority." ;
+    owl:onProperty dacura:valuesFrom ;
+    owl:allValuesFrom seshat:PoliticalAuthority
+  ] ;
+  seshat:PoliticalAuthorityVariable [
+    a owl:Class ;
+    rdfs:subClassOf dacura:UncertainTemporalVariable ;
+    rdfs:label "Political Authority Variable" ;
+    rdfs:comment "The value of a seshat variable that refers to a seshat:Political Authority entity." ;
+    owl:intersectionOf <http://localhost/all/ontology/seshat/seshat11>
+  ] ;
+  seshat:PopulationVariable [
+    a owl:Class ;
+    rdfs:subClassOf dacura:UncertainTemporalNonNegativeIntegerDataVariable ;
+    rdfs:label "Population Variable" ;
+    rdfs:comment "Seshat variable to hold a population size value." ;
+    seshat:unitOfMeasure seshat:numPeople
+  ] ;
+  seshat:SupraculturalEntityValueRestriction [
+    a owl:Restriction ;
+    rdfs:label "Supracultural Entity Value Restriction" ;
+    rdfs:comment "Assures that SupraculturalEntity value is a proper seshat:SupraculturalEntity." ;
+    owl:onProperty dacura:definiteValue ;
+    owl:allValuesFrom seshat:SupraculturalEntity
+  ] ;
+  seshat:SupraculturalEntityRangeMinValueRestriction [
+    a owl:Restriction ;
+    rdfs:label "Supracultural Entity Min Value Restriction" ;
+    rdfs:comment "Assures that SupraculturalEntity min value is a proper seshat:SupraculturalEntity." ;
+    owl:onProperty dacura:minValue ;
+    owl:allValuesFrom seshat:SupraculturalEntity
+  ] ;
+  seshat:SupraculturalEntityRangeMaxValueRestriction [
+    a owl:Restriction ;
+    rdfs:label "Supracultural Entity Max Value Restriction" ;
+    rdfs:comment "Assures that SupraculturalEntity max value is a proper seshat:SupraculturalEntity." ;
+    owl:onProperty dacura:maxValue ;
+    owl:allValuesFrom seshat:SupraculturalEntity
+  ] ;
+  seshat:SupraculturalEntityBagOfValuesRestriction [
+    a owl:Restriction ;
+    rdfs:label "Supracultural Entity Bag of Values Restriction" ;
+    rdfs:comment "Assures that SupraculturalEntity bag value has all elements of type seshat:SupraculturalEntity." ;
+    owl:onProperty dacura:valuesFrom ;
+    owl:allValuesFrom seshat:SupraculturalEntity
+  ] ;
+  seshat:SupraculturalEntityVariable [
+    a owl:Class ;
+    rdfs:subClassOf dacura:UncertainTemporalVariable ;
+    rdfs:label "Supracultural Entity Variable" ;
+    rdfs:comment "Seshat variable to hold a supracultural entity." ;
+    owl:intersectionOf <http://localhost/all/ontology/seshat/seshat16>
+  ] ;
+  seshat:OrganisationValueRestriction [
+    a owl:Restriction ;
+    rdfs:label "Organisation Value Restriction" ;
+    rdfs:comment "Assures that Organisation value is a proper seshat:Organisation." ;
+    owl:onProperty dacura:definiteValue ;
+    owl:allValuesFrom seshat:Organisation
+  ] ;
+  seshat:OrganisationRangeMinValueRestriction [
+    a owl:Restriction ;
+    rdfs:label "Organisation Min Value Restriction" ;
+    rdfs:comment "Assures that Organisation min value is a proper seshat:Organisation." ;
+    owl:onProperty dacura:minValue ;
+    owl:allValuesFrom seshat:Organisation
+  ] ;
+  seshat:OrganisationRangeMaxValueRestriction [
+    a owl:Restriction ;
+    rdfs:label "Organisation Max Value Restriction" ;
+    rdfs:comment "Assures that Organisation max value is a proper seshat:Organisation." ;
+    owl:onProperty dacura:maxValue ;
+    owl:allValuesFrom seshat:Organisation
+  ] ;
+  seshat:OrganisationBagOfValuesRestriction [
+    a owl:Restriction ;
+    rdfs:label "Organisation Bag of Values Restriction" ;
+    rdfs:comment "Assures that Organisation bag value has all elements of type seshat:Organisation." ;
+    owl:onProperty dacura:valuesFrom ;
+    owl:allValuesFrom seshat:Organisation
+  ] ;
+  seshat:OrganisationVariable [
+    a owl:Class ;
+    rdfs:subClassOf dacura:UncertainTemporalVariable ;
+    rdfs:label "Organisation Variable" ;
+    rdfs:comment "This is the class of seshat variables that have a seshat:Organisation as their value type. Adding this class allows us to model super-properties that respect the seshat variable structure based on multiple inheritance to deal with temporal scoping, uncertainty  while specifying a domain." ;
+    owl:intersectionOf <http://localhost/all/ontology/seshat/seshat21>
+  ] ;
+  seshat:CityValueRestriction [
+    a owl:Restriction ;
+    rdfs:label "City Value Restriction" ;
+    rdfs:comment "Assures that City value is a proper seshat:City." ;
+    owl:onProperty dacura:definiteValue ;
+    owl:allValuesFrom seshat:City
+  ] ;
+  seshat:CityRangeMinValueRestriction [
+    a owl:Restriction ;
+    rdfs:label "City Min Value Restriction" ;
+    rdfs:comment "Assures that City min value is a proper seshat:City." ;
+    owl:onProperty dacura:minValue ;
+    owl:allValuesFrom seshat:City
+  ] ;
+  seshat:CityRangeMaxValueRestriction [
+    a owl:Restriction ;
+    rdfs:label "City Max Value Restriction" ;
+    rdfs:comment "Assures that City max value is a proper seshat:City." ;
+    owl:onProperty dacura:maxValue ;
+    owl:allValuesFrom seshat:City
+  ] ;
+  seshat:CityBagOfValuesRestriction [
+    a owl:Restriction ;
+    rdfs:label "City Bag of Values Restriction" ;
+    rdfs:comment "Assures that City bag value has all elements of type seshat:City." ;
+    owl:onProperty dacura:valuesFrom ;
+    owl:allValuesFrom seshat:City
+  ] ;
+  seshat:CityVariable [
+    a owl:Class ;
+    rdfs:subClassOf dacura:UncertainTemporalVariable ;
+    rdfs:label "City Variable" ;
+    rdfs:comment "This is the class of seshat variables that have a seshat:City as their value type. Adding this class allows us to model super-properties that respect the seshat variable structure based on multiple inheritance to deal with temporal scoping, uncertainty  while specifying a domain." ;
+    owl:intersectionOf <http://localhost/all/ontology/seshat/seshat26>
+  ] ;
+  seshat:NavalEngagementValueRestriction [
+    a owl:Restriction ;
+    rdfs:label "Naval Engagement Value Restriction" ;
+    rdfs:comment "Assures that NavalEngagement value is a proper  seshat:NavalEngagement." ;
+    owl:onProperty dacura:definiteValue ;
+    owl:allValuesFrom seshat:NavalEngagement
+  ] ;
+  seshat:NavalEngagementRangeMinValueRestriction [
+    a owl:Restriction ;
+    rdfs:label "Naval Engagement Min Value Restriction" ;
+    rdfs:comment "Assures that NavalEngagement min value is a proper  seshat:NavalEngagement." ;
+    owl:onProperty dacura:minValue ;
+    owl:allValuesFrom seshat:NavalEngagement
+  ] ;
+  seshat:NavalEngagementRangeMaxValueRestriction [
+    a owl:Restriction ;
+    rdfs:label "Naval Engagement Max Value Restriction" ;
+    rdfs:comment "Assures that NavalEngagement max value is a proper  seshat:NavalEngagement." ;
+    owl:onProperty dacura:maxValue ;
+    owl:allValuesFrom seshat:NavalEngagement
+  ] ;
+  seshat:NavalEngagementBagOfValuesRestriction [
+    a owl:Restriction ;
+    rdfs:label "Naval Engagement Bag of Values Restriction" ;
+    rdfs:comment "Assures that NavalEngagement bag value has all elements of type  seshat:NavalEngagement." ;
+    owl:onProperty dacura:valuesFrom ;
+    owl:allValuesFrom seshat:NavalEngagement
+  ] ;
+  seshat:NavalEngagementVariable [
+    a owl:Class ;
+    rdfs:subClassOf dacura:UncertainTemporalVariable ;
+    rdfs:label "Naval Engagement Variable" ;
+    rdfs:comment "This is the class of seshat variables that have a seshat:NavalEngagement as their value type." ;
+    owl:intersectionOf <http://localhost/all/ontology/seshat/seshat31>
+  ] ;
+  seshat:LandBattleValueRestriction [
+    a owl:Restriction ;
+    rdfs:label "Land Battle Value Restriction" ;
+    rdfs:comment "Assures that LandBattle value is a proper seshat:LandBattle." ;
+    owl:onProperty dacura:definiteValue ;
+    owl:allValuesFrom seshat:LandBattle
+  ] ;
+  seshat:LandBattleRangeMinValueRestriction [
+    a owl:Restriction ;
+    rdfs:label "Land Battle Min Value Restriction" ;
+    rdfs:comment "Assures that LandBattle min value is a proper seshat:LandBattle." ;
+    owl:onProperty dacura:minValue ;
+    owl:allValuesFrom seshat:LandBattle
+  ] ;
+  seshat:LandBattleRangeMaxValueRestriction [
+    a owl:Restriction ;
+    rdfs:label "Land Battle Max Value Restriction" ;
+    rdfs:comment "Assures that LandBattle max value is a proper seshat:LandBattle." ;
+    owl:onProperty dacura:maxValue ;
+    owl:allValuesFrom seshat:LandBattle
+  ] ;
+  seshat:LandBattleBagOfValuesRestriction [
+    a owl:Restriction ;
+    rdfs:label "Land Battle Bag of Values Restriction" ;
+    rdfs:comment "Assures that LandBattle bag value has all elements of type seshat:LandBattle." ;
+    owl:onProperty dacura:valuesFrom ;
+    owl:allValuesFrom seshat:LandBattle
+  ] ;
+  seshat:LandBattleVariable [
+    a owl:Class ;
+    rdfs:subClassOf dacura:UncertainTemporalVariable ;
+    rdfs:label "Land Battle Variable" ;
+    rdfs:comment "This is the class of seshat variables that have a seshat:LandBattle as their value type." ;
+    owl:intersectionOf <http://localhost/all/ontology/seshat/seshat36>
+  ] ;
+  seshat:SiegeValueRestriction [
+    a owl:Restriction ;
+    rdfs:label "Siege Value Restriction" ;
+    rdfs:comment "Assures that Siege value is a proper seshat:Siege." ;
+    owl:onProperty dacura:definiteValue ;
+    owl:allValuesFrom seshat:Siege
+  ] ;
+  seshat:SiegeRangeMinValueRestriction [
+    a owl:Restriction ;
+    rdfs:label "Siege Min Value Restriction" ;
+    rdfs:comment "Assures that Siege min value is a proper seshat:Siege." ;
+    owl:onProperty dacura:minValue ;
+    owl:allValuesFrom seshat:Siege
+  ] ;
+  seshat:SiegeRangeMaxValueRestriction [
+    a owl:Restriction ;
+    rdfs:label "Siege Max Value Restriction" ;
+    rdfs:comment "Assures that Siege max value is a proper seshat:Siege." ;
+    owl:onProperty dacura:maxValue ;
+    owl:allValuesFrom seshat:Siege
+  ] ;
+  seshat:SiegeBagOfValuesRestriction [
+    a owl:Restriction ;
+    rdfs:label "Siege Bag of Values Restriction" ;
+    rdfs:comment "Assures that Siege bag value has all elements of type seshat:Siege." ;
+    owl:onProperty dacura:valuesFrom ;
+    owl:allValuesFrom seshat:Siege
+  ] ;
+  seshat:SiegeVariable [
+    a owl:Class ;
+    rdfs:subClassOf dacura:UncertainTemporalVariable ;
+    rdfs:label "Siege Variable" ;
+    rdfs:comment "This is the class of seshat variables that have a seshat:Siege as their value type." ;
+    owl:intersectionOf <http://localhost/all/ontology/seshat/seshat41>
+  ] ;
+  seshat:LanguageValueRestriction [
+    a owl:Restriction ;
+    rdfs:label "Language Value Restriction" ;
+    rdfs:comment "Assures that Language value is a proper seshat:Language." ;
+    owl:onProperty dacura:definiteValue ;
+    owl:allValuesFrom seshat:Language
+  ] ;
+  seshat:LanguageRangeMinValueRestriction [
+    a owl:Restriction ;
+    rdfs:label "Language Min Value Restriction" ;
+    rdfs:comment "Assures that Language min value is a proper seshat:Language." ;
+    owl:onProperty dacura:minValue ;
+    owl:allValuesFrom seshat:Language
+  ] ;
+  seshat:LanguageRangeMaxValueRestriction [
+    a owl:Restriction ;
+    rdfs:label "Language Max Value Restriction" ;
+    rdfs:comment "Assures that Language max value is a proper seshat:Language." ;
+    owl:onProperty dacura:maxValue ;
+    owl:allValuesFrom seshat:Language
+  ] ;
+  seshat:LanguageBagOfValuesRestriction [
+    a owl:Restriction ;
+    rdfs:label "Language Bag of Values Restriction" ;
+    rdfs:comment "Assures that Language bag value has all elements of type seshat:Language." ;
+    owl:onProperty dacura:valuesFrom ;
+    owl:allValuesFrom seshat:Language
+  ] ;
+  seshat:LanguageVariable [
+    a owl:Class ;
+    rdfs:subClassOf dacura:UncertainTemporalVariable ;
+    rdfs:label "Language Variable" ;
+    rdfs:comment "Describes a seshat:Language variable for a seshat:Organisation." ;
+    owl:intersectionOf <http://localhost/all/ontology/seshat/seshat46>
+  ] ;
+  seshat:LevelsVariable [
+    a owl:Class ;
+    rdfs:subClassOf dacura:UncertainTemporalNonNegativeIntegerDataVariable ;
+    rdfs:label "Levels Variable" ;
+    rdfs:comment "Seshat variable to hold a number of levels, such as in a hierarchy." ;
+    dacura:unitOfMeasure seshat:levels
+  ] ;
+  seshat:BuildingValueRestriction [
+    a owl:Restriction ;
+    rdfs:label "Building Value Restriction" ;
+    rdfs:comment "Assures that Building value is a proper seshat:Building." ;
+    owl:onProperty dacura:definiteValue ;
+    owl:allValuesFrom seshat:Building
+  ] ;
+  seshat:BuildingRangeMinValueRestriction [
+    a owl:Restriction ;
+    rdfs:label "Building Min Value Restriction" ;
+    rdfs:comment "Assures that Building min value is a proper seshat:Building." ;
+    owl:onProperty dacura:minValue ;
+    owl:allValuesFrom seshat:Building
+  ] ;
+  seshat:BuildingRangeMaxValueRestriction [
+    a owl:Restriction ;
+    rdfs:label "Building Max Value Restriction" ;
+    rdfs:comment "Assures that Building max value is a proper seshat:Building." ;
+    owl:onProperty dacura:maxValue ;
+    owl:allValuesFrom seshat:Building
+  ] ;
+  seshat:BuildingBagOfValuesRestriction [
+    a owl:Restriction ;
+    rdfs:label "Building Bag of Values Restriction" ;
+    rdfs:comment "Assures that Building bag value has all elements of type seshat:Building." ;
+    owl:onProperty dacura:valuesFrom ;
+    owl:allValuesFrom seshat:Building
+  ] ;
+  seshat:BuildingVariable [
+    a owl:Class ;
+    rdfs:subClassOf dacura:UncertainTemporalVariable ;
+    rdfs:label "Building Variable" ;
+    rdfs:comment "A generic Building Variable." ;
+    owl:intersectionOf <http://localhost/all/ontology/seshat/seshat51>
+  ] ;
+  seshat:LinearDimensionVariable [
+    a owl:Class ;
+    rdfs:subClassOf dacura:UncertainTemporalNonNegativeIntegerDataVariable ;
+    rdfs:label "Linear Dimension Variable" ;
+    rdfs:comment "A Linear dimension Variable measured in metres. " ;
+    dacura:unitOfMeasure seshat:meters
+  ] ;
+  seshat:CostVariable [
+    rdfs:subClassOf seshat:HumanEffort ;
+    rdfs:label "Cost Variable" ;
+    rdfs:comment "Used for buildings"
+  ] ;
+  seshat:Entity [
+    a owl:Class ;
+    rdfs:subClassOf dacura:Entity ;
+    rdfs:label "Seshat Entitity" ;
+    rdfs:comment "This is the super-class of all primary Seshat entities - the units of data collection. For example Organisations, Polities, Territories and NGAs."
+  ] ;
+  seshat:TemporalEntity [
+    a owl:Class ;
+    rdfs:subClassOf seshat:Entity ;
+    rdfs:label "temporal entity" ;
+    rdfs:comment "An abstract concept describing anything that must have temporal bounds."
+  ] ;
+  seshat:Organisation [
+    a owl:Class ;
+    rdfs:subClassOf seshat:TemporalEntity ;
+    owl:disjointWith seshat:Territory ;
+    rdfs:label "Organisation" ;
+    rdfs:comment "An abstract concept describing human social groups."
+  ] ;
+  seshat:PoliticalAuthority [
+    a owl:Class ;
+    rdfs:subClassOf seshat:Organisation ;
+    rdfs:label "Political Authority" ;
+    rdfs:comment "A derived concept covering human social groups with some self-governing powers."
+  ] ;
+  seshat:SupraculturalEntity [
+    a owl:Class ;
+    rdfs:subClassOf seshat:Organisation ;
+    rdfs:label "Supracultural Entity" ;
+    rdfs:comment "Political Authority entities are often embedded within larger-scale cultural groupings of polities or quasipolities. These are sometimes referred to as 'civilizations'. For example, medieval European kingdoms were part of Latin Christendom. During the periods of disunity in China, warring states there, nevertheless, belonged to the same Chinese cultural sphere. Archaeologists often use 'archaeological traditions' to denote such large-scale cultural entities (for example, Peregrine's Atlas of Cultural Evolution). Note, 'supracultural entity' refers to cultural interdependence, and is distinct from a political confederation or alliance, which should be coded under 'supra-polity relations.'."
+  ] ;
+  seshat:SubPolity [
+    a owl:Class ;
+    rdfs:subClassOf seshat:PoliticalAuthority ;
+    rdfs:label "Sub-polity" ;
+    rdfs:comment "A derived concept covering human social groups that are temporal, geographic or political components of other human social groups."
+  ] ;
+  seshat:Polity [
+    a owl:Class ;
+    rdfs:subClassOf seshat:PoliticalAuthority ;
+    rdfs:label "Polity" ;
+    rdfs:comment "A polity is defined as an independent political unit. Kinds of polities range from villages (local communities) through simple and complex chiefdoms to states and empires. A polity can be either centralized or not (e.g., organized as a confederation). What distinguishes a polity from other human groupings and organizations is that it is politically independent of any overarching authority; it possesses sovereignty. Polities are defined spatially by the area enclosed within a boundary on the world map. There may be more than one such areas. Polities are dynamical entities, and thus their geographical extent may change with time. Thus, typically each polity will be defined by a set of multiple boundaries, each for a specified period of time. For prehistoric periods and for NGAs populated by a multitude of small-scale polities we use a variant called quasi-polity."
+  ] ;
+  seshat:QuasiPolity [
+    a owl:Class ;
+    rdfs:subClassOf seshat:PoliticalAuthority ;
+    rdfs:label "Quasi-polity" ;
+    rdfs:comment " The polity-based approach is not feasible for those periods when a NGA is divided up among a multitude of small-scale polities (e.g., independent villages or even many small chiefdoms). In this instance we use the concept of 'quasi-polity'. Similarly, for societies known only archaeologically we may not be able to establish the boundaries of polities, even approximately. Quasi-polity is defined as a cultural area with some degree of cultural (including linguistic, if known) homogeneity that is distinct from surrounding areas. For example, the Marshall Islands before German occupation had no overarching native or colonial authority (chiefs controlled various subsets of islands and atolls) and therefore it was not a polity. But it was a quasi-polity because of the significant cultural and linguistic uniformity. The idea is to collect data for the quasi-polity as a whole. This way we can integrate over (often patchy) data from different sites and different polities to estimate what a 'generic' polity was like. Accordingly, when coding, for example, social complexity variables, enter data not for the whole NGA but for a 'typical' polity in it. For example, when coding for a quasi-polity polity territory is not the area of the NGA as a whole, but the average or typical area of polities within the NGA."
+  ] ;
+  seshat:InterestGroup [
+    a owl:Class ;
+    rdfs:subClassOf seshat:Organisation ;
+    rdfs:label "Interest group" ;
+    rdfs:comment "An Interest Group(IG) is a social group that pursues some common interest, so that its members are united by a common goal or goals. Polities and religious cults are also interest groups, but the IG category is broader. It also includes ethnic groups, professional associations, warrior bands, solidarity associations, mutual aid societies, firms and banks (including their premodern variants), etc. The IG is defined sociologically, not geographically. However, if desired, a geographic area, enclosed within a boundary, may be associated with it in the same way as with a polity or a  Religious System(RS). "
+  ] ;
+  seshat:ReligiousSystem [
+    a owl:Class ;
+    rdfs:subClassOf seshat:InterestGroup ;
+    rdfs:label "Religious system" ;
+    rdfs:comment "Religious System (RS). This unit is defined in ways that are analogous to a polity, except it reflects religious, rather than political authority. Religious systems are dynamical and are typically defined by a set of dated boundaries. Unlike polities, religious systems often overlap with each other."
+  ] ;
+  seshat:City [
+    a owl:Class ;
+    rdfs:subClassOf seshat:Organisation ;
+    rdfs:label "city" ;
+    rdfs:comment "Cities are represented by a single point on the map that doesn’t change with time. Although it is possible to reflect their spatial expansion dynamically, we chose not to do so in the current implementation."
+  ] ;
+  seshat:Language [
+    a seshat:Entity ;
+    rdfs:label "Language" ;
+    rdfs:comment "An identifiable human language."
+  ] ;
+  seshat:LinguisticFamily [
+    a owl:Class ;
+    rdfs:label "Linguistic Family" ;
+    rdfs:comment "An identifiable lingusitic family for classifying human languages."
+  ] ;
+  seshat:linguisticFamily [
+    a owl:ObjectProperty ;
+    rdfs:label "Linguistic Family" ;
+    rdfs:comment "A link between a language and a linguistic family." ;
+    rdfs:domain seshat:Language ;
+    rdfs:range seshat:LinguisticFamily
+  ] ;
+  seshat:Building [
+    a seshat:Entity ;
+    rdfs:label "Building" ;
+    rdfs:comment "Used to describe impressive/costly buildings that are then associated with the Polities that built them and the NGAs in which they are placed. They have 3 dimensions and a narrative paragraph."
+  ] ;
+  seshat:height [
+    rdfs:subPropertyOf seshat:hasVariable ;
+    rdfs:label "Heigth (building)" ;
+    rdfs:comment "The height of a building in meters." ;
+    rdfs:domain seshat:Building ;
+    rdfs:range seshat:LinearDimensionVariable
+  ] ;
+  seshat:extent [
+    rdfs:subPropertyOf seshat:hasVariable ;
+    rdfs:label "Extent (building)" ;
+    rdfs:comment "The the horizontal dimension along the longest axis of a building in meters." ;
+    rdfs:domain seshat:Building ;
+    rdfs:range seshat:LinearDimensionVariable
+  ] ;
+  seshat:cost [
+    rdfs:subPropertyOf seshat:hasVariable ;
+    rdfs:label "Cost (building)" ;
+    rdfs:comment "The cost of a building in people-years." ;
+    rdfs:domain seshat:Building ;
+    rdfs:range seshat:CostVariable
+  ] ;
+  seshat:Territory [
+    a owl:Class ;
+    rdfs:subClassOf seshat:Entity ;
+    owl:disjointWith seshat:Organisation ;
+    rdfs:label "Unit of territory" ;
+    rdfs:comment "An abstract concept describing geographical locations or areas."
+  ] ;
+  seshat:CollectionOfTerritories [
+    a owl:Class ;
+    rdfs:subClassOf seshat:Territory ;
+    rdfs:label "collection of territories" ;
+    rdfs:comment "A container class for a group of units of territories."
+  ] ;
+  seshat:FreeFormArea [
+    a owl:Class ;
+    rdfs:subClassOf seshat:Territory ;
+    rdfs:label "Free form area" ;
+    rdfs:comment "Freeform area (FA). This is an area enclosed within a boundary, or a dated set of boundaries. Basically, it is our method for treating an arbitrary shape on the map to which a historical expert wishes to tie certain values of coded variables. Examples include a province within an empire, something with a hole in it, or a ‘southeast corner of a region."
+  ] ;
+  seshat:NGA [
+    a owl:Class ;
+    rdfs:subClassOf seshat:FreeFormArea ;
+    rdfs:label "NGA, Natural geographic area" ;
+    rdfs:comment "Natural Geographic Area (NGA). This type of unit is defined spatially by the area enclosed within a boundary drawn on the world map. It does not change with time. Its rough spatial scale is 100 km × 100 km (+/- 50%). Examples: Latium, Upper Egypt, Middle Yellow River Valley. "
+  ] ;
+  seshat:Event [
+    a owl:Class ;
+    rdfs:subClassOf seshat:TemporalEntity ;
+    rdfs:label "event" ;
+    rdfs:comment "An abstract class describing historical events."
+  ] ;
+  seshat:War [
+    a owl:Class ;
+    rdfs:subClassOf seshat:Event ;
+    rdfs:label "war" ;
+    rdfs:comment "A derived concept covering historical wars."
+  ] ;
+  seshat:Battle [
+    a owl:Class ;
+    rdfs:subClassOf seshat:Event ;
+    rdfs:label "battle" ;
+    rdfs:comment "A derived concept covering historical battles."
+  ] ;
+  seshat:NavalEngagement [
+    a owl:Class ;
+    rdfs:subClassOf seshat:Battle ;
+    rdfs:label "Naval Engagement" ;
+    rdfs:comment "A derived concept covering historical naval engagements."
+  ] ;
+  seshat:LandBattle [
+    a owl:Class ;
+    rdfs:subClassOf seshat:Battle ;
+    rdfs:label "Land battle" ;
+    rdfs:comment "A derived concept covering historical land battles."
+  ] ;
+  seshat:Siege [
+    a owl:Class ;
+    rdfs:subClassOf seshat:Event ;
+    rdfs:label "Siege" ;
+    rdfs:comment "Note that 'siege' is a generic name for any interaction between an army and a settlement belonging to opposing factions. If an army entered a hostile city without resistance, this is siege. "
+  ] ;
+  seshat:MetaConflict [
+    a owl:Class ;
+    rdfs:subClassOf seshat:Event ;
+    rdfs:label "Meta-conflict" ;
+    rdfs:comment "Is this war part of a group of conflicts that span a much larger timeframe between the belligerents? For example, the 'First', 'Second' and 'Third Punic' wars are conflicts within the Roman-Carthage meta-conflict. These wars are coded as separate wars, rather than grouped together and coded as a single 'Roman-Carthage' war."
+  ] ;
+  seshat:hasVariable [
+    a owl:ObjectProperty ;
+    rdfs:subPropertyOf dacura:hasVariable ;
+    rdfs:label "has variable" ;
+    rdfs:comment "The basic property relation for seshat datasets. Used to relate a seshat entity and its value with qualified information, e.g. uncertainty, temporal bounds, about the value. All seshat variable properties inherit from this property." ;
+    rdfs:range dacura:Variable ;
+    rdfs:domain seshat:Entity
+  ] ;
+  seshat:hasGeneralVariable [
+    a owl:ObjectProperty ;
+    rdfs:subPropertyOf seshat:hasVariable ;
+    rdfs:label "has general variable" ;
+    rdfs:comment "This sub-property of seshat:hasVariable provides a way to define seshat:Organisation variables as members of the set of general variables."
+  ] ;
+  seshat:hasSocialComplexityVariable [
+    a owl:ObjectProperty ;
+    rdfs:subPropertyOf seshat:hasVariable ;
+    rdfs:label "has social complexity variable" ;
+    rdfs:comment "This sub-property of seshat:hasVariable provides a way to define seshat:Organisation variables as members of the set of social complexity variables."
+  ] ;
+  seshat:hasWarfareVariable [
+    a owl:ObjectProperty ;
+    rdfs:subPropertyOf seshat:hasVariable ;
+    rdfs:label "has warfare variable" ;
+    rdfs:comment "This sub-property of seshat:hasVariable provides a way to define seshat:Organisation variables as members of the set of warfare variables."
+  ] ;
+  seshat:hasRitualVariable [
+    a owl:ObjectProperty ;
+    rdfs:subPropertyOf seshat:hasVariable ;
+    rdfs:label "has ritual variable" ;
+    rdfs:comment "This sub-property of seshat:hasVariable provides a way to define seshat:Organisation variables as members of the set of ritual variables."
+  ] ;
+  seshat:hasEconomyTechnologyVariable [
+    rdfs:subPropertyOf seshat:hasVariable ;
+    rdfs:label "has economy and technology variable" ;
+    rdfs:comment "This sub-property of seshat:hasVariable provides a way to define seshat:Territory variables as members of the set of economy and technology variables."
+  ] ;
+  seshat:hasAgricultureVariable [
+    rdfs:subPropertyOf seshat:hasVariable ;
+    rdfs:label "has agriculture variable" ;
+    rdfs:comment "This sub-property of seshat:hasVariable provides a way to define seshat:Territory variables as members of the set of agriculture variables."
+  ] ;
+  seshat:inUTMZone [
+    rdfs:subPropertyOf seshat:hasGeneralVariable ;
+    rdfs:label "In UTM Zone" ;
+    rdfs:domain seshat:Entity ;
+    rdfs:range seshat:UTMZoneAndLatBandVariable ;
+    rdfs:comment " List only one, usually where the capital city is located."
+  ] ;
+  seshat:UTMZoneAndLatBandValueRestriction [
+    a owl:Restriction ;
+    rdfs:label "UTM Zone And Lat Band Value Restriction" ;
+    rdfs:comment "Assures that UTMZoneAndLatBand value is a proper seshat:UTMZoneAndLatBandValue." ;
+    owl:onProperty dacura:definiteValue ;
+    owl:allValuesFrom seshat:UTMZoneAndLatBandValue
+  ] ;
+  seshat:UTMZoneAndLatBandRangeMinValueRestriction [
+    a owl:Restriction ;
+    rdfs:label "UTM Zone And Lat Band Min Value Restriction" ;
+    rdfs:comment "Assures that UTMZoneAndLatBand min value is a proper seshat:UTMZoneAndLatBandValue." ;
+    owl:onProperty dacura:minValue ;
+    owl:allValuesFrom seshat:UTMZoneAndLatBandValue
+  ] ;
+  seshat:UTMZoneAndLatBandRangeMaxValueRestriction [
+    a owl:Restriction ;
+    rdfs:label "UTM Zone And Lat Band Max Value Restriction" ;
+    rdfs:comment "Assures that UTMZoneAndLatBand max value is a proper seshat:UTMZoneAndLatBandValue." ;
+    owl:onProperty dacura:maxValue ;
+    owl:allValuesFrom seshat:UTMZoneAndLatBandValue
+  ] ;
+  seshat:UTMZoneAndLatBandBagOfValuesRestriction [
+    a owl:Restriction ;
+    rdfs:label "UTM Zone And Lat Band Bag of Values Restriction" ;
+    rdfs:comment "Assures that UTMZoneAndLatBand bag value has all elements of type seshat:UTMZoneAndLatBandValue." ;
+    owl:onProperty dacura:valuesFrom ;
+    owl:allValuesFrom seshat:UTMZoneAndLatBandValue
+  ] ;
+  seshat:UTMZoneAndLatBandVariable [
+    a owl:Class ;
+    rdfs:subClassOf dacura:UncertainTemporalVariable ;
+    rdfs:label "UTM Zone And Lat Band Variable" ;
+    rdfs:comment "This defines a single UTM Zone and a single lattitude band from the MGRS geospatial reference system." ;
+    owl:intersectionOf <http://localhost/all/ontology/seshat/seshat56>
+  ] ;
+  seshat:UTMZoneAndLatBandValue [ owl:subClassOf <http://localhost/all/ontology/seshat/seshat61> ] ;
+  seshat:uTMZone [
+    a owl:DatatypeProperty ;
+    rdfs:label "UTM Zone" ;
+    rdfs:domain seshat:UTMZoneAndLatBandValue ;
+    rdfs:range xsd:nonNegativeInteger ;
+    rdfs:comment "This defines a single UTM (Universal Transverse Mercator coordinate system) Zone."
+  ] ;
+  seshat:lattitudeBand [
+    a owl:DatatypeProperty ;
+    rdfs:label "Lattitude Band" ;
+    rdfs:domain seshat:UTMZoneAndLatBandValue ;
+    rdfs:range xsd:string ;
+    rdfs:comment "This gives the value of a single lattitude band from the MGRS geospatial reference system"
+  ] ;
+  seshat:uTMZoneAndLatBand14Q [
+    a seshat:UTMZoneAndLatBandValue ;
+    rdfs:label "14Q" ;
+    rdfs:comment "UTM 14Q, a single UTM Zone and a single lattitude band from the MGRS geospatial reference system" ;
+    seshat:uTMZone 14 ;
+    seshat:lattidudeBand "Q"
+  ] ;
+  seshat:uTMZoneAndLatBand33T [
+    a seshat:UTMZoneAndLatBandValue ;
+    rdfs:label "33-T" ;
+    rdfs:comment "UTM 33-T, a single UTM Zone and a single lattitude band from the MGRS geospatial reference system" ;
+    seshat:uTMZone 33 ;
+    seshat:lattidudeBand "T"
+  ] ;
+  seshat:uTMZoneAndLatBand34T [
+    a seshat:UTMZoneAndLatBandValue ;
+    rdfs:label "UTM 34-T" ;
+    rdfs:comment "UTM 34-T, a single UTM Zone and a single lattitude band from the MGRS geospatial reference system." ;
+    seshat:uTMZone 34 ;
+    seshat:lattidudeBand "T"
+  ] ;
+  seshat:name [
+    rdfs:subPropertyOf seshat:hasGeneralVariable ;
+    rdfs:label "Name" ;
+    rdfs:comment "The name of a seshat Entity. Generally same as the name of the wiki page." ;
+    rdfs:domain seshat:Entity ;
+    rdfs:range seshat:NameVariable
+  ] ;
+  seshat:alternativeName [
+    rdfs:subPropertyOf seshat:hasGeneralVariable ;
+    rdfs:label "Alternative name" ;
+    rdfs:comment "The name of a seshat Entity. Generally same as the name of the wiki page." ;
+    rdfs:domain seshat:Entity ;
+    rdfs:range seshat:NameVariable
+  ] ;
+  seshat:peakDate [
+    a owl:ObjectProperty ;
+    rdfs:subPropertyOf seshat:hasGeneralVariable ;
+    rdfs:label "Peak date" ;
+    rdfs:domain seshat:Organisation ;
+    rdfs:range seshat:TemporalInstantVariable ;
+    rdfs:comment "The period when the polity was at its peak, whether militarily, in terms of the size of territory controlled, or the degree of cultural development. This variable has a subjective element, but typically historians agree when the peak was."
+  ] ;
+  seshat:duration [
+    a owl:ObjectProperty ;
+    rdfs:label "Duration" ;
+    rdfs:subPropertyOf seshat:hasGeneralVariable ;
+    rdfs:domain seshat:TemporalEntity ;
+    rdfs:range seshat:DurationVariable ;
+    rdfs:comment "A property used to define the temporal bounds of a seshat:TemporalEntity. For example, corresponds to the Duration for a Polity from the Seshat codebook."
+  ] ;
+  seshat:degreeOfCentralization [
+    a owl:ObjectProperty ;
+    rdfs:label "Degree of centralization" ;
+    rdfs:subPropertyOf seshat:hasGeneralVariable ;
+    rdfs:domain seshat:Organisation ;
+    rdfs:range seshat:DegreeOfCentralizationVariable ;
+    rdfs:comment """The degree to which the center of a polity exercized control over regional subpolities.  Some polities such as the Medieval German Empire or China under the Zhou Dynasty began as reasonably coherent states, but with time gradually lost cohesion. The 'Degree of centralization' variable allows to capture these transitions (by coding time periods when the polity transitions, for example, from a 'confederated state' to 'loose' and finally to 'nominal' degree of centralization. The allowed values are:     'quasipolity' = or 'none'. Use if the NGA is inhabited by many politically independent groups
+    'nominal' = regional rulers pay only nominal allegiance to the overall ruler and maintain independence on all important aspects of governing, including taxation and warfare. (example: Japan during the Sengoku period)
+    'loose' = the central government exercises a certain degree of control, especially over military matters and international relations. Otherwise the regional rulers are left alone (example: European 'feudalism' after the collapse of the Carolingian empire)
+    'confederated state' = regions enjoy a large degree of autonomy in internal (regional) government. In particular, the regional governors are either hereditary rulers, or are elected by regional elites or by the population of the region; and regional governments can levy and dispose of regional taxes. Use this category for the more centralized 'feudal states'.
+    'unitary state' = regional governors are appointed and removed by the central authorities, taxes are imposed by, and transmitted to the center.
+'none' - not defined in codebook """
+  ] ;
+  seshat:DegreeOfCentralizationValueRestriction [
+    a owl:Restriction ;
+    rdfs:label "Degree Of Centralization Value Restriction" ;
+    rdfs:comment "Assures that DegreeOfCentralization value is a proper seshat:DegreeOfCentralisationValue." ;
+    owl:onProperty dacura:definiteValue ;
+    owl:allValuesFrom seshat:DegreeOfCentralisationValue
+  ] ;
+  seshat:DegreeOfCentralizationRangeMinValueRestriction [
+    a owl:Restriction ;
+    rdfs:label "Degree Of Centralization Min Value Restriction" ;
+    rdfs:comment "Assures that DegreeOfCentralization min value is a proper seshat:DegreeOfCentralisationValue." ;
+    owl:onProperty dacura:minValue ;
+    owl:allValuesFrom seshat:DegreeOfCentralisationValue
+  ] ;
+  seshat:DegreeOfCentralizationRangeMaxValueRestriction [
+    a owl:Restriction ;
+    rdfs:label "Degree Of Centralization Max Value Restriction" ;
+    rdfs:comment "Assures that DegreeOfCentralization max value is a proper seshat:DegreeOfCentralisationValue." ;
+    owl:onProperty dacura:maxValue ;
+    owl:allValuesFrom seshat:DegreeOfCentralisationValue
+  ] ;
+  seshat:DegreeOfCentralizationBagOfValuesRestriction [
+    a owl:Restriction ;
+    rdfs:label "Degree Of Centralization Bag of Values Restriction" ;
+    rdfs:comment "Assures that DegreeOfCentralization bag value has all elements of type seshat:DegreeOfCentralisationValue." ;
+    owl:onProperty dacura:valuesFrom ;
+    owl:allValuesFrom seshat:DegreeOfCentralisationValue
+  ] ;
+  seshat:DegreeOfCentralizationVariable [
+    a owl:Class ;
+    rdfs:subClassOf dacura:UncertainTemporalVariable ;
+    rdfs:label "Degree Of Centralization Variable" ;
+    rdfs:comment "The Degree of Centralisation main variable for Seshat:Polities." ;
+    owl:intersectionOf <http://localhost/all/ontology/seshat/seshat65>
+  ] ;
+  seshat:DegreeOfCentralisationValue [ rdfs:subClassOf <http://localhost/all/ontology/seshat/seshat70> ] ;
+  seshat:quasiPolityOrNone [
+    a seshat:DegreeOfCentralisationValue ;
+    rdfs:label "Quasipolity or None" ;
+    rdfs:comment "Use if the NGA is inhabited by many politically independent groups"
+  ] ;
+  seshat:nominal [
+    a seshat:DegreeOfCentralisationValue ;
+    rdfs:label "Nominal" ;
+    rdfs:comment "Regional rulers pay only nominal allegiance to the overall ruler and maintain independence on all important aspects of governing, including taxation and warfare. (example: Japan during the Sengoku period)."
+  ] ;
+  seshat:loose [
+    a seshat:DegreeOfCentralisationValue ;
+    rdfs:label "Loose" ;
+    rdfs:comment "The central government exercises a certain degree of control, especially over military matters and international relations. Otherwise the regional rulers are left alone (example: European 'feudalism' after the collapse of the Carolingian empire)"
+  ] ;
+  seshat:confederatedState [
+    a seshat:DegreeOfCentralisationValue ;
+    rdfs:label "Confederated State" ;
+    rdfs:comment "Regions enjoy a large degree of autonomy in internal (regional) government. In particular, the regional governors are either hereditary rulers, or are elected by regional elites or by the population of the region; and regional governments can levy and dispose of regional taxes. Use this category for the more centralized 'feudal states'."
+  ] ;
+  seshat:unitaryState [
+    a seshat:DegreeOfCentralisationValue ;
+    rdfs:label "Unitary State" ;
+    rdfs:comment "Regional governors are appointed and removed by the central authorities, taxes are imposed by, and transmitted to the center."
+  ] ;
+  seshat:supraPolityRelations [
+    a owl:ObjectProperty ;
+    rdfs:label "Supra-Polity Relations" ;
+    rdfs:subPropertyOf seshat:hasGeneralVariable ;
+    rdfs:domain seshat:Organisation ;
+    rdfs:range seshat:supraPolityRelationsVariable ;
+    rdfs:comment "Polities may have a fuzzy starting date, if they originate as subpolities under a disintegrating overarching polity. These transitions are captured by the variable 'Supra-polity relations'. "
+  ] ;
+  seshat:supraPolityRelationsValueRestriction [
+    a owl:Restriction ;
+    rdfs:label "supra Polity Relations Value Restriction" ;
+    rdfs:comment "Assures that supraPolityRelations value is a proper seshat:SupraPolityRelationsValue." ;
+    owl:onProperty dacura:definiteValue ;
+    owl:allValuesFrom seshat:SupraPolityRelationsValue
+  ] ;
+  seshat:supraPolityRelationsRangeMinValueRestriction [
+    a owl:Restriction ;
+    rdfs:label "supra Polity Relations Min Value Restriction" ;
+    rdfs:comment "Assures that supraPolityRelations min value is a proper seshat:SupraPolityRelationsValue." ;
+    owl:onProperty dacura:minValue ;
+    owl:allValuesFrom seshat:SupraPolityRelationsValue
+  ] ;
+  seshat:supraPolityRelationsRangeMaxValueRestriction [
+    a owl:Restriction ;
+    rdfs:label "supra Polity Relations Max Value Restriction" ;
+    rdfs:comment "Assures that supraPolityRelations max value is a proper seshat:SupraPolityRelationsValue." ;
+    owl:onProperty dacura:maxValue ;
+    owl:allValuesFrom seshat:SupraPolityRelationsValue
+  ] ;
+  seshat:supraPolityRelationsBagOfValuesRestriction [
+    a owl:Restriction ;
+    rdfs:label "supra Polity Relations Bag of Values Restriction" ;
+    rdfs:comment "Assures that supraPolityRelations bag value has all elements of type seshat:SupraPolityRelationsValue." ;
+    owl:onProperty dacura:valuesFrom ;
+    owl:allValuesFrom seshat:SupraPolityRelationsValue
+  ] ;
+  seshat:supraPolityRelationsVariable [
+    a owl:Class ;
+    rdfs:subClassOf dacura:UncertainTemporalVariable ;
+    rdfs:label "supra Polity Relations Variable" ;
+    rdfs:comment "The seshat variable for describing this property." ;
+    owl:intersectionOf <http://localhost/all/ontology/seshat/seshat76>
+  ] ;
+  seshat:SupraPolityRelationsValue [ owl:subClassOf <http://localhost/all/ontology/seshat/seshat81> ] ;
+  seshat:noSupraPolityRelations [
+    a seshat:SupraPolityRelationsValue ;
+    rdfs:label "No Supra-Polity Relations" ;
+    rdfs:comment "Called 'none' in codebook but undefined."
+  ] ;
+  seshat:alliance [
+    a seshat:SupraPolityRelationsValue ;
+    rdfs:label "Alliance" ;
+    rdfs:comment "Belongs to a long-term military-political alliance of independent polities ('long-term' refers to more or less permanent relationship between polities extending over multiple years)."
+  ] ;
+  seshat:nominalAllegiance [
+    a seshat:SupraPolityRelationsValue ;
+    rdfs:label "Nominal Allegiance" ;
+    rdfs:comment "The same as 'nominal' under Degree of centralization variable but now reflecting the position of the focal polity within the overarching political authority."
+  ] ;
+  seshat:personalUnion [
+    a seshat:SupraPolityRelationsValue ;
+    rdfs:label "Personal Union" ;
+    rdfs:comment "The focal polity is united with another, or others, as a result of a dynastic marriage."
+  ] ;
+  seshat:vassalage [
+    a seshat:SupraPolityRelationsValue ;
+    rdfs:label "Vassalage" ;
+    rdfs:comment "Corresponding to the 'loose' category in the Degree of centralization."
+  ] ;
+  seshat:preceedingPoliticalAuthority [
+    a owl:ObjectProperty ;
+    rdfs:label "Preceeding Political Organisation", "Preceeding (quasi)polity" ;
+    rdfs:subPropertyOf seshat:hasGeneralVariable, seshat:relatedToOrganisation ;
+    rdfs:domain seshat:PoliticalAuthority ;
+    rdfs:range seshat:PoliticalAuthorityVariable ;
+    rdfs:comment "This code is based on the core region of the current polity (not the NGA region). E.g. Achaemenid Empire's core region was Persia, where they were preceded by the Median Empire."
+  ] ;
+  seshat:relationshipToPreceedingPoliticalAuthority [
+    a owl:ObjectProperty ;
+    rdfs:label "Relationship to preceding (quasi)polity" ;
+    rdfs:subPropertyOf seshat:hasGeneralVariable ;
+    rdfs:domain seshat:Organisation ;
+    rdfs:range seshat:relationshipToPreceedingPoliticalAuthorityVariable ;
+    rdfs:comment "Possible codes: continuity (gradual change), cultural assimilation (by another quasipolity in the absence of substantial population replacement), elite migration (the preceding elites replaced by new elites coming from elsewhere), population migration (evidence for substantial population replacement). In the narrative paragraph explain the evidential basis for the code: what are the proxies for change? Examples include DNA data, isotope data, material (other than subsistence) culture, subsistence mode, symbolic culture (incl. burial practices), settlement patterns. "
+  ] ;
+  seshat:relationshipToPreceedingPoliticalAuthorityValueRestriction [
+    a owl:Restriction ;
+    rdfs:label "relationship To Preceeding Political Authority Value Restriction" ;
+    rdfs:comment "Assures that relationshipToPreceedingPoliticalAuthority value is a proper seshat:relationshipToPreceedingPoliticalAuthorityValue." ;
+    owl:onProperty dacura:definiteValue ;
+    owl:allValuesFrom seshat:relationshipToPreceedingPoliticalAuthorityValue
+  ] ;
+  seshat:relationshipToPreceedingPoliticalAuthorityRangeMinValueRestriction [
+    a owl:Restriction ;
+    rdfs:label "relationship To Preceeding Political Authority Min Value Restriction" ;
+    rdfs:comment "Assures that relationshipToPreceedingPoliticalAuthority min value is a proper seshat:relationshipToPreceedingPoliticalAuthorityValue." ;
+    owl:onProperty dacura:minValue ;
+    owl:allValuesFrom seshat:relationshipToPreceedingPoliticalAuthorityValue
+  ] ;
+  seshat:relationshipToPreceedingPoliticalAuthorityRangeMaxValueRestriction [
+    a owl:Restriction ;
+    rdfs:label "relationship To Preceeding Political Authority Max Value Restriction" ;
+    rdfs:comment "Assures that relationshipToPreceedingPoliticalAuthority max value is a proper seshat:relationshipToPreceedingPoliticalAuthorityValue." ;
+    owl:onProperty dacura:maxValue ;
+    owl:allValuesFrom seshat:relationshipToPreceedingPoliticalAuthorityValue
+  ] ;
+  seshat:relationshipToPreceedingPoliticalAuthorityBagOfValuesRestriction [
+    a owl:Restriction ;
+    rdfs:label "relationship To Preceeding Political Authority Bag of Values Restriction" ;
+    rdfs:comment "Assures that relationshipToPreceedingPoliticalAuthority bag value has all elements of type seshat:relationshipToPreceedingPoliticalAuthorityValue." ;
+    owl:onProperty dacura:valuesFrom ;
+    owl:allValuesFrom seshat:relationshipToPreceedingPoliticalAuthorityValue
+  ] ;
+  seshat:relationshipToPreceedingPoliticalAuthorityVariable [
+    a owl:Class ;
+    rdfs:subClassOf dacura:UncertainTemporalVariable ;
+    rdfs:label "relationship To Preceeding Political Authority Variable" ;
+    rdfs:comment "The seshat variable for describing this property." ;
+    owl:intersectionOf <http://localhost/all/ontology/seshat/seshat87>
+  ] ;
+  seshat:relationshipToPreceedingPoliticalAuthorityValue [ owl:subClassOf <http://localhost/all/ontology/seshat/seshat92> ] ;
+  seshat:continuity [
+    a seshat:RelationshipToPreceedingPoliticalAuthorityValue ;
+    rdfs:label "Continuity" ;
+    rdfs:comment "Gradual change."
+  ] ;
+  seshat:culturalAssimilation [
+    a seshat:RelationshipToPreceedingPoliticalAuthorityValue ;
+    rdfs:label "Cultural Assimilation" ;
+    rdfs:comment "By another quasipolity in the absence of substantial population replacement."
+  ] ;
+  seshat:eliteMigration [
+    a seshat:relationshipToPreceedingPoliticalAuthorityValue ;
+    rdfs:label "Elite Migration" ;
+    rdfs:comment "The preceding elites replaced by new elites coming from elsewhere."
+  ] ;
+  seshat:populationMigration [
+    a seshat:RelationshipToPreceedingPoliticalAuthorityValue ;
+    rdfs:label "Population Migration" ;
+    rdfs:comment "Evidence for substantial population replacement."
+  ] ;
+  seshat:succeedingPoliticalAuthority [
+    a owl:ObjectProperty ;
+    rdfs:label "Succeeding Political Organisation", "Succeeding (quasi)polity" ;
+    rdfs:subPropertyOf seshat:hasGeneralVariable, seshat:relatedToOrganisation ;
+    rdfs:domain seshat:PoliticalAuthority ;
+    rdfs:range seshat:PoliticalAuthorityVariable ;
+    rdfs:comment "Only name it here and don't code the nature of change (it's coded on the page of the succeeding quasipolity). This code is based on the core region of the current polity (not the NGA region). E.g. Achaemenid Empire's core region was Persia, where they were succeeded by the Macedonian Empire."
+  ] ;
+  seshat:supraculturalEntity [
+    a owl:ObjectProperty ;
+    rdfs:label "Supracultural Entity" ;
+    rdfs:subPropertyOf seshat:hasGeneralVariable, seshat:relatedToOrganisation ;
+    rdfs:domain seshat:PoliticalAuthority ;
+    rdfs:range seshat:SupraculturalEntityVariable ;
+    rdfs:comment "Provides a link to a larger-scale cultural groupings of polities or quasipolities, a supraculturalEntity."
+  ] ;
+  seshat:scaleOfSCInteraction [
+    a owl:ObjectProperty ;
+    rdfs:label "Scale of supracultural interaction" ;
+    rdfs:subPropertyOf seshat:hasGeneralVariable ;
+    rdfs:domain seshat:PoliticalAuthority ;
+    rdfs:range seshat:ScaleOfSCInteractionVariable ;
+    rdfs:comment "km squared. An estimate of the area encompassed by the supracultural entity."
+  ] ;
+  seshat:ScaleOfSCInteractionVariable [
+    a owl:Class ;
+    rdfs:subClassOf dacura:UncertainTemporalUnsignedLongDataVariable ;
+    rdfs:label "Scale of supracultural interaction Variable" ;
+    rdfs:comment "Seshat variable for scale of supracultural interaction" ;
+    dacura:unitOfMeasure seshat:metresSquared
+  ] ;
+  seshat:capital [
+    rdfs:label "Capital" ;
+    rdfs:subPropertyOf seshat:hasGeneralVariable, seshat:relatedToOrganisation ;
+    rdfs:domain seshat:PoliticalAuthority ;
+    rdfs:comment """The city where the ruler spends most of its time. If there were more than one capital supply all names and enclose in curly braces. For example, {Susa; Pasargadae; Persepolis; Ecbatana; Babylon}. Note that the capital may be different from the largest city (see below).
+
+'Capital' may be difficult to code for archaeologically known societies. If there is reasonable basis to believe that the largest known settlement was the seat of the ruler code it as capital (and indicate uncertainty in the narrative paragraph). Archaeologists are able to recognize special architectural structures, such as a ceremonial centres and some kind of citadels or palaces. These features could be recognized with certainty after a careful study of the whole region and the settlement network. If such an inference cannot be made, code as 'unknown' (again, the largest settlement is coded elsewhere). """
+  ] ;
+  seshat:language [
+    rdfs:subPropertyOf seshat:hasGeneralVariable ;
+    rdfs:label "Language" ;
+    rdfs:comment " List the language(s) used polity-wide for administration, religion, and military affairs. Also list the language spoken by the majority of the population, if different from the above. " ;
+    rdfs:domain seshat:Organisation ;
+    rdfs:range seshat:LanguageVariable
+  ] ;
+  seshat:map [
+    rdfs:subPropertyOf seshat:hasGeneralVariable ;
+    rdfs:label "Map" ;
+    rdfs:comment "For quasipolities mark not only the range but also the neighboring quasipolities and the main archaeological sites." ;
+    rdfs:domain seshat:Entity ;
+    rdfs:range seshat:MapVariable
+  ] ;
+  seshat:MapVariable [
+    rdfs:subClassOf seshat:ImageVariable ;
+    rdfs:label "Map Variable" ;
+    rdfs:comment "Used to hold a seshat variable pointing at a seshat:Map."
+  ] ;
+  seshat:territory [
+    rdfs:subPropertyOf seshat:hasSocialComplexityVariable ;
+    rdfs:label "Territory", "Polity Territory" ;
+    rdfs:comment "in squared kilometers." ;
+    rdfs:domain seshat:Organisation ;
+    rdfs:range seshat:TerritoryVariable
+  ] ;
+  seshat:TerritoryVariable [
+    a owl:Class ;
+    rdfs:subClassOf dacura:UncertainTemporalUnsignedLongDataVariable ;
+    rdfs:label "Territory Variable" ;
+    rdfs:comment "Seshat variable to hold a territory area value." ;
+    dacura:unitOfMeasure seshat:metresSquared
+  ] ;
+  seshat:population [
+    rdfs:subPropertyOf seshat:hasSocialComplexityVariable ;
+    rdfs:label "Population", "Polity Population" ;
+    rdfs:comment "Estimated population of the polity; can change as a result of both adding/losing new territories or by population growth/decline within a region ." ;
+    rdfs:domain seshat:Organisation ;
+    rdfs:range seshat:PopulationVariable
+  ] ;
+  seshat:largestSettlement [
+    rdfs:subPropertyOf seshat:hasSocialComplexityVariable ;
+    rdfs:label "Largest Settlement" ;
+    rdfs:comment "Note that this could be different from the capital (coded under General). If possible, indicate the dynamics (that is, how population changed during the temporal period of the polity). Note that we are also building a city database - you should consult it as it may already have the needed data." ;
+    rdfs:domain seshat:Organisation ;
+    rdfs:range seshat:CityVariable
+  ] ;
+  seshat:largestCommunicationDistance [
+    rdfs:subPropertyOf seshat:hasSocialComplexityVariable ;
+    rdfs:label "Largest communication distance" ;
+    rdfs:comment """Distance in kilometers between the capital and the furthest provincial capital. Use the figure for the most direct land and/or sea route that was available.
+
+As an alternative for prehistoric communities, measure the distance between largest quasi-capital and furthest village within the quasi-polity. """ ;
+    rdfs:domain seshat:Organisation ;
+    rdfs:range seshat:LargestCommunicationDistanceVariable
+  ] ;
+  seshat:LargestCommunicationDistanceVariable [
+    a owl:Class ;
+    rdfs:subClassOf dacura:UncertainTemporalUnsignedLongDataVariable ;
+    rdfs:label "Largest Communication Distance Variable" ;
+    rdfs:comment "Seshat variable to hold the largest communication distance value." ;
+    seshat:unitOfMeasure seshat:metre
+  ] ;
+  seshat:settlementHierarchy [
+    rdfs:subPropertyOf seshat:hasSocialComplexityVariable ;
+    rdfs:label "Settlement hierarchy" ;
+    rdfs:comment """levels. This variable records the hierarchy of not just settlement sizes, but also their complexity as reflected in different roles they play within the (quasi)polity. As settlements become more populous they acquire more complex functions: transportational (e.g. port); economic (e.g. market); administrative (e.g. storehouse, local government building); cultural (e.g. theatre); religious (e.g. temple), utilitarian (e.g. hospital), monumental (e.g. statues, plazas).
+
+Example: (6) Large City (monumental structures, theatre, market, hospital, central government buildings) (5) City (market, theatre, regional government buildings) (4) Large Town (market, administrative buildings) (3) Town (administrative buildings, storehouse)) (2) Village (shrine) (1) Hamlet (residential only).
+
+In the narrative paragraph explain the different levels and list their functions. Provide a (crude) estimate of population sizes. For example, Large Town (market, temple, administrative buildings): 2,000-5,000 inhabitants.  """ ;
+    rdfs:domain seshat:Organisation ;
+    rdfs:range seshat:LevelsVariable
+  ] ;
+  seshat:administrativeLevels [
+    rdfs:subPropertyOf seshat:hasSocialComplexityVariable ;
+    rdfs:label "Administrative levels" ;
+    rdfs:comment """ levels. An example of hierarchy for a state society could be (5) the overall ruler, (4) provincial/regional governors, (3) district heads, (2) town mayors, (1) village heads.
+
+Note: Often there are more than one concurrent administrative hierarchy. In the example above the hierarchy refers to the territorial government. In addition, the ruler may have a hierarchically organized central bureaucracy located in the capital. For example, (4)the overall ruler, (3) chiefs of various ministries, (2) mid-level bureaucrats, (1) scribes and clerks. In the narrative paragraph detail what is known about both hierarchies. The machine-readable code should reflect the largest number (the longer chain of command)""" ;
+    rdfs:domain seshat:Organisation ;
+    rdfs:range seshat:LevelsVariable
+  ] ;
+  seshat:religiousLevels [
+    rdfs:subPropertyOf seshat:hasSocialComplexityVariable ;
+    rdfs:label "Religious levels" ;
+    rdfs:comment "levels. Same principle as with adminstrative levels variable. Start with the head of the official cult (if present) and work down to the local priest (level 1)." ;
+    rdfs:domain seshat:Organisation ;
+    rdfs:range seshat:LevelsVariable
+  ] ;
+  seshat:ReligiousLevelsVariable [
+    rdfs:subClassOf dacura:Variable ;
+    rdfs:label "Religious Levels Variable" ;
+    rdfs:comment "Seshat variable to hold the Religious levels value." ;
+    seshat:unitOfMeasure seshat:levels
+  ] ;
+  seshat:militaryLevels [
+    rdfs:subPropertyOf seshat:hasSocialComplexityVariable ;
+    rdfs:label "Military  levels" ;
+    rdfs:comment """levels. Again, start with the commander-in-chief and work down to the private (level 1).
+
+Even in primitive societies such as simple chiefdoms it is often possible to distinguish at least two levels – a commander and soldiers. A complex chiefdom would be coded three levels. The presence of warrior burials might be the basis for inferring the existence of a military organization. (The lowest military level is always the individual soldier).""" ;
+    rdfs:domain seshat:Organisation ;
+    rdfs:range seshat:LevelsVariable
+  ] ;
+  seshat:hasRitual [
+    a owl:ObjectProperty ;
+    rdfs:subPropertyOf seshat:hasComponent ;
+    rdfs:label "Has Ritual" ;
+    rdfs:comment "Relates a RitualRecord to an Entity." ;
+    rdfs:range seshat:PoliticalAuthority ;
+    rdfs:domain seshat:RitualRecordVariable
+  ] ;
+  seshat:largestScaleCollectiveRitualOfOfficialCult [
+    rdfs:subPropertyOf seshat:hasRitual ;
+    rdfs:label "Largest Scale Collective Ritual of the Official Cult" ;
+    rdfs:comment "Code the variables below for the collective ritual of the official cult that is performed on the largest scale. Largest scale refers to the largest number of people a ritual brings together in a single location. If there are several rituals that have the same level of scale, code the most frequent one. "
+  ] ;
+  seshat:mostWidespreadCollectiveRitualOfOfficialCult [
+    rdfs:subPropertyOf seshat:hasRitual ;
+    rdfs:label "Most Widespread Collective Ritual of the Official Cult" ;
+    rdfs:comment "Widespread refers to the degree of coverage a ritual has in a polity and therefore to the proportion of the overall population that participates in or observes a ritual. Keep in mind that it is possible that the ritual with the highest coverage is not necessarily a mass ritual performed at one location, but can be a ritual that is performed all over the polity and of which the aggregate of the audiences represent the largest degree of coverage. "
+  ] ;
+  seshat:mostFrequentCollectiveRitualOfOfficialCult [
+    rdfs:subPropertyOf seshat:hasRitual ;
+    rdfs:label "Most Frequent Collective Ritual of the Official Cult" ;
+    rdfs:comment "Code the ritual record for the most frequent collective ritual of the official cult. "
+  ] ;
+  seshat:mostEuphoricCollectiveRitualOfOfficialCult [
+    rdfs:subPropertyOf seshat:hasRitual ;
+    rdfs:label "Most Euphoric Collective Ritual of the Official Cult" ;
+    rdfs:comment "Code the ritual record for the most euphoric collective ritual of the official cult. "
+  ] ;
+  seshat:mostDysphoricCollectiveRitual [
+    rdfs:subPropertyOf seshat:hasRitual ;
+    rdfs:label "Most Dysphoric Collective Ritual" ;
+    rdfs:comment "Unlike the other rituals, the most dysphoric collective ritual may not belong to the official cult, but may be practiced by another group that has a significant role in the polity. . "
+  ] ;
+  seshat:Ritual [
+    a owl:Class ;
+    rdfs:label "Ritual" ;
+    rdfs:comment "A Specific Ritual."
+  ] ;
+  seshat:CollectiveRitual [
+    rdfs:subClassOf seshat:Ritual ;
+    rdfs:label "Collective Ritual" ;
+    rdfs:comment "A collective ritual is a ritual in which two or more people participate."
+  ] ;
+  seshat:OfficialCultRitual [
+    rdfs:subClassOf seshat:CollectiveRitual ;
+    rdfs:label "Ritual of the Official Cult" ;
+    rdfs:comment "With the official cult we refer to the set of collective ritual practices that are most closely associated with legitimation of the power structure (including elites, if any)."
+  ] ;
+  seshat:MostDysphoricRitual [
+    rdfs:subClassOf seshat:CollectiveRitual ;
+    rdfs:label "Most Dysphoric Ritual" ;
+    rdfs:comment "The most dysphoric collective ritual may not belong to the official cult, but may be practiced by another group that has a significant role in the polity."
+  ] ;
+  seshat:MostEuphoricRitual [
+    rdfs:subClassOf seshat:OfficialCultRitual ;
+    rdfs:label "Most Euphoric Ritual" ;
+    rdfs:comment "Nothing in codebook."
+  ] ;
+  seshat:MostFrequentRitual [
+    rdfs:subClassOf seshat:OfficialCultRitual ;
+    rdfs:label "Most Frequent Ritual" ;
+    rdfs:comment "Nothing in codebook."
+  ] ;
+  seshat:MostWidespreadRitual [
+    rdfs:subClassOf seshat:OfficialCultRitual ;
+    rdfs:label "Most Widespread Ritual" ;
+    rdfs:comment "Widespread refers to the degree of coverage a ritual has in a polity and therefore to the proportion of the overall population that participates in or observes a ritual. Keep in mind that it is possible that the ritual with the highest coverage is not necessarily a mass ritual performed at one location, but can be a ritual that is performed all over the polity and of which the aggregate of the audiences represent the largest degree of coverage."
+  ] ;
+  seshat:LargestScaleRitual [
+    rdfs:subClassOf seshat:OfficialCultRitual ;
+    rdfs:label "Largest Scale Ritual" ;
+    rdfs:comment "Largest scale refers to the largest number of people a ritual brings together in a single location."
+  ] ;
+  seshat:hasComponent [
+    a owl:ObjectProperty ;
+    rdfs:label "Has Component" ;
+    rdfs:comment "This relation is used to bind a component of an Entity to that Entity." ;
+    rdfs:range seshat:EntityComponent ;
+    rdfs:domain seshat:Entity
+  ] ;
+  seshat:RitualRecord [
+    rdfs:subClassOf seshat:EntityComponent ;
+    rdfs:label "Ritual Record Variable" ;
+    rdfs:comment "A grouping of ritual variables that forms a template for completing the description of a single ritual." ;
+    owl:equivalentClass <http://localhost/all/ontology/seshat/seshat97>, <http://localhost/all/ontology/seshat/seshat98>, <http://localhost/all/ontology/seshat/seshat102>, <http://localhost/all/ontology/seshat/seshat103>, <http://localhost/all/ontology/seshat/seshat104>, <http://localhost/all/ontology/seshat/seshat108>, <http://localhost/all/ontology/seshat/seshat112>, <http://localhost/all/ontology/seshat/seshat116>, <http://localhost/all/ontology/seshat/seshat120>, <http://localhost/all/ontology/seshat/seshat121>, <http://localhost/all/ontology/seshat/seshat122>
+  ] ;
+  seshat:EntityComponent [
+    rdfs:subClassOf seshat:Entity ;
+    rdfs:label "Entity Component" ;
+    rdfs:comment "This is a structural class of things that group sets of related variables that form a coherent component of an Entity."
+  ] ;
+  seshat:RitualNameVariable [
+    rdfs:subClassOf seshat:NameVariable ;
+    rdfs:label "Ritual Name Variable" ;
+    rdfs:comment "The name of a ritual. In the narrative part, also give a brief description of the ritual." ;
+    dacura:annotationMandatory true
+  ] ;
+  seshat:ritualName [
+    rdfs:subPropertyOf seshat:hasRitualVariable ;
+    rdfs:label "Ritual Name" ;
+    rdfs:comment " In the narrative part, also give a brief description of the ritual" ;
+    rdfs:range seshat:RitualNameVariable ;
+    rdfs:domain seshat:RitualRecord
+  ] ;
+  seshat:ritualFrequency [
+    rdfs:subPropertyOf seshat:hasRitualVariable ;
+    rdfs:label "Frequency" ;
+    rdfs:comment "aily/weekly/monthly/yearly/once per generation/once in a lifetime. Code the frequency of participating in a ritual from the perspective of the participants. This group of participants does not include the ritual specialists, like priests. Highly engaged audiences (audiences who are processing, jeering, ...) are considered as participants. Audiences consisting of passive spectators or witnesses are coded for in the next variable. When it is difficult to distinguish between a highly engaged audience and an audience consisting of passive spectators, code these audiences here. Code the frequency of participating in a ritual from the perspective of a typical member of an audience consisting of passive spectators or witnesses. Code the frequency of participating in a ritual from the perspective of the ritual specialist (e.g. priest)." ;
+    rdfs:range seshat:RitualFrequencyVariable ;
+    rdfs:domain seshat:RitualRecord
+  ] ;
+  seshat:RitualFrequencyVariable [
+    rdfs:subClassOf seshat:HumanScaleTemporalFrequencyVariable ;
+    rdfs:label "Ritual Frequency Variable" ;
+    rdfs:comment "The human-scale temporal frequency of a ritual"
+  ] ;
+  seshat:HumanScaleTemporalFrequencyValueRestriction [
+    a owl:Restriction ;
+    rdfs:label "Human Scale Temporal Frequency Value Restriction" ;
+    rdfs:comment "Assures that HumanScaleTemporalFrequency value is a proper seshat:HumanScaleTemporalFrequencyValue." ;
+    owl:onProperty dacura:definiteValue ;
+    owl:allValuesFrom seshat:HumanScaleTemporalFrequencyValue
+  ] ;
+  seshat:HumanScaleTemporalFrequencyRangeMinValueRestriction [
+    a owl:Restriction ;
+    rdfs:label "Human Scale Temporal Frequency Min Value Restriction" ;
+    rdfs:comment "Assures that HumanScaleTemporalFrequency min value is a proper seshat:HumanScaleTemporalFrequencyValue." ;
+    owl:onProperty dacura:minValue ;
+    owl:allValuesFrom seshat:HumanScaleTemporalFrequencyValue
+  ] ;
+  seshat:HumanScaleTemporalFrequencyRangeMaxValueRestriction [
+    a owl:Restriction ;
+    rdfs:label "Human Scale Temporal Frequency Max Value Restriction" ;
+    rdfs:comment "Assures that HumanScaleTemporalFrequency max value is a proper seshat:HumanScaleTemporalFrequencyValue." ;
+    owl:onProperty dacura:maxValue ;
+    owl:allValuesFrom seshat:HumanScaleTemporalFrequencyValue
+  ] ;
+  seshat:HumanScaleTemporalFrequencyBagOfValuesRestriction [
+    a owl:Restriction ;
+    rdfs:label "Human Scale Temporal Frequency Bag of Values Restriction" ;
+    rdfs:comment "Assures that HumanScaleTemporalFrequency bag value has all elements of type seshat:HumanScaleTemporalFrequencyValue." ;
+    owl:onProperty dacura:valuesFrom ;
+    owl:allValuesFrom seshat:HumanScaleTemporalFrequencyValue
+  ] ;
+  seshat:HumanScaleTemporalFrequencyVariable [
+    a owl:Class ;
+    rdfs:subClassOf dacura:UncertainTemporalVariable ;
+    rdfs:label "Human Scale Temporal Frequency Variable" ;
+    rdfs:comment "Seshat variable for defining ritual event frequencies." ;
+    owl:intersectionOf <http://localhost/all/ontology/seshat/seshat126>
+  ] ;
+  seshat:HumanScaleTemporalFrequencyValue [ rdfs:subClassOf <http://localhost/all/ontology/seshat/seshat131> ] ;
+  seshat:daily [
+    a seshat:HumanScaleTemporalFrequencyValue ;
+    rdfs:label "Daily" ;
+    rdfs:comment "An event that occurs on a daily basis."
+  ] ;
+  seshat:weekly [
+    a seshat:HumanScaleTemporalFrequencyValue ;
+    rdfs:label "Weekly" ;
+    rdfs:comment "An event that occurs on a weekly basis."
+  ] ;
+  seshat:monthly [
+    a seshat:HumanScaleTemporalFrequencyValue ;
+    rdfs:label "Monthly" ;
+    rdfs:comment "An event that occurs on a monthly basis."
+  ] ;
+  seshat:yearly [
+    a seshat:HumanScaleTemporalFrequencyValue ;
+    rdfs:label "Yearly" ;
+    rdfs:comment "An event that occurs on a yearly basis."
+  ] ;
+  seshat:oncePerGeneration [
+    a seshat:HumanScaleTemporalFrequencyValue ;
+    rdfs:label "Once Per Geneation" ;
+    rdfs:comment "An event that occurs on a once per generation basis."
+  ] ;
+  seshat:onceInALifetime [
+    a seshat:HumanScaleTemporalFrequencyValue ;
+    rdfs:label "Once in a Lifetime" ;
+    rdfs:comment "An event that occurs on a once in a lifetime basis."
+  ] ;
+  seshat:RitualActor [
+    a owl:Class ;
+    rdfs:label "Ritual Actor" ;
+    rdfs:comment "Defines the set of possible actors in rituals. Used to scope the definition of a seshat:ritualFrequency or seshat:ritualInclusiveness value."
+  ] ;
+  seshat:RitualSpecialist [
+    a owl:Class ;
+    rdfs:subClassOf seshat:RitualActor ;
+    rdfs:label "Ritual Specialist" ;
+    rdfs:comment "A ritual specialist (e.g. priest). Used to scope the definition of a seshat:ritualFrequency or seshat:ritualInclusiveness value."
+  ] ;
+  seshat:Participant [
+    a owl:Class ;
+    rdfs:subClassOf seshat:RitualActor ;
+    rdfs:label "Participant" ;
+    rdfs:comment "This group of participants does not include the ritual specialists, like priests. Highly engaged audiences (audiences who are processing, jeering, ...) are considered as participants. Audiences consisting of passive spectators or witnesses are coded as seshat:Audience. Used to scope the definition of a seshat:ritualFrequency or seshat:ritualInclusiveness value."
+  ] ;
+  seshat:Audience [
+    a owl:Class ;
+    rdfs:subClassOf seshat:RitualActor ;
+    rdfs:label "Audience" ;
+    rdfs:comment "A typical member of a ritual audience consisting of passive spectators or witnesses. Used to scope the definition of a seshat:ritualFrequency or seshat:ritualInclusiveness value."
+  ] ;
+  seshat:ritualDuration [
+    rdfs:subPropertyOf seshat:hasRitualVariable ;
+    rdfs:label "Ritual Duration" ;
+    rdfs:comment "Indicate the duration of the ritual, including the unit of measurement (e.g. 2 hours or 3 days). In case the duration of the ritual varies (e.g. the duration varies between 6 and 10 hours) code for the midpoint (i.e. 8 hours)." ;
+    rdfs:domain seshat:RitualRecord ;
+    rdfs:range seshat:RitualDurationVariable
+  ] ;
+  seshat:RitualDurationVariable [
+    a owl:Class ;
+    rdfs:subClassOf dacura:UncertainTemporalDurationDataVariable ;
+    rdfs:label "Ritual Duration Variable" ;
+    rdfs:comment "Seshat variable for defining ritual durations using xsd:duration."
+  ] ;
+  seshat:typicalSizeOfParticipatingGroup [
+    rdfs:subPropertyOf seshat:hasRitualVariable ;
+    rdfs:label "Typical Size of Participating Group" ;
+    rdfs:comment "In absolute numbers." ;
+    rdfs:domain seshat:RitualRecord ;
+    rdfs:range seshat:TypicalSizeOfParticipatingGroupVariable
+  ] ;
+  seshat:TypicalSizeOfParticipatingGroupVariable [
+    a owl:Class ;
+    rdfs:subClassOf dacura:UncertainTemporalNonNegativeIntegerDataVariable ;
+    rdfs:label "Typical Size of Participating Group Variable" ;
+    rdfs:comment "Seshat variable for defining number of people involved in a ritual." ;
+    dacura:unitOfMeasure seshat:numPeople
+  ] ;
+  seshat:ritualInclusivness [
+    rdfs:subPropertyOf seshat:hasRitualVariable ;
+    rdfs:label "Ritual Inclusivness" ;
+    rdfs:comment "Defines a set of possible groups from which ritual actors may be drawn. May be coded for ritual specialists, participants and audience" ;
+    rdfs:domain seshat:RitualRecord ;
+    rdfs:range seshat:RitualGroupVariable
+  ] ;
+  seshat:RitualGroupValueRestriction [
+    a owl:Restriction ;
+    rdfs:label "Ritual Group Value Restriction" ;
+    rdfs:comment "Assures that RitualGroup value is a proper seshat:RitualGroupValue." ;
+    owl:onProperty dacura:definiteValue ;
+    owl:allValuesFrom seshat:RitualGroupValue
+  ] ;
+  seshat:RitualGroupRangeMinValueRestriction [
+    a owl:Restriction ;
+    rdfs:label "Ritual Group Min Value Restriction" ;
+    rdfs:comment "Assures that RitualGroup min value is a proper seshat:RitualGroupValue." ;
+    owl:onProperty dacura:minValue ;
+    owl:allValuesFrom seshat:RitualGroupValue
+  ] ;
+  seshat:RitualGroupRangeMaxValueRestriction [
+    a owl:Restriction ;
+    rdfs:label "Ritual Group Max Value Restriction" ;
+    rdfs:comment "Assures that RitualGroup max value is a proper seshat:RitualGroupValue." ;
+    owl:onProperty dacura:maxValue ;
+    owl:allValuesFrom seshat:RitualGroupValue
+  ] ;
+  seshat:RitualGroupBagOfValuesRestriction [
+    a owl:Restriction ;
+    rdfs:label "Ritual Group Bag of Values Restriction" ;
+    rdfs:comment "Assures that RitualGroup bag value has all elements of type seshat:RitualGroupValue." ;
+    owl:onProperty dacura:valuesFrom ;
+    owl:allValuesFrom seshat:RitualGroupValue
+  ] ;
+  seshat:RitualGroupVariable [
+    a owl:Class ;
+    rdfs:subClassOf dacura:UncertainTemporalVariable ;
+    rdfs:label "Ritual Group Variable" ;
+    rdfs:comment "Defines the inclusiveness of a ritual in terms of where members of a class are recruited from." ;
+    owl:intersectionOf <http://localhost/all/ontology/seshat/seshat138>
+  ] ;
+  seshat:RitualGroupValue [ rdfs:subClassOf <http://localhost/all/ontology/seshat/seshat143> ] ;
+  seshat:wholePolity [
+    a seshat:RitualGroupValue ;
+    rdfs:label "Whole Polity" ;
+    rdfs:comment "The extent of this group is the whole polity."
+  ] ;
+  seshat:allAdultMales [
+    a seshat:RitualGroupValue ;
+    rdfs:label "All Adult Males" ;
+    rdfs:comment "The extent of this group is all adult males."
+  ] ;
+  seshat:rulingElites [
+    a seshat:RitualGroupValue ;
+    rdfs:label "Ruling Elites" ;
+    rdfs:comment "The extent of this group is the ruling elites."
+  ] ;
+  seshat:dominantEthnicGroup [
+    a seshat:RitualGroupValue ;
+    rdfs:label "Dominant Ethnic Group" ;
+    rdfs:comment "The extent of this group is the dominant ethnic group."
+  ] ;
+  seshat:dominantMilitaryUnit [
+    a seshat:RitualGroupValue ;
+    rdfs:label "Dominant Military Unit" ;
+    rdfs:comment "The extent of this group is the dominant military unit."
+  ] ;
+  seshat:anotherKindOfInterestGroup [
+    a seshat:RitualGroupValue ;
+    rdfs:label "Another Kind of Interest Group" ;
+    rdfs:comment "The extent of this group is another kind of interest group."
+  ] ;
+  seshat:ritualElement [
+    rdfs:subPropertyOf seshat:hasRitualVariable ;
+    rdfs:label "Ritual Element" ;
+    rdfs:comment "Used to code the euphoric and dysphoric elements of a particiular ritual. Dysphoric elements are negative (frightening, painful, or unpleasant), emotionally arousing components of ritual. Euphoric elements are positive, emotionally arousing components of a ritual. " ;
+    rdfs:domain seshat:RitualRecord ;
+    rdfs:range seshat:RitualElementVariable
+  ] ;
+  seshat:RitualElementVariable [
+    rdfs:subClassOf dacura:UncertainTemporalBooleanDataVariable ;
+    rdfs:label "Ritual Element Variable" ;
+    rdfs:comment "Holds a boolean ritual element value"
+  ] ;
+  seshat:RitualElement [
+    a owl:Class ;
+    rdfs:label "Ritual Element" ;
+    rdfs:commemt "A classiciation scheme for euphoric or dysphoric elements of a ritual."
+  ] ;
+  seshat:Dysphoric [
+    rdfs:subClassOf seshat:RitualElement ;
+    rdfs:label "Dysphoric" ;
+    rdfs:comment "Dysphoric elements are negative (frightening, painful, or unpleasant), emotionally arousing components of ritual."
+  ] ;
+  seshat:Euphoric [
+    rdfs:subClassOf seshat:RitualElement ;
+    rdfs:label "Euphoric" ;
+    rdfs:comment "Euphoric elements are positive, emotionally arousing components of a ritual. "
+  ] ;
+  seshat:Sex [
+    rdfs:subClassOf seshat:Euphoric ;
+    rdfs:label "Sex" ;
+    rdfs:comment "No codebook entry. "
+  ] ;
+  seshat:Feasting [
+    rdfs:subClassOf seshat:Euphoric ;
+    rdfs:label "Feasting" ;
+    rdfs:comment "No codebook entry. "
+  ] ;
+  seshat:Alcohol [
+    rdfs:subClassOf seshat:Euphoric ;
+    rdfs:label "Alcohol" ;
+    rdfs:comment "No codebook entry. "
+  ] ;
+  seshat:EuphoriaInducingDrugs [
+    rdfs:subClassOf seshat:Euphoric ;
+    rdfs:label "Euphoria-inducing Drugs" ;
+    rdfs:comment "Other than alchol. "
+  ] ;
+  seshat:Dancing [
+    rdfs:subClassOf seshat:Euphoric ;
+    rdfs:label "Dancing" ;
+    rdfs:comment "No codebook entry. "
+  ] ;
+  seshat:SynchronousMovement [
+    rdfs:subClassOf seshat:Euphoric ;
+    rdfs:label "Synchronous Movement" ;
+    rdfs:comment "e.g. dancing or marching in unison. "
+  ] ;
+  seshat:Singing [
+    rdfs:subClassOf seshat:Euphoric ;
+    rdfs:label "Singing" ;
+    rdfs:comment "No codebook entry. "
+  ] ;
+  seshat:Entertainment [
+    rdfs:subClassOf seshat:Euphoric ;
+    rdfs:label "Entertainment" ;
+    rdfs:comment "No codebook entry. "
+  ] ;
+  seshat:OtherEuphoric [
+    rdfs:subClassOf seshat:Euphoric ;
+    rdfs:label "Other Euphoric" ;
+    rdfs:comment "List the others. "
+  ] ;
+  seshat:Fasting [
+    rdfs:subClassOf seshat:Dysphoric ;
+    rdfs:label "Fasting" ;
+    rdfs:comment "No codebook entry. "
+  ] ;
+  seshat:Vigil [
+    rdfs:subClassOf seshat:Dysphoric ;
+    rdfs:label "Vigil/Sleep Deprivation" ;
+    rdfs:comment "No codebook entry. "
+  ] ;
+  seshat:Fear [
+    rdfs:subClassOf seshat:Dysphoric ;
+    rdfs:label "Fear" ;
+    rdfs:comment "No codebook entry. "
+  ] ;
+  seshat:Humiliation [
+    rdfs:subClassOf seshat:Dysphoric ;
+    rdfs:label "Humiliation" ;
+    rdfs:comment "No codebook entry. "
+  ] ;
+  seshat:Disgust [
+    rdfs:subClassOf seshat:Dysphoric ;
+    rdfs:label "Disgust" ;
+    rdfs:comment "No codebook entry. "
+  ] ;
+  seshat:Poisoning [
+    rdfs:subClassOf seshat:Dysphoric ;
+    rdfs:label "Poisoning/Dysphoria-causing Drugs" ;
+    rdfs:comment "e.g. vomiting. "
+  ] ;
+  seshat:Pain [
+    rdfs:subClassOf seshat:Dysphoric ;
+    rdfs:label "Pain" ;
+    rdfs:comment "No codebook entry. "
+  ] ;
+  seshat:Mutiliation [
+    rdfs:subClassOf seshat:Dysphoric ;
+    rdfs:label "Mutiliation" ;
+    rdfs:comment "No codebook entry. "
+  ] ;
+  seshat:RiskOfDeath [
+    rdfs:subClassOf seshat:Dysphoric ;
+    rdfs:label "Risk of Death" ;
+    rdfs:comment "No codebook entry. "
+  ] ;
+  seshat:OtherDysphoric [
+    rdfs:subClassOf seshat:Dysphoric ;
+    rdfs:label "Other Dysphoric" ;
+    rdfs:comment "List the others. "
+  ] ;
+  seshat:ritualCohesion [
+    rdfs:subPropertyOf seshat:hasRitualVariable ;
+    rdfs:label "Ritual Cohesion", "Cohesion" ;
+    rdfs:comment "Cohesion among performers of the ritual. " ;
+    rdfs:domain seshat:RitualRecord ;
+    rdfs:range seshat:RitualCohesionVariable
+  ] ;
+  seshat:RitualCohesionVariable [
+    rdfs:subClassOf dacura:UncertainTemporalBooleanDataVariable ;
+    rdfs:label "Ritual Cohesion Variable" ;
+    rdfs:comment "Holds a boolean ritual cohesion value"
+  ] ;
+  seshat:RitualCohesion [
+    a owl:Class ;
+    rdfs:label "Ritual Cohesion" ;
+    rdfs:comment "Defines the set of types of cohesion that are possible among members of a ritual." ;
+    owl:oneOf <http://localhost/all/ontology/seshat/seshat150>
+  ] ;
+  seshat:honourCode [
+    a seshat:RitualCohesion ;
+    rdfs:label "Honour Code" ;
+    rdfs:comment "Not defined in codebook."
+  ] ;
+  seshat:oathTaking [
+    a seshat:RitualCohesion ;
+    rdfs:label "Oath Taking" ;
+    rdfs:comment "Not defined in codebook."
+  ] ;
+  seshat:otherCohesion [
+    a seshat:RitualCohesion ;
+    rdfs:label "Other Cohesion" ;
+    rdfs:comment "Not defined in codebook."
+  ] ;
+  seshat:familyObligations [
+    a seshat:RitualCohesion ;
+    rdfs:label "Obligations to Each Other's Families" ;
+    rdfs:comment "Not defined in codebook."
+  ] ;
+  seshat:commonEnemies [
+    a seshat:RitualCohesion ;
+    rdfs:label "Enemies of any Group Member are my Enemies" ;
+    rdfs:comment "Not defined in codebook."
+  ] ;
+  seshat:willingToDie [
+    a seshat:RitualCohesion ;
+    rdfs:label "Willingness to Die for Each Other" ;
+    rdfs:comment "Not defined in codebook."
+  ] ;
+  seshat:orthopraxyChecks [
+    rdfs:subPropertyOf seshat:hasRitualVariable ;
+    rdfs:label "Orthopraxy Checks" ;
+    rdfs:comment "Orthopraxy checks are mechanisms used to ensure that rituals are performed in a standardized way, e.g. through the supervisory prominence of a professionalized priesthood or other system of governance, appeal to texts detailing the proper procedure, etc. In the narrative paragraph, also give a brief description of the orthopraxy checks." ;
+    rdfs:domain seshat:RitualRecord ;
+    rdfs:range seshat:OrthopraxyChecksVariable
+  ] ;
+  seshat:OrthopraxyChecksVariable [
+    rdfs:subClassOf dacura:UncertainTemporalBooleanDataVariable ;
+    rdfs:label "Orthopraxy Checks Variable" ;
+    rdfs:comment "Holds the seshat:OrthopraxyChecks value for a seshat:RitualRecord." ;
+    dacura:annotationMandatory true
+  ] ;
+  seshat:orthodoxyChecks [
+    rdfs:subPropertyOf seshat:hasRitualVariable ;
+    rdfs:label "Orthodoxy Checks" ;
+    rdfs:comment "Orthodoxy checks are mechanisms used to ensure that rituals are interpreted in a standardized way, e.g. through the supervisory prominence of a professionalized priesthood or other system of governance, appeal to texts detailing the proper interpretation, etc. In the main paragraph, also give a brief description of the orthodoxy checks." ;
+    rdfs:domain seshat:RitualRecord ;
+    rdfs:range seshat:OrthodoxyChecksVariable
+  ] ;
+  seshat:OrthodoxyChecksVariable [
+    rdfs:subClassOf dacura:UncertainTemporalBooleanDataVariable ;
+    rdfs:label "Orthodoxy Checks Variable" ;
+    rdfs:comment "Holds the seshat:OrthodoxyChecks value for a seshat:RitualRecord." ;
+    dacura:annotationMandatory true
+  ] ;
+  seshat:costsOfParticipation [
+    rdfs:subPropertyOf seshat:hasRitualVariable ;
+    rdfs:label "Costs of Participation" ;
+    rdfs:comment "The costs of participation in a ritual." ;
+    rdfs:domain seshat:RitualRecord ;
+    rdfs:range <http://localhost/all/ontology/seshat/seshat156>
+  ] ;
+  seshat:CostsOfParticipationVariable [
+    rdfs:subClassOf dacura:UncertainTemporalBooleanDataVariable ;
+    rdfs:label "Costs of Participation Variable" ;
+    rdfs:comment "Holds the seshat:CostsOfParticipation values for a seshat:RitualRecord."
+  ] ;
+  seshat:ParticipationCost [
+    a owl:Class ;
+    rdfs:label "Participation Cost" ;
+    rdfs:comment "Defines the type of participation costs for rituals."
+  ] ;
+  seshat:Currency [
+    rdfs:subClassOf seshat:ParticipationCost ;
+    rdfs:label "Currency" ;
+    rdfs:comment "No entry in codebook."
+  ] ;
+  seshat:HealthCost [
+    rdfs:subClassOf seshat:ParticipationCost ;
+    rdfs:label "Health Costs" ;
+    rdfs:comment "No entry in codebook."
+  ] ;
+  seshat:Property [
+    rdfs:subClassOf seshat:ParticipationCost ;
+    rdfs:label "Property/Valuable Items" ;
+    rdfs:comment "No entry in codebook."
+  ] ;
+  seshat:OtherParticipationCost [
+    rdfs:subClassOf seshat:ParticipationCost ;
+    rdfs:label "Other Participation Cost", "Other" ;
+    rdfs:comment "List the other(s)."
+  ] ;
+  seshat:Sacrifice [
+    rdfs:subClassOf seshat:ParticipationCost ;
+    rdfs:label "Sacrifice" ;
+    rdfs:comment "A set of participation costs for rituals."
+  ] ;
+  seshat:Animal [
+    rdfs:subClassOf seshat:Sacrifice ;
+    rdfs:label "Animal Sacrifice" ;
+    rdfs:comment "No entry in codebook."
+  ] ;
+  seshat:Human [
+    rdfs:subClassOf seshat:Sacrifice ;
+    rdfs:label "Human Sacrifice" ;
+    rdfs:comment "A set of participation costs based on human sacrifice for rituals."
+  ] ;
+  seshat:OfAnOutGroupMember [
+    rdfs:subClassOf seshat:Human ;
+    rdfs:label "Of an Out-Group Member" ;
+    rdfs:comment "i.e. an individual who is not considered part of the group performing the ritual."
+  ] ;
+  seshat:OfAnInGroupMember [
+    rdfs:subClassOf seshat:Human ;
+    rdfs:label "Of an In-Group Member" ;
+    rdfs:comment "i.e. an individual who is considered part of the group performing the ritual."
+  ] ;
+  seshat:OfARelative [
+    rdfs:subClassOf seshat:Human ;
+    rdfs:label "Of a Relative" ;
+    rdfs:comment "e.g. sacrificing the first-born son."
+  ] ;
+  seshat:UnitOfMeasure [
+    a seshat:Entity ;
+    rdfs:label "Unit of Measure" ;
+    rdfs:comment "Definitions of the units used by seshat variables."
+  ] ;
+  seshat:metresSquared [
+    a dacura:UnitOfMeasure ;
+    rdfs:label "Metres squared" ;
+    rdfs:comment "The SI unit of measure for area."
+  ] ;
+  seshat:numPeople [
+    a dacura:UnitOfMeasure ;
+    rdfs:label "Number of People" ;
+    rdfs:comment "A measure counted in numbers of people."
+  ] ;
+  seshat:metres [
+    a dacura:UnitOfMeasure ;
+    rdfs:label "Metres" ;
+    rdfs:comment "The SI unit of measure for distance."
+  ] ;
+  seshat:levels [
+    a dacura:UnitOfMeasure ;
+    rdfs:label "Levels" ;
+    rdfs:comment "The number of levels for a hierarchy."
+  ] ;
+  seshat:personYear [
+    a dacura:UnitOfMeasure ;
+    rdfs:label "Person-Year" ;
+    rdfs:comment "A number of person-years of human effort, a measure of cost or effort."
+  ] ;
+  seshat:day [
+    a dacura:UnitOfMeasure ;
+    rdfs:label "Day" ;
+    rdfs:comment "A number of days, a measure of time or speed."
+  ] ;
+  seshat:year [
+    a dacura:UnitOfMeasure ;
+    rdfs:label "Year" ;
+    rdfs:comment "A number of years, a measure of time or speed."
+  ] ;
+  seshat:relatedToOrganisation [
+    a owl:ObjectProperty ;
+    rdfs:label "relatedToOrganisation" ;
+    rdfs:domain seshat:Entity ;
+    rdfs:range seshat:Organisation ;
+    rdfs:comment "A property used to associate an Entity with another Organisation."
+  ] ;
+  ns0:seshat1 ( dacura:UncertainTemporalVariable ) ;
+  ns0:seshat2 ( seshat:TemporalInstantBagOfValuesRestriction ) ;
+  ns0:seshat3 ( seshat:TemporalInstantRangeMaxValueRestriction ) ;
+  ns0:seshat4 ( seshat:TemporalInstantRangeMinValueRestriction ) ;
+  ns0:seshat5 ( seshat:TemporalInstantValueRestriction ) ;
+  ns0:seshat6 ( dacura:UncertainTemporalVariable ) ;
+  ns0:seshat7 ( seshat:DurationBagOfValuesRestriction ) ;
+  ns0:seshat8 ( seshat:DurationRangeMaxValueRestriction ) ;
+  ns0:seshat9 ( seshat:DurationRangeMinValueRestriction ) ;
+  ns0:seshat10 ( seshat:DurationValueRestriction ) ;
+  ns0:seshat11 ( dacura:UncertainTemporalVariable ) ;
+  ns0:seshat12 ( seshat:PoliticalAuthorityBagOfValuesRestriction ) ;
+  ns0:seshat13 ( seshat:PoliticalAuthorityRangeMaxValueRestriction ) ;
+  ns0:seshat14 ( seshat:PoliticalAuthorityRangeMinValueRestriction ) ;
+  ns0:seshat15 ( seshat:PoliticalAuthorityValueRestriction ) ;
+  ns0:seshat16 ( dacura:UncertainTemporalVariable ) ;
+  ns0:seshat17 ( seshat:SupraculturalEntityBagOfValuesRestriction ) ;
+  ns0:seshat18 ( seshat:SupraculturalEntityRangeMaxValueRestriction ) ;
+  ns0:seshat19 ( seshat:SupraculturalEntityRangeMinValueRestriction ) ;
+  ns0:seshat20 ( seshat:SupraculturalEntityValueRestriction ) ;
+  ns0:seshat21 ( dacura:UncertainTemporalVariable ) ;
+  ns0:seshat22 ( seshat:OrganisationBagOfValuesRestriction ) ;
+  ns0:seshat23 ( seshat:OrganisationRangeMaxValueRestriction ) ;
+  ns0:seshat24 ( seshat:OrganisationRangeMinValueRestriction ) ;
+  ns0:seshat25 ( seshat:OrganisationValueRestriction ) ;
+  ns0:seshat26 ( dacura:UncertainTemporalVariable ) ;
+  ns0:seshat27 ( seshat:CityBagOfValuesRestriction ) ;
+  ns0:seshat28 ( seshat:CityRangeMaxValueRestriction ) ;
+  ns0:seshat29 ( seshat:CityRangeMinValueRestriction ) ;
+  ns0:seshat30 ( seshat:CityValueRestriction ) ;
+  ns0:seshat31 ( dacura:UncertainTemporalVariable ) ;
+  ns0:seshat32 ( seshat:NavalEngagementBagOfValuesRestriction ) ;
+  ns0:seshat33 ( seshat:NavalEngagementRangeMaxValueRestriction ) ;
+  ns0:seshat34 ( seshat:NavalEngagementRangeMinValueRestriction ) ;
+  ns0:seshat35 ( seshat:NavalEngagementValueRestriction ) ;
+  ns0:seshat36 ( dacura:UncertainTemporalVariable ) ;
+  ns0:seshat37 ( seshat:LandBattleBagOfValuesRestriction ) ;
+  ns0:seshat38 ( seshat:LandBattleRangeMaxValueRestriction ) ;
+  ns0:seshat39 ( seshat:LandBattleRangeMinValueRestriction ) ;
+  ns0:seshat40 ( seshat:LandBattleValueRestriction ) ;
+  ns0:seshat41 ( dacura:UncertainTemporalVariable ) ;
+  ns0:seshat42 ( seshat:SiegeBagOfValuesRestriction ) ;
+  ns0:seshat43 ( seshat:SiegeRangeMaxValueRestriction ) ;
+  ns0:seshat44 ( seshat:SiegeRangeMinValueRestriction ) ;
+  ns0:seshat45 ( seshat:SiegeValueRestriction ) ;
+  ns0:seshat46 ( dacura:UncertainTemporalVariable ) ;
+  ns0:seshat47 ( seshat:LanguageBagOfValuesRestriction ) ;
+  ns0:seshat48 ( seshat:LanguageRangeMaxValueRestriction ) ;
+  ns0:seshat49 ( seshat:LanguageRangeMinValueRestriction ) ;
+  ns0:seshat50 ( seshat:LanguageValueRestriction ) ;
+  ns0:seshat51 ( dacura:UncertainTemporalVariable ) ;
+  ns0:seshat52 ( seshat:BuildingBagOfValuesRestriction ) ;
+  ns0:seshat53 ( seshat:BuildingRangeMaxValueRestriction ) ;
+  ns0:seshat54 ( seshat:BuildingRangeMinValueRestriction ) ;
+  ns0:seshat55 ( seshat:BuildingValueRestriction ) ;
+  ns0:seshat56 ( dacura:UncertainTemporalVariable ) ;
+  ns0:seshat57 ( seshat:UTMZoneAndLatBandBagOfValuesRestriction ) ;
+  ns0:seshat58 ( seshat:UTMZoneAndLatBandRangeMaxValueRestriction ) ;
+  ns0:seshat59 ( seshat:UTMZoneAndLatBandRangeMinValueRestriction ) ;
+  ns0:seshat60 ( seshat:UTMZoneAndLatBandValueRestriction ) ;
+  ns0:seshat61 [
+    a owl:Class ;
+    rdfs:label "UTM Zone and Lattidude Band Value" ;
+    rdfs:comment "This defines a single UTM Zone and a single lattitude band from the MGRS geospatial reference system. The instances of this class are pre-defined" ;
+    owl:oneOf ns0:seshat62
+  ] ;
+  ns0:seshat62 ( seshat:uTMZoneAndLatBand14Q ) ;
+  ns0:seshat63 ( seshat:uTMZoneAndLatBand33T ) ;
+  ns0:seshat64 ( seshat:uTMZoneAndLatBand34T ) ;
+  ns0:seshat65 ( dacura:UncertainTemporalVariable ) ;
+  ns0:seshat66 ( seshat:DegreeOfCentralizationBagOfValuesRestriction ) ;
+  ns0:seshat67 ( seshat:DegreeOfCentralizationRangeMaxValueRestriction ) ;
+  ns0:seshat68 ( seshat:DegreeOfCentralizationRangeMinValueRestriction ) ;
+  ns0:seshat69 ( seshat:DegreeOfCentralizationValueRestriction ) ;
+  ns0:seshat70 [
+    a owl:Class ;
+    rdfs:label "Degree of Centralisation Value" ;
+    rdfs:comment "Holds allowed values for this variable, the values are defined as instances." ;
+    owl:oneOf ns0:seshat71
+  ] ;
+  ns0:seshat71 ( seshat:quasiPolityOrNone ) ;
+  ns0:seshat72 ( seshat:nominal ) ;
+  ns0:seshat73 ( seshat:loose ) ;
+  ns0:seshat74 ( seshat:confederatedState ) ;
+  ns0:seshat75 ( seshat:unitaryState ) ;
+  ns0:seshat76 ( dacura:UncertainTemporalVariable ) ;
+  ns0:seshat77 ( seshat:supraPolityRelationsBagOfValuesRestriction ) ;
+  ns0:seshat78 ( seshat:supraPolityRelationsRangeMaxValueRestriction ) ;
+  ns0:seshat79 ( seshat:supraPolityRelationsRangeMinValueRestriction ) ;
+  ns0:seshat80 ( seshat:supraPolityRelationsValueRestriction ) ;
+  ns0:seshat81 [
+    a owl:Class ;
+    rdfs:label "Supra-Polity Relations Value" ;
+    rdfs:comment "Holds the allowed values for supra-polity Relations." ;
+    owl:oneOf ns0:seshat82
+  ] ;
+  ns0:seshat82 ( seshat:alliance ) ;
+  ns0:seshat83 ( seshat:nominalAllegiance ) ;
+  ns0:seshat84 ( seshat:personalUnion ) ;
+  ns0:seshat85 ( seshat:vassalage ) ;
+  ns0:seshat86 ( seshat:noSupraPolityRelations ) ;
+  ns0:seshat87 ( dacura:UncertainTemporalVariable ) ;
+  ns0:seshat88 ( seshat:relationshipToPreceedingPoliticalAuthorityBagOfValuesRestriction ) ;
+  ns0:seshat89 ( seshat:relationshipToPreceedingPoliticalAuthorityRangeMaxValueRestriction ) ;
+  ns0:seshat90 ( seshat:relationshipToPreceedingPoliticalAuthorityRangeMinValueRestriction ) ;
+  ns0:seshat91 ( seshat:relationshipToPreceedingPoliticalAuthorityValueRestriction ) ;
+  ns0:seshat92 [
+    a owl:Class ;
+    rdfs:label "Relationship To Preceeding Political Organisation Value" ;
+    rdfs:comment "Holds the allowed values for supra-polity Relations." ;
+    owl:oneOf ns0:seshat93
+  ] ;
+  ns0:seshat93 ( seshat:continuity ) ;
+  ns0:seshat94 ( seshat:culturalAssimilation ) ;
+  ns0:seshat95 ( seshat:eliteMigration ) ;
+  ns0:seshat96 ( seshat:populationMigration ) ;
+  ns0:seshat97 [
+    a owl:Restriction ;
+    owl:onProperty seshat:ritualName ;
+    owl:cardinality "1"^^xsd:nonNegativeInteger ;
+    owl:allValuesFrom seshat:RitualNameVariable
+  ] ;
+  ns0:seshat98 [
+    a owl:Restriction ;
+    owl:onProperty seshat:ritualFrequency ;
+    owl:cardinality "3"^^xsd:nonNegativeInteger ;
+    owl:allValuesFrom ns0:seshat99
+  ] ;
+  ns0:seshat99 [
+    a owl:Class ;
+    owl:intersectionOf ns0:seshat100
+  ] ;
+  ns0:seshat100 ( seshat:RitualFrequencyVariable ) ;
+  ns0:seshat101 ( seshat:RitualActor ) ;
+  ns0:seshat102 [
+    a owl:Restriction ;
+    owl:onProperty seshat:ritualDuration ;
+    owl:cardinality "1"^^xsd:nonNegativeInteger ;
+    owl:allValuesFrom seshat:RitualDurationVariable
+  ] ;
+  ns0:seshat103 [
+    a owl:Restriction ;
+    owl:onProperty seshat:typicalSizeOfParticipatingGroup ;
+    owl:cardinality "1"^^xsd:nonNegativeInteger ;
+    owl:allValuesFrom seshat:TypicalSizeOfParticipatingGroupVariable
+  ] ;
+  ns0:seshat104 [
+    a owl:Restriction ;
+    owl:onProperty seshat:ritualInclusiveness ;
+    owl:cardinality "3"^^xsd:nonNegativeInteger ;
+    owl:allValuesFrom ns0:seshat105
+  ] ;
+  ns0:seshat105 [
+    a owl:Class ;
+    owl:intersectionOf ns0:seshat106
+  ] ;
+  ns0:seshat106 ( seshat:RitualGroupVariable ) ;
+  ns0:seshat107 ( seshat:RitualActor ) ;
+  ns0:seshat108 [
+    a owl:Restriction ;
+    owl:onProperty seshat:ritualElement ;
+    owl:minCardinality "19"^^xsd:nonNegativeInteger ;
+    owl:allValuesFrom ns0:seshat109
+  ] ;
+  ns0:seshat109 [
+    a owl:Class ;
+    owl:intersectionOf ns0:seshat110
+  ] ;
+  ns0:seshat110 ( seshat:RitualElementVariable ) ;
+  ns0:seshat111 ( seshat:RitualElement ) ;
+  ns0:seshat112 [
+    a owl:Restriction ;
+    owl:onProperty seshat:ritualCohesion ;
+    owl:cardinality "6"^^xsd:nonNegativeInteger ;
+    owl:allValuesFrom ns0:seshat113
+  ] ;
+  ns0:seshat113 [
+    a owl:Class ;
+    owl:intersectionOf ns0:seshat114
+  ] ;
+  ns0:seshat114 ( seshat:RitualCohesionVariable ) ;
+  ns0:seshat115 ( seshat:RitualCohesion ) ;
+  ns0:seshat116 [
+    a owl:Restriction ;
+    owl:onProperty seshat:ritualCohesion ;
+    owl:minCardinality "6"^^xsd:nonNegativeInteger ;
+    owl:allValuesFrom ns0:seshat117
+  ] ;
+  ns0:seshat117 [
+    a owl:Class ;
+    owl:intersectionOf ns0:seshat118
+  ] ;
+  ns0:seshat118 ( seshat:RitualCohesionVariable ) ;
+  ns0:seshat119 ( seshat:RitualCohesion ) ;
+  ns0:seshat120 [
+    a owl:Restriction ;
+    owl:onProperty seshat:orthopraxyChecks ;
+    owl:cardinality "1"^^xsd:nonNegativeInteger ;
+    owl:allValuesFrom seshat:OrthopraxyCheckVariable
+  ] ;
+  ns0:seshat121 [
+    a owl:Restriction ;
+    owl:onProperty seshat:orthodoxyChecks ;
+    owl:cardinality "1"^^xsd:nonNegativeInteger ;
+    owl:allValuesFrom seshat:OrthodoxyCheckVariable
+  ] ;
+  ns0:seshat122 [
+    a owl:Restriction ;
+    owl:onProperty seshat:costsOfParticipation ;
+    owl:minCardinality "8"^^xsd:nonNegativeInteger ;
+    owl:allValuesFrom ns0:seshat123
+  ] ;
+  ns0:seshat123 [
+    a owl:Class ;
+    owl:intersectionOf ns0:seshat124
+  ] ;
+  ns0:seshat124 ( seshat:CostsOfParticipationVariable ) ;
+  ns0:seshat125 ( seshat:ParticipationCost ) ;
+  ns0:seshat126 ( dacura:UncertainTemporalVariable ) ;
+  ns0:seshat127 ( seshat:HumanScaleTemporalFrequencyBagOfValuesRestriction ) ;
+  ns0:seshat128 ( seshat:HumanScaleTemporalFrequencyRangeMaxValueRestriction ) ;
+  ns0:seshat129 ( seshat:HumanScaleTemporalFrequencyRangeMinValueRestriction ) ;
+  ns0:seshat130 ( seshat:HumanScaleTemporalFrequencyValueRestriction ) ;
+  ns0:seshat131 [
+    a owl:Class ;
+    rdfs:label "Human Scale Temporal Frequency Value" ;
+    rdfs:comment "Defines a set of frequencies in terms of both temporal units and human sclaes such as lifetimes and generations. Holds allowed values for this variable, the values are defined as instances." ;
+    owl:oneOf ns0:seshat132
+  ] ;
+  ns0:seshat132 ( seshat:daily ) ;
+  ns0:seshat133 ( seshat:weekly ) ;
+  ns0:seshat134 ( seshat:monthly ) ;
+  ns0:seshat135 ( seshat:yearly ) ;
+  ns0:seshat136 ( seshat:oncePerGeneration ) ;
+  ns0:seshat137 ( seshat:onceInALifetime ) ;
+  ns0:seshat138 ( dacura:UncertainTemporalVariable ) ;
+  ns0:seshat139 ( seshat:RitualGroupBagOfValuesRestriction ) ;
+  ns0:seshat140 ( seshat:RitualGroupRangeMaxValueRestriction ) ;
+  ns0:seshat141 ( seshat:RitualGroupRangeMinValueRestriction ) ;
+  ns0:seshat142 ( seshat:RitualGroupValueRestriction ) ;
+  ns0:seshat143 [
+    a owl:Class ;
+    rdfs:label "Ritual Group Value" ;
+    rdfs:comment "Defines a set of possible groups from which ritual actors may be drawn. Holds allowed values for this variable, the values are defined as instances." ;
+    owl:oneOf ns0:seshat144
+  ] ;
+  ns0:seshat144 ( seshat:wholePolity ) ;
+  ns0:seshat145 ( seshat:allAdultMales ) ;
+  ns0:seshat146 ( seshat:rulingElites ) ;
+  ns0:seshat147 ( seshat:dominantEthnicGroup ) ;
+  ns0:seshat148 ( seshat:dominantMilitaryUnit ) ;
+  ns0:seshat149 ( seshat:anotherKindOfInterestGroup ) ;
+  ns0:seshat150 ( seshat:honourCode ) ;
+  ns0:seshat151 ( seshat:oathTaking ) ;
+  ns0:seshat152 ( seshat:otherCohesion ) ;
+  ns0:seshat153 ( seshat:familyObligations ) ;
+  ns0:seshat154 ( seshat:commonEnemies ) ;
+  ns0:seshat155 ( seshat:willingToDie ) ;
+  ns0:seshat157 ( seshat:CostsOfParticipationVariable ) ;
+  ns0:seshat158 ( seshat:ParticipationCost ) ;
+  ns0:seshat156 [ owl:intersectionOf ns0:seshat157 ] .
+
