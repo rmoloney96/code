@@ -26,12 +26,33 @@ fac (s n) = (fac n) * (s n)
 
 open import Relation.Binary.PropositionalEquality
 
+{-
+
+A couple of easy examples of nat induction 
+
+(cong)ruence gives us that x ≡ y → f x ≡ f y
+
+Its definition in the standard libarary is:
+
+cong : ∀ {a b} {A : Set a} {B : Set b}
+       (f : A → B) {x y} → x ≡ y → f x ≡ f y
+cong f refl = refl
+
+-} 
+
 n+0≡n : ∀ n → (n + z) ≡ n 
 n+0≡n = ℕInduction (λ n → (n + z) ≡ n) refl (λ n p → cong s p) 
 
 n+1+m≡1+n+m : ∀ n m → n + (s m) ≡ s (n + m)
 n+1+m≡1+n+m n m = ℕInduction (λ n → (n + s m) ≡ s (n + m)) refl (λ _ → cong s) n
 
+{-
+
+rewrite is synactic sugar for an induction principle over _≡_.
+
+These proofs get a lot messier with out the sugar.
+
+-}
 +-assoc : ∀ n m o → (n + m) + o ≡ n + (m + o)
 +-assoc n m o = ℕInduction (λ m → (n + m) + o ≡ n + (m + o)) zP {!sP!} m
   where zP : ((n + z) + o) ≡ (n + o)
@@ -45,6 +66,13 @@ n+1+m≡1+n+m n m = ℕInduction (λ n → (n + s m) ≡ s (n + m)) refl (λ _ �
   where sP : (n₁ : ℕ) → (n + n₁) ≡ (n₁ + n) → (n + s n₁) ≡ s (n₁ + n)
         sP n₁ p rewrite (n+1+m≡1+n+m n n₁) = cong s p
 
+{-
+
+The following are needed for the example: sum n = n + (n + 1) / 2
+
+We avoid division by writing: 2 * (sum n) = n + (n + 1)
+
+-}
 n*1≡n : ∀ n → (n * s z) ≡ n
 n*1≡n = ℕInduction (λ n → (n * s z) ≡ n) refl (λ n p → cong s p) 
 
@@ -90,5 +118,29 @@ n*sm≡m*[n*m] m = ℕInduction (λ p → (m * s p) ≡ (m + (m * p))) zP {!!}
                      | +-comm n (sum n + n)
                      | +-assoc (sum n + n) n (sum n)
                      | +-comm n (sum n) = refl 
+
+{- BTree example -}
+
+data BTree : Set where
+  leaf : BTree
+  branch : BTree → BTree → BTree 
+
+BTreeInduction : ∀ (P : BTree → Set) → (P leaf) → (∀ n m → P n → P m → P (branch n m)) → (t : BTree) → P t
+BTreeInduction P lh bh leaf = lh
+BTreeInduction P lh bh (branch t t₁) = bh t t₁ (BTreeInduction P lh bh t) ((BTreeInduction P lh bh t₁)) 
+
+♯ofLeaves : BTree → ℕ
+♯ofLeaves = BTreeInduction (λ _ → ℕ) (s z) (λ _ _ n₁ n₂ →  n₁ + n₂)
+
+♯ofBranches : BTree → ℕ
+♯ofBranches = BTreeInduction (λ _ → ℕ) z (λ _ _ n₁ n₂ → (s z) + (n₁ + n₂))
+
+♯ofLeaves≡♯ofBranches+1 : ∀ t → ♯ofLeaves t ≡ s (♯ofBranches t)
+♯ofLeaves≡♯ofBranches+1 = BTreeInduction (λ x → ♯ofLeaves x ≡ s (♯ofBranches x)) refl bh
+  where bh : (n m : BTree) →
+             ♯ofLeaves n ≡ s (♯ofBranches n) →
+             ♯ofLeaves m ≡ s (♯ofBranches m) →
+             ♯ofLeaves (branch n m) ≡ s (♯ofBranches (branch n m))
+        bh n m p q rewrite p | q | n+1+m≡1+n+m (♯ofBranches n) (♯ofBranches m) = refl 
 
 
