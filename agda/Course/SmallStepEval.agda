@@ -34,9 +34,7 @@ open import Data.Sum
 ⟶progress (E ⊕ E₁)              | inj₂ (E' , P) = inj₂ ((E' ⊕ E₁) , ⊕₁⟶ P)
 
 {-
-
 The size of an expression will be used to find a well founded relation on terms
-
 -}
 
 ∣_∣ : Exp → ℕ
@@ -97,5 +95,4 @@ evalWF E (acc rs) | inj₂ (E' , P) | n , k⟶⋆ (k , Q) = n , k⟶⋆ (suc k ,
 {- Now eval is re-expressed with an additional auxilliary relation tracking the wellfoundedness -} 
 eval : ∀ E → Σ[ n ∈ ℕ ] E ⟶⋆ num n
 eval E = evalWF E (wf⟵ E)
-
 
