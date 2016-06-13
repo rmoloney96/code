@@ -1,5 +1,5 @@
 
-module Simplified where
+module OperationalSemantics where
 
 open import Data.Nat
 
@@ -18,9 +18,9 @@ data _⇓_ : Exp → Exp → Set where
       
   E⊕E : ∀ {E₁ E₂ n₁ n₂} →
   
-      E₁ ⇓ num n₁ → E₂ ⇓ num n₂ →
-      ---------------------------------
-         E₁ ⊕ E₂ ⇓ num (n₁ + n₂)
+      E₁ ⇓ num n₁  →  E₂ ⇓ num n₂ →
+      ----------------------------
+        E₁ ⊕ E₂ ⇓ num (n₁ + n₂)
   
 
 -- Need for Σ which gives us specifications / existentials.
@@ -57,7 +57,7 @@ data _⟶_ : Exp → Exp → Set where
   ⊕₂⟶ : ∀ {n E₂ E₂'} →
 
           E₂ ⟶ E₂' →  
-          --------------------
+          --------------------------
           num n ⊕ E₂ ⟶ num n ⊕ E₂'
 
 example⟶₁ : (num 3 ⊕ num 7) ⊕ (num 8 ⊕ num 1) ⟶ num 10 ⊕ (num 8 ⊕ num 1)
@@ -69,19 +69,19 @@ infix 8 _⟶ch_
 data _⟶ch_ : Exp → Exp → Set where
   +⟶ch : ∀ {n m} →
   
-          -----------------------------
+          -------------------------------
           num n ⊕ num m ⟶ch num (n + m)
 
   ⊕₁⟶ch : ∀ {E₁ E₁' E₂} →
 
           E₁ ⟶ch E₁' → 
-          ---------------------
+          ----------------------
           E₁ ⊕ E₂ ⟶ch E₁' ⊕ E₂
 
   ⊕₂⟶ch : ∀ {E₁ E₂ E₂'} →
 
           E₂ ⟶ch E₂' →  
-          --------------------
+          ----------------------
           E₁ ⊕ E₂ ⟶ch E₁ ⊕ E₂'
 
 
@@ -116,22 +116,27 @@ open import Relation.Nullary
 data _⟶_⟨_⟩ : Exp → Exp → ℕ → Set where
   z⟶ : ∀ {E₁} →
   
-                 --------------
-                 E₁ ⟶ E₁ ⟨ 0 ⟩
+       --------------
+       E₁ ⟶ E₁ ⟨ 0 ⟩
                  
   sn⟶ : ∀ {E₁ E₂ E₃ n} →
 
-                 E₁ ⟶ E₂ ⟨ n ⟩ → E₂ ⟶ E₃ →  
-                 -----------------------------
-                 E₁ ⟶ E₃ ⟨ 1 + n ⟩ 
+        E₁ ⟶ E₂ →  E₂ ⟶ E₃ ⟨ n ⟩ →  
+        ----------------------------
+             E₁ ⟶ E₃ ⟨ 1 + n ⟩ 
 
 
 data _⟶⋆_ : Exp → Exp → Set where
   k⟶⋆ : ∀ {E₁ E₂} →
 
-                 Σ[ k ∈ ℕ ] E₁ ⟶ E₂ ⟨ k ⟩ →
-                 --------------------------
-                 E₁ ⟶⋆ E₂ 
+        Σ[ k ∈ ℕ ] E₁ ⟶ E₂ ⟨ k ⟩ →
+        --------------------------
+               E₁ ⟶⋆ E₂ 
+
+-- Small step reductions are like numbers with extra indices, so we can add them.
+add⟶⟨k⟩ : ∀ {E E₁ E₂ k l} → E ⟶ E₁ ⟨ k ⟩ → E₁ ⟶ E₂ ⟨ l ⟩ → E ⟶ E₂ ⟨ k + l ⟩
+add⟶⟨k⟩ z⟶ b = b
+add⟶⟨k⟩ (sn⟶ a x) b = sn⟶ a (add⟶⟨k⟩ x b)
 
 -- We need a notion of equality - we'll use Agda's 
 open import Relation.Binary.PropositionalEquality
@@ -139,27 +144,75 @@ open import Relation.Binary.PropositionalEquality
 ⇓Consistency : ∀ {E n m} → (E ⇓ n) → (E ⇓ m) → n ≡ m
 ⇓Consistency n⇓n n⇓n = refl
 ⇓Consistency (E⊕E d₁ d₂) (E⊕E d₃ d₄) with ⇓Consistency d₁ d₃ | ⇓Consistency d₂ d₄
-⇓Consistency (E⊕E d₁ d₂) (E⊕E d₃ d₄) | refl | refl = refl 
+⇓Consistency (E⊕E d₁ d₂) (E⊕E d₃ d₄) | refl | refl = refl
 
-{-
-∣_∣  : ∀ {k E E'} → E ⟶ E' ⟨ k ⟩ → ℕ
-∣_∣ {k} e = k
+⟶deterministic : ∀ {E E₁ E₂} → E ⟶ E₁ → E ⟶ E₂ → E₁ ≡ E₂
+⟶deterministic +⟶ +⟶ = refl
+⟶deterministic +⟶ (⊕₁⟶ ())
+⟶deterministic +⟶ (⊕₂⟶ ())
+⟶deterministic (⊕₁⟶ ()) +⟶
+⟶deterministic (⊕₁⟶ p) (⊕₁⟶ q) = cong₂ _⊕_ (⟶deterministic p q) refl
+⟶deterministic (⊕₁⟶ ()) (⊕₂⟶ q)
+⟶deterministic (⊕₂⟶ ()) +⟶
+⟶deterministic (⊕₂⟶ p) (⊕₁⟶ ())
+⟶deterministic (⊕₂⟶ p) (⊕₂⟶ q) = cong₂ _⊕_ refl ((⟶deterministic p q))
 
-∣_∣⋆  : ∀ {E E'} → E ⟶⋆ E' → ℕ
-∣ k⟶⋆ (n , p) ∣⋆ = ∣ p ∣
+data Val : Exp → Set where
+  numVal : ∀ n → Val (num n)
 
-⟶⋆Diamond : ∀ {E E₁ E₂} → (E ⟶⋆ E₁) → (E ⟶⋆ E₂) → Σ[ E₃ ∈ Exp ] (E₁ ⟶⋆ E₃ × E₂ ⟶⋆ E₃)
-⟶⋆Diamond (k⟶⋆ (zero , z⟶)) (k⟶⋆ (n , p)) = _ , k⟶⋆ (n , p) , k⟶⋆ (zero , z⟶)
-⟶⋆Diamond (k⟶⋆ (suc n , p)) (k⟶⋆ (zero , z⟶)) = _ , k⟶⋆ (zero , z⟶) , k⟶⋆ (suc n , p)
-⟶⋆Diamond (k⟶⋆ (suc n , sn⟶ p x)) (k⟶⋆ (suc m , sn⟶ q x₁)) with ⟶⋆Diamond {!!} {!!} --  (k⟶⋆ (n , p)) (k⟶⋆ (m , q))
-⟶⋆Diamond (k⟶⋆ (suc n , sn⟶ p x)) (k⟶⋆ (suc m , sn⟶ q x₁)) | res = {!!}
--}
+-- We want sums
+open import Data.Sum
 
-{-
-⟶⋆Consistency : ∀ {E n m} → (E ⟶⋆ num n) × (E ⟶⋆ num m) → n ≡ m
-⟶⋆Consistency (k⟶⋆ _ _ (zero , z⟶ _) , k⟶⋆ _ _ (zero , z⟶ _)) = refl
-⟶⋆Consistency (k⟶⋆ _ _ (zero , z⟶ _) , k⟶⋆ _ _ (suc n , sn⟶ _ E₂ _ .n () x))
-⟶⋆Consistency (k⟶⋆ _ _ (suc k₁ , sn⟶ _ E₂ _ .k₁ () P) , k⟶⋆ _ _ (.0 , z⟶ _))
-⟶⋆Consistency (k⟶⋆ E₁ _ (suc k₁ , sn⟶ .E₁ E₂ _ .k₁ x P) , k⟶⋆ .E₁ _ (.(suc n) , sn⟶ .E₁ E₃ _ n x₁ Q)) = {!!}
--}
+⟶progress : ∀ E → Val E ⊎ Σ[ E' ∈ Exp ] E ⟶ E' 
+⟶progress (num x) = inj₁ (numVal x)
+⟶progress (E ⊕ E₁)              with ⟶progress E
+⟶progress (_ ⊕ E₁)              | inj₁ (numVal x) with ⟶progress E₁
+⟶progress (.(num n) ⊕ .(num m)) | inj₁ (numVal n) | inj₁ (numVal m) = inj₂ (num (n + m) , +⟶)
+⟶progress (.(num n) ⊕ E₁)       | inj₁ (numVal n) | inj₂ (E' , P) = inj₂ ((num n ⊕ E') , ⊕₂⟶ P)
+⟶progress (E ⊕ E₁)              | inj₂ (E' , P) = inj₂ ((E' ⊕ E₁) , ⊕₁⟶ P)
+
+∣_∣ : Exp → ℕ
+∣ num x ∣ = 1
+∣ E ⊕ E₁ ∣ = 1 + ∣ E ∣ + ∣ E₁ ∣
+
+data Acc {A : Set} (_≺_ : A → A → Set) (x : A) : Set where
+  acc : (g : (∀ y → y ≺ x → Acc _≺_ y)) → Acc _≺_ x
+
+WellFounded : {A : Set} → (_≺_ : A → A → Set) → Set
+WellFounded R = ∀ x → Acc R x
+
+ℕ-wf : WellFounded _<′_
+ℕ-wf n = acc (aux n)
+  where aux : ∀ x y → y <′ x → Acc _<′_ y
+        aux .(suc y) y ≤′-refl = ℕ-wf y
+        aux .(suc x) y (≤′-step {x} p) = aux x y p 
+
+_≺_ : Exp → Exp → Set
+x ≺ y = ∣ x ∣ <′ ∣ y ∣ 
+
+Acc<⇒Acc≺ : ∀ x → Acc  _<′_ (∣ x ∣) → Acc _≺_ x
+Acc<⇒Acc≺ x (acc g) = acc (λ y p → Acc<⇒Acc≺ y (g ∣ y ∣ p))
+
+wf≺ : WellFounded _≺_
+wf≺ x = Acc<⇒Acc≺ x (ℕ-wf ∣ x ∣)
+
+open import Data.Nat.Properties
+
+E≺E⊕E₁ : ∀ E E₁ → E ≺ (E ⊕ E₁)
+E≺E⊕E₁ E E₁ = m≤′m+n (suc ∣ E ∣) ∣ E₁ ∣
+
+open import Data.Nat.Properties.Simple
+
+E₁≺E⊕E₁ : ∀ E E₁ → E₁ ≺ (E ⊕ E₁)
+E₁≺E⊕E₁ E E₁ rewrite +-comm ∣ E ∣ ∣ E₁ ∣ = m≤′m+n (suc ∣ E₁ ∣) ∣ E ∣
+
+evalAux : ∀ E → Acc _≺_ E → Σ[ n ∈ ℕ ] E ⟶⋆ num n
+evalAux (num x) _ = x , k⟶⋆ (zero , z⟶)
+evalAux (E ⊕ E₁) (acc g) with evalAux E (g E (E≺E⊕E₁ E E₁))
+evalAux (E ⊕ E₁) (acc g) | n , P with evalAux E₁ (g  E₁ (E₁≺E⊕E₁ E E₁))
+evalAux (E ⊕ E₁) (acc g) | n , P | m , Q = n + m , {!!} 
+
+n≤m⇒n+o≤m+o : ∀ {n m o} → n ≤ m → n + o ≤ m + o
+n≤m⇒n+o≤m+o {zero} {m} {o} z≤n = n≤m+n m o
+n≤m⇒n+o≤m+o (s≤s p) = s≤s (n≤m⇒n+o≤m+o p)
 
