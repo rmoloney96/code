@@ -8,17 +8,6 @@ open import Data.Product
 open import Induction.WellFounded
 open import Relation.Binary.PropositionalEquality
 
-⟶deterministic : ∀ {E E₁ E₂} → E ⟶ E₁ → E ⟶ E₂ → E₁ ≡ E₂
-⟶deterministic +⟶ +⟶ = refl
-⟶deterministic +⟶ (⊕₁⟶ ())
-⟶deterministic +⟶ (⊕₂⟶ ())
-⟶deterministic (⊕₁⟶ ()) +⟶
-⟶deterministic (⊕₁⟶ p) (⊕₁⟶ q) = cong₂ _⊕_ (⟶deterministic p q) refl
-⟶deterministic (⊕₁⟶ ()) (⊕₂⟶ q)
-⟶deterministic (⊕₂⟶ ()) +⟶
-⟶deterministic (⊕₂⟶ p) (⊕₁⟶ ())
-⟶deterministic (⊕₂⟶ p) (⊕₂⟶ q) = cong₂ _⊕_ refl ((⟶deterministic p q))
-
 data Val : Exp → Set where
   numVal : ∀ n → Val (num n)
 
@@ -96,15 +85,3 @@ evalWF E (acc rs) | inj₂ (E' , P) | n , k⟶⋆ (k , Q) = n , k⟶⋆ (suc k ,
 eval : ∀ E → Σ[ n ∈ ℕ ] E ⟶⋆ num n
 eval E = evalWF E (wf⟵ E)
 
-{- We not only get the same answer, but in the same number of steps. -}
-⟶⟨k⟩deterministic : ∀ {E n m k l} → E ⟶ num n ⟨ k ⟩ → E ⟶ num m ⟨ l ⟩ → n ≡ m × k ≡ l 
-⟶⟨k⟩deterministic z⟶ z⟶ = refl , refl
-⟶⟨k⟩deterministic z⟶ (sn⟶ () q)
-⟶⟨k⟩deterministic (sn⟶ () p) z⟶
-⟶⟨k⟩deterministic (sn⟶ x p) (sn⟶ x₁ q) with ⟶deterministic x x₁
-⟶⟨k⟩deterministic (sn⟶ x p) (sn⟶ x₁ q) | refl with ⟶⟨k⟩deterministic p q
-⟶⟨k⟩deterministic (sn⟶ x p) (sn⟶ x₁ q) | refl | refl , refl = refl , refl
-
-⟶⋆deterministic : ∀ {E n m} → E ⟶⋆ num n → E ⟶⋆ num m → n ≡ m
-⟶⋆deterministic (k⟶⋆ (n , P)) (k⟶⋆ (m , Q)) with ⟶⟨k⟩deterministic P Q
-⟶⋆deterministic (k⟶⋆ (n₁ , P)) (k⟶⋆ (.n₁ , Q)) | refl , refl = refl

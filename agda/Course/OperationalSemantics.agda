@@ -135,11 +135,23 @@ data _⟶⋆_ : Exp → Exp → Set where
         --------------------------
                E₁ ⟶⋆ E₂ 
 
--- We need a notion of equality - we'll use Agda's 
-open import Relation.Binary.PropositionalEquality
+data _⟶ch_⟨_⟩ : Exp → Exp → ℕ → Set where
+  z⟶ch : ∀ {E₁} →
+  
+       --------------
+       E₁ ⟶ch E₁ ⟨ 0 ⟩
+                 
+  sn⟶ch : ∀ {E₁ E₂ E₃ n} →
 
-⇓Consistency : ∀ {E n m} → (E ⇓ n) → (E ⇓ m) → n ≡ m
-⇓Consistency n⇓n n⇓n = refl
-⇓Consistency (E⊕E d₁ d₂) (E⊕E d₃ d₄) with ⇓Consistency d₁ d₃ | ⇓Consistency d₂ d₄
-⇓Consistency (E⊕E d₁ d₂) (E⊕E d₃ d₄) | refl | refl = refl
+        E₁ ⟶ch E₂ →  E₂ ⟶ch E₃ ⟨ n ⟩ →  
+        ----------------------------
+             E₁ ⟶ch E₃ ⟨ 1 + n ⟩ 
+
+data _⟶ch⋆_ : Exp → Exp → Set where
+  k⟶ch⋆ : ∀ {E₁ E₂} →
+
+        Σ[ k ∈ ℕ ] E₁ ⟶ch E₂ ⟨ k ⟩ →
+        --------------------------
+               E₁ ⟶ch⋆ E₂ 
+
 
