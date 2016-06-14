@@ -103,11 +103,61 @@ E⟶ch-n⟨k⟩⇒E⇓n z⟶ch = n⇓n
 E⟶ch-n⟨k⟩⇒E⇓n (sn⟶ch x P) with E⟶ch-n⟨k⟩⇒E⇓n P
 E⟶ch-n⟨k⟩⇒E⇓n (sn⟶ch x P) | O = E⟶ch-E'⇒E'⇓n⇒E⇓n x O
 
-E⟶ch⋆⇒E⇓n : ∀ {E n} → E ⟶ch⋆ num n  → E ⇓ n
-E⟶ch⋆⇒E⇓n (k⟶ch⋆ (_ , P)) = E⟶ch-n⟨k⟩⇒E⇓n P
+E⟶ch⋆n⇒E⇓n : ∀ {E n} → E ⟶ch⋆ num n  → E ⇓ n
+E⟶ch⋆n⇒E⇓n (k⟶ch⋆ (_ , P)) = E⟶ch-n⟨k⟩⇒E⇓n P
 
 {-
 We'll use ⇓ to establish determinacy for ⟶ch⋆
 -}
 ⟶ch⋆deterministic : ∀ {E n m} → E ⟶ch⋆ num n → E ⟶ch⋆ num m → n ≡ m
-⟶ch⋆deterministic p q = ⇓deterministic (E⟶ch⋆⇒E⇓n p) (E⟶ch⋆⇒E⇓n q)
+⟶ch⋆deterministic p q = ⇓deterministic (E⟶ch⋆n⇒E⇓n p) (E⟶ch⋆n⇒E⇓n q)
+
+{-
+
+The proof that:
+
+E ⇓ n → E ⟶ch⋆ (num n)  
+
+-}
+add⟶ch⟨k⟩ : ∀ {E E₁ E₂ k l} → E ⟶ch E₁ ⟨ k ⟩ → E₁ ⟶ch E₂ ⟨ l ⟩ → E ⟶ch E₂ ⟨ k + l ⟩
+add⟶ch⟨k⟩ z⟶ch b = b
+add⟶ch⟨k⟩ (sn⟶ch a x) b = sn⟶ch a (add⟶ch⟨k⟩ x b)
+
+ch⊕₁context : ∀ E₁ E₂ n k → E₁ ⟶ch num n ⟨ k ⟩ → (E₁ ⊕ E₂) ⟶ch⋆ (num n ⊕ E₂)
+ch⊕₁context .(num n) E₂ n .0 z⟶ch = k⟶ch⋆ (zero , z⟶ch)
+ch⊕₁context E₁ E₂ n _ (sn⟶ch {_} {E₂'} {_} {m} x p) with ch⊕₁context E₂' E₂ n m p
+ch⊕₁context E₁ E₂ n _ (sn⟶ch x₁ p) | k⟶ch⋆ (k , P) = k⟶ch⋆ (suc k , sn⟶ch (⊕₁⟶ch x₁) P)
+
+ch⊕₂context : ∀ E n m k → E ⟶ch num m ⟨ k ⟩ → (num n ⊕ E) ⟶ch⋆ (num (n + m))
+ch⊕₂context .(num m) n m .0 z⟶ch = k⟶ch⋆ (1 , sn⟶ch +⟶ch z⟶ch)
+ch⊕₂context E n m _ (sn⟶ch {_} {E₂'} {_} {l} x p) with ch⊕₂context E₂' n m l p
+ch⊕₂context E n m _ (sn⟶ch x₁ p) | k⟶ch⋆ (k , P) = k⟶ch⋆ (suc k , sn⟶ch (⊕₂⟶ch x₁) P)
+
+E⇓n⇒E⟶ch⋆n : ∀ {E n} →  E ⇓ n → E ⟶ch⋆ num n
+E⇓n⇒E⟶ch⋆n n⇓n = k⟶ch⋆ (zero , z⟶ch)
+E⇓n⇒E⟶ch⋆n (E⊕E p p₁) with E⇓n⇒E⟶ch⋆n p
+E⇓n⇒E⟶ch⋆n (E⊕E {E₁} {E₂} {n₁} {n₂} p p₁) | k⟶ch⋆ (k , P) with E⇓n⇒E⟶ch⋆n p₁ | ch⊕₁context E₁ E₂ n₁ k P
+E⇓n⇒E⟶ch⋆n (E⊕E {E₁} {E₂} {n₁} {n₂} p p₁) | k⟶ch⋆ (k , P) | k⟶ch⋆ (l , Q) | k⟶ch⋆ (m , O) with ch⊕₂context E₂ n₁ n₂ l Q
+E⇓n⇒E⟶ch⋆n (E⊕E p p₁) | k⟶ch⋆ (k , P) | k⟶ch⋆ (l , Q) | k⟶ch⋆ (m , O) | k⟶ch⋆ (r , L) with add⟶ch⟨k⟩ O L
+E⇓n⇒E⟶ch⋆n (E⊕E p p₁) | k⟶ch⋆ (k , P) | k⟶ch⋆ (l , Q) | k⟶ch⋆ (m , O) | k⟶ch⋆ (r , L) | ans = k⟶ch⋆ (m + r , ans)
+
+{-
+
+The proof that:
+
+E ⟶ch⋆ n → E ⟶⋆ n
+
+-} 
+E⟶ch⋆n⇒E⟶⋆n : ∀ {E n} → E ⟶ch⋆ num n → E ⟶⋆ num n
+E⟶ch⋆n⇒E⟶⋆n p = E⇓n⇒E⟶⋆n (E⟶ch⋆n⇒E⇓n p) 
+
+{-
+
+The proof that:
+
+E ⟶⋆ n → E ⟶ch⋆ n 
+
+-} 
+E⟶⋆n⇒E⟶ch⋆n : ∀ {E n} → E ⟶⋆ num n → E ⟶ch⋆ num n
+E⟶⋆n⇒E⟶ch⋆n p = E⇓n⇒E⟶ch⋆n (E⟶⋆n⇒E⇓n p)
+
