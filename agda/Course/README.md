@@ -19,7 +19,7 @@ A limited number of examples from the slides are present in the file: **Inductio
 
 Some of the consistency proofs are given in **Consistency.agda**. 
 
-There is a proof that (∀ E → Σ[ n ∈ ℕ ] E ⟶⋆ num n) in **SmallSteEval.agda**.  It makes use of transfinite induction rather than strong mathematical induction, but the approach is substantially similar. Induction is performed over the size of proofs.
+There is a proof that (∀ E → Σ[ n ∈ ℕ ] E ⟶⋆ num n) in **SmallStepEval.agda**.  It makes use of transfinite induction rather than strong mathematical induction, but the approach is substantially similar. Induction is performed over the size of proofs.
 
 * **Topic 3:** A (first-order) functional programming language.
 
