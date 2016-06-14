@@ -4,6 +4,8 @@ Semantics of Programming Languages (CS3017)
 
 This directory contains Agda proof scripts which accompany the slides for the CS3017 course at Trinity present here: https://www.cs.tcd.ie/matthew.hennessy/splexternal2015/index.php.
 
+The terms which prove termination at a value, double as runable evaluation functions!
+
 Structure
 ---------
 
