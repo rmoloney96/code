@@ -20,16 +20,29 @@ add⟶⟨k⟩ (sn⟶ a x) b = sn⟶ a (add⟶⟨k⟩ x b)
 ⊕₂context E n m _ (sn⟶ {_} {E₂'} {_} {l} x p) with ⊕₂context E₂' n m l p
 ⊕₂context E n m _ (sn⟶ x₁ p) | k⟶⋆ (k , P) = k⟶⋆ (suc k , sn⟶ (⊕₂⟶ x₁) P) 
 
-E⇓n⇒E⟶⋆n : ∀ {E n} → E ⇓ num n → E ⟶⋆ num n
+E⇓n⇒E⟶⋆n : ∀ {E n} → E ⇓ n → E ⟶⋆ num n
 E⇓n⇒E⟶⋆n n⇓n = k⟶⋆ (zero , z⟶)
 E⇓n⇒E⟶⋆n (E⊕E Bs Bs₁)                      with E⇓n⇒E⟶⋆n Bs | E⇓n⇒E⟶⋆n Bs₁
 E⇓n⇒E⟶⋆n (E⊕E {E₁} {E₂} {n₁} {n₂} Bs Bs₁) | k⟶⋆ (k , P)     | res          with ⊕₁context E₁ E₂ n₁ k P
 E⇓n⇒E⟶⋆n (E⊕E {E₁} {E₂} {n₁} {n₂} Bs Bs₁) | k⟶⋆ (k , P)     | k⟶⋆ (l , Q) | res with ⊕₂context E₂ n₁ n₂ l Q
-E⇓n⇒E⟶⋆n (E⊕E Bs Bs₁)                      | k⟶⋆ (k , P)     | k⟶⋆ (l , Q) | k⟶⋆ (m , O) | k⟶⋆ (r , L) with add⟶⟨k⟩ O L
-E⇓n⇒E⟶⋆n (E⊕E Bs Bs₁)                      | k⟶⋆ (k , P)     | k⟶⋆ (l , Q) | k⟶⋆ (m , O) | k⟶⋆ (r , L) | ans = k⟶⋆ (m + r , ans)
+E⇓n⇒E⟶⋆n (E⊕E Bs Bs₁)                     | k⟶⋆ (k , P)     | k⟶⋆ (l , Q) | k⟶⋆ (m , O) | k⟶⋆ (r , L) with add⟶⟨k⟩ O L
+E⇓n⇒E⟶⋆n (E⊕E Bs Bs₁) | k⟶⋆ (k , P)     | k⟶⋆ (l , Q)     | k⟶⋆ (m , O) | k⟶⋆ (r , L) | ans = k⟶⋆ (m + r , ans)
 
-E⟶n⟨k⟩⇒E⇓n : ∀ {E n k} → E ⟶ num n ⟨ k ⟩ → E ⇓ num n
+E⟶E'⇒E⇓n⇒E'⇓n : ∀ {E E' n} → E ⟶ E' → E ⇓ n → E' ⇓ n
+E⟶E'⇒E⇓n⇒E'⇓n = {!!}
+
+E⟶n⇒E⇓n : ∀ {E n} → E ⟶ num n → E ⇓ n
+E⟶n⇒E⇓n +⟶ = E⊕E n⇓n n⇓n
+
+E⟶n⟨k⟩⇒E⇓n : ∀ {E n k} → E ⟶ num n ⟨ k ⟩ → E ⇓ n
 E⟶n⟨k⟩⇒E⇓n z⟶ = n⇓n
-E⟶n⟨k⟩⇒E⇓n (sn⟶ x P) with E⟶n⟨k⟩⇒E⇓n P 
-E⟶n⟨k⟩⇒E⇓n {E} (sn⟶ x P) | res = {!Er!}
+E⟶n⟨k⟩⇒E⇓n (sn⟶ x P) with E⟶n⟨k⟩⇒E⇓n P
+E⟶n⟨k⟩⇒E⇓n (sn⟶ x P) | n⇓n = E⟶n⇒E⇓n x
+E⟶n⟨k⟩⇒E⇓n (sn⟶ x P) | E⊕E E E₁ = {!!}
 
+
+{- with P
+E⟶n⟨k⟩⇒E⇓n P | z⟶ = n⇓n
+E⟶n⟨k⟩⇒E⇓n P | (sn⟶ x Q) with E⟶n⟨k⟩⇒E⇓n Q
+E⟶n⟨k⟩⇒E⇓n P | (sn⟶ x Q) | res = {!!}
+-}

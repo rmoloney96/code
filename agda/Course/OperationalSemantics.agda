@@ -10,17 +10,17 @@ data Exp : Set where
 -- Big step operational semantics
 
 infix 10 _⇓_ 
-data _⇓_ : Exp → Exp → Set where
+data _⇓_ : Exp → ℕ → Set where
   n⇓n : ∀ {n} →
 
       -------------
-      num n ⇓ num n
+      num n ⇓ n
       
   E⊕E : ∀ {E₁ E₂ n₁ n₂} →
   
-      E₁ ⇓ num n₁  →  E₂ ⇓ num n₂ →
+      E₁ ⇓ n₁  →  E₂ ⇓ n₂ →
       ----------------------------
-        E₁ ⊕ E₂ ⇓ num (n₁ + n₂)
+        E₁ ⊕ E₂ ⇓ (n₁ + n₂)
   
 
 -- Need for Σ which gives us specifications / existentials.
@@ -32,12 +32,12 @@ open import Data.Product
 -- It is a type of pairs, which has a witness (of type ℕ in this case) and a proof
 -- that P holds of that witness.
 --
-evalBig : ∀ E → Σ[ n ∈ ℕ ] E ⇓ num n
+evalBig : ∀ E → Σ[ n ∈ ℕ ] E ⇓ n
 evalBig (num x) = x , n⇓n
 evalBig (e ⊕ e₁) with evalBig e | evalBig e₁
 evalBig (e ⊕ e₁) | n , proof_n | m , proof_m = n + m , E⊕E proof_n proof_m
 
-example⇓ : num 3 ⊕ (num 2 ⊕ num 1) ⇓ num 6
+example⇓ : num 3 ⊕ (num 2 ⊕ num 1) ⇓ 6
 example⇓ = proj₂ (evalBig (num 3 ⊕ (num 2 ⊕ num 1)))
 
 -- Small step operational semantics
