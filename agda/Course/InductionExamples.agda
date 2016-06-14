@@ -54,7 +54,7 @@ These proofs get a lot messier with out the sugar.
 
 -}
 +-assoc : ∀ n m o → (n + m) + o ≡ n + (m + o)
-+-assoc n m o = ℕInduction (λ m → (n + m) + o ≡ n + (m + o)) zP {!sP!} m
++-assoc n m o = ℕInduction (λ m → (n + m) + o ≡ n + (m + o)) zP sP m
   where zP : ((n + z) + o) ≡ (n + o)
         zP rewrite (n+0≡n n) = refl
         sP : (n₁ : ℕ) → ((n + n₁) + o) ≡ (n + (n₁ + o)) →
@@ -62,7 +62,7 @@ These proofs get a lot messier with out the sugar.
         sP n₁ p rewrite n+1+m≡1+n+m n n₁ | n+1+m≡1+n+m n (n₁ + o) = cong s p 
 
 +-comm : ∀ n m → n + m ≡ m + n
-+-comm n = ℕInduction (λ m' → (n + m') ≡ (m' + n)) (n+0≡n n) {!sP!}
++-comm n = ℕInduction (λ m' → (n + m') ≡ (m' + n)) (n+0≡n n) sP
   where sP : (n₁ : ℕ) → (n + n₁) ≡ (n₁ + n) → (n + s n₁) ≡ s (n₁ + n)
         sP n₁ p rewrite (n+1+m≡1+n+m n n₁) = cong s p
 
@@ -90,7 +90,7 @@ m*[1+n]≡m+[m*n] m n = ℕInduction (λ m → m * (s n) ≡ m + (m * n)) refl s
                 | +-assoc n₁ n (n₁ * n) = refl
 
 n*sm≡m*[n*m] : ∀ n m → (n * s m) ≡ n + (n * m)
-n*sm≡m*[n*m] m = ℕInduction (λ p → (m * s p) ≡ (m + (m * p))) zP {!!}
+n*sm≡m*[n*m] m = ℕInduction (λ p → (m * s p) ≡ (m + (m * p))) zP sP
   where zP : (m * s z) ≡ (m + (m * z))
         zP rewrite n*0≡0 m | n+0≡n m | n*1≡n m = refl
         sP : ∀ n → (m * s n) ≡ (m + (m * n)) → (m * s (s n)) ≡ (m + (m * s n))
