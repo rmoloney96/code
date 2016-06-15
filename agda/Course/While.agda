@@ -349,3 +349,73 @@ progress (while x do C) s with evalBool x s
 progress (while x do C) s | tt , proj₂ = inj₂ ((C , (while x do C)) , s , S-whilte-true proj₂)
 progress (while x do C) s | ff , proj₂ = inj₂ (skip , s , S-whilte-false proj₂)
 
+{-
+
+Partiality due to non-termination is somewhat tricky to model in type theory.
+
+We will use a coinductively defined "Delay" monad.
+
+-}
+open import Coinduction
+open import Category.Monad
+open import Function
+
+data Delay (A : Set) : Set where 
+  now : A → Delay A
+  later : ∞ (Delay A) → Delay A
+
+_>>=_ : ∀ {A B} → Delay A → (A → Delay B) → Delay B
+now x >>= f = f x
+later ∞x >>= f = later (♯ (♭ ∞x >>= f))
+
+delayMonad : RawMonad Delay
+delayMonad = record { return = now
+                      ; _>>=_ = _>>=_ }
+
+fake : Delay ℕ
+fake = later (♯ fake)
+
+
+mutual
+
+  seqMaker : ∀ C C₁ s → Delay (Σ[ s' ∈ State ] ⟨ C , s ⟩⇓ s' com) → Delay (Σ[ s'' ∈ State ] ⟨ (C , C₁) , s ⟩⇓ s'' com)
+  seqMaker C C₁ s x = {!!}
+
+--  seqMaker2 
+--  seqMaker2
+  
+  whileMaker : ∀ x C s → ⟨ x , s ⟩⇓ tt bool → Delay (Σ[ s' ∈ State ] ⟨ while x do C , s ⟩⇓ s' com)
+  whileMaker x C s P with evalWhile C s
+  whileMaker x C s P | res = {!!}
+
+  whileMaker1 : {!!}
+  whileMaker1 = {!!}
+
+  evalWhile : ∀ C s → Delay (Σ[ s' ∈ State ] ⟨ C , s ⟩⇓ s' com)
+  evalWhile (x ≔ x₁) s with evalArith x₁ s
+  evalWhile (x ≔ x₁) s | n , P = now ((s [ x ↦ n ] ) , B-assign P)
+  evalWhile (if x then C else C₁) s with evalBool x s
+  evalWhile (if x then C else C₁) s | tt , P = later $ ♯ (evalWhile C s >>= (λ { ( s , Q ) → now (s , B-if-true P Q) })) 
+  evalWhile (if x then C else C₁) s | ff , P = later $ ♯ (evalWhile C₁ s >>= (λ { ( s , Q ) → now (s , B-if-false P Q) }))
+  evalWhile (C , C₁) s = later $ ♯ seqMaker C C₁ s (evalWhile C s)  
+  evalWhile skip s = now (s , B-skip)
+  evalWhile (while x do C) s with evalBool x s
+  evalWhile (while x do C) s | tt , P = later $ ♯ {!!} 
+  evalWhile (while x do C) s | ff , P = now (s , B-while-false P)
+        
+⟦_⟧ : Com → State → Delay State
+⟦ C ⟧ s = evalWhile C s >>= (now ∘ proj₁)
+
+{-
+evalWhile {!now (s'' , B-while-true P Q R)!} s'
+
+(λ { ( s' , Q ) → later $ ♯ (evalWhile ((while x do C)) s' >>=
+now (s'' , B-while-true P Q R)now (s'' , B-while-true P Q R)                     λ { ( s'' , R ) → now (s'' , B-while-true P Q R) }
+
+-- {- offload later $ ♯ (evalWhile C s >>= 
+              (λ { ( s' , Q ) → later $ ♯ (evalWhile C₁ s' >>= 
+               λ { ( s'' , R ) → now (s'' , B-seq Q R) })} -}-}
+               
+{- later $ ♯ (evalWhile C s >>=
+                    (λ { ( s' , Q ) → evalWhile (while x do C) s' >>= 
+                     λ { ( s'' , R ) → now (s'' , B-while-true P Q R)}})) -}

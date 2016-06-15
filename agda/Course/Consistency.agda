@@ -142,6 +142,9 @@ E⇓n⇒E⟶ch⋆n (E⊕E p p₁) | k⟶ch⋆ (k , P) | k⟶ch⋆ (l , Q) | k⟶
 E⇓n⇒E⟶ch⋆n (E⊕E p p₁) | k⟶ch⋆ (k , P) | k⟶ch⋆ (l , Q) | k⟶ch⋆ (m , O) | k⟶ch⋆ (r , L) | ans = k⟶ch⋆ (m + r , ans)
 
 {-
+Both of the following proofs are done using the big-step operational semantics as intermediary
+(as it's easier to establish and we've already done it).
+
 
 The proof that:
 
@@ -160,4 +163,3 @@ E ⟶⋆ n → E ⟶ch⋆ n
 -} 
 E⟶⋆n⇒E⟶ch⋆n : ∀ {E n} → E ⟶⋆ num n → E ⟶ch⋆ num n
 E⟶⋆n⇒E⟶ch⋆n p = E⇓n⇒E⟶ch⋆n (E⟶⋆n⇒E⇓n p)
-
