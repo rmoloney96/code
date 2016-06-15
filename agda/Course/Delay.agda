@@ -7,7 +7,6 @@ https://github.com/jmchapman/Relative-Monads/blob/master/Delay.agda
 
 module Delay where
 
---open import Coinduction 
 open import Size
 open import Category.Monad
 open import Level renaming (zero to lzero; suc to lsuc)

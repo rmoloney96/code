@@ -353,7 +353,8 @@ progress (while x do C) s | ff , proj₂ = inj₂ (skip , s , S-whilte-false pro
 
 Partiality due to non-termination is somewhat tricky to model in type theory.
 
-We will use a coinductively defined "Delay" monad.
+We will use a coinductively defined "Delay" monad.  The Delay monad is defined
+in Delay.agda
 
 -}
 open import Function
@@ -384,6 +385,17 @@ mutual
                                         later (evalWhile' (while x do C) s') >>= λ { (s'' , R) →
                                         now (s'' , B-while-true P Q R) }}
   evalWhile (while x do C) s | ff , P = now (s , B-while-false P)
-        
-⟦_⟧ : ∀ {i} → Com → State → Delay State i
+
+{-
+
+And now we can write our semantic interpretation as given in the slides:
+
+as a map from syntax to a partial function over states. 
+
+-}
+-- Non-Termination partiality arrow
+_⇀_ : ∀ {i} → Set → Set → Set
+_⇀_ {i} A B = A → Delay B i
+
+⟦_⟧ : ∀ Com → (State ⇀ State)
 ⟦ C ⟧ s = evalWhile C s >>= (now ∘ proj₁)
