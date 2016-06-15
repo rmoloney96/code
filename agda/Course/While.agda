@@ -359,10 +359,26 @@ We will use a coinductively defined "Delay" monad.
 open import Function
 open import Delay
 
+never : ∀ {i A} → ∞Delay A i 
+force never = later never
+
 mutual
 
---  seqOne : ∀ {i} C C₁ s → Delay (Σ[ s' ∈ State ] ⟨ C , s ⟩⇓ s' com) i → Delay (Σ[ s'' ∈ State ] ⟨ (C , C₁) , s ⟩⇓ s'' com) i
---  seqOne C C₁ s ?P = {!?P >>= λ { (s' , P) → ?!} -- seqTwo C C₁ s s' P  
+  seqOne : ∀ {i} C C₁ s → Delay (Σ[ s' ∈ State ] ⟨ C , s ⟩⇓ s' com) i → Delay (Σ[ s'' ∈ State ] ⟨ (C , C₁) , s ⟩⇓ s'' com) i
+  seqOne C C₁ s ?P = ?P >>= λ { (s' , P) → seqTwo C C₁ s s' P (evalWhile C₁ s')  } 
+  
+  seqTwo : ∀ {i} C C₁ s s' → ⟨ C , s ⟩⇓ s' com → Delay (Σ[ s'' ∈ State ] ⟨ C₁ , s' ⟩⇓ s'' com) i → Delay (Σ[ s'' ∈ State ] ⟨ (C , C₁) , s ⟩⇓ s'' com) i
+  seqTwo C C₁ s s' P ?Q = ?Q >>= (λ {(s'' , Q) → now (s'' , B-seq P Q)})
+
+{- (evalWhile C s) >>= λ { (s' , Q) →
+   (evalWhile (while x do C) s') >>= λ { (s'' , R) →
+   now (s'' , (B-while-true P Q R))}} -}
+   
+  whileOne : ∀ {i} x C s → ⟨ x , s ⟩⇓ tt bool → Delay (Σ[ s' ∈ State ] ⟨ C , s ⟩⇓ s' com) i → Delay (Σ[ s'' ∈ State ] ⟨ while x do C , s ⟩⇓ s'' com) i
+  whileOne x C s P ?Q = ?Q >>= λ { (s' , Q) → whileTwo x C s s' P Q (evalWhile (while x do C) s') }
+
+  whileTwo : ∀ {i} x C s s' → ⟨ x , s ⟩⇓ tt bool → ⟨ C , s ⟩⇓ s' com → Delay (Σ[ s'' ∈ State ] ⟨ while x do C , s' ⟩⇓ s'' com) i → Delay (Σ[ s'' ∈ State ] ⟨ while x do C , s ⟩⇓ s'' com) i
+  whileTwo x C s s' P Q ?R = {!!}
 
   evalWhile : ∀ {i} C s → Delay (Σ[ s' ∈ State ] ⟨ C , s ⟩⇓ s' com) i
   evalWhile (x ≔ x₁) s with evalArith x₁ s
@@ -370,14 +386,10 @@ mutual
   evalWhile (if x then C else C₁) s with evalBool x s
   evalWhile (if x then C else C₁) s | tt , P = later! (evalWhile C s) >>= λ { (s' , Q) → now (s' , B-if-true P Q)}
   evalWhile (if x then C else C₁) s | ff , P = later! (evalWhile C₁ s) >>= λ { (s' , Q) → now (s' , B-if-false P Q)}
-  evalWhile (C , C₁) s = later! (evalWhile C s) >>= λ { (s' , P) →
-                         later! (evalWhile C₁ s') >>= λ { (s'' , Q) →
-                         now (s'' , B-seq P Q)}}
+  evalWhile (C , C₁) s = seqOne C C₁ s (evalWhile C s)
   evalWhile skip s = now (s , B-skip)
   evalWhile (while x do C) s with evalBool x s
-  evalWhile (while x do C) s | tt , P = later! (evalWhile C s) >>= λ { (s' , Q) →
-                                        later! (evalWhile (while x do C) s') >>= λ { (s'' , R) →
-                                        now (s'' , (B-while-true P Q R))}}
+  evalWhile (while x do C) s | tt , P = whileOne x C s P (evalWhile C s)
   evalWhile (while x do C) s | ff , P = now (s , B-while-false P)
         
 ⟦_⟧ : ∀ {i} → Com → State → Delay State i
