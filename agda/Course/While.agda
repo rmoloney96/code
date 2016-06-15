@@ -371,8 +371,10 @@ mutual
   evalWhile (x ≔ x₁) s with evalArith x₁ s
   evalWhile (x ≔ x₁) s | n , P = now ((s [ x ↦ n ] ) , B-assign P)
   evalWhile (if x then C else C₁) s with evalBool x s
-  evalWhile (if x then C else C₁) s | tt , P = later! (evalWhile C s) >>= λ { (s' , Q) → now (s' , B-if-true P Q)}
-  evalWhile (if x then C else C₁) s | ff , P = later! (evalWhile C₁ s) >>= λ { (s' , Q) → now (s' , B-if-false P Q)}
+  evalWhile (if x then C else C₁) s | tt , P = later (evalWhile' C s) >>= λ { (s' , Q) →
+                                               now (s' , B-if-true P Q)}
+  evalWhile (if x then C else C₁) s | ff , P = later (evalWhile' C₁ s) >>= λ { (s' , Q) →
+                                               now (s' , B-if-false P Q)}
   evalWhile (C , C₁) s = later (evalWhile' C s) >>= λ { (s' , P) →
                          later (evalWhile' C₁ s') >>= λ { (s'' , Q) →
                          now (s'' , B-seq P Q) }}
