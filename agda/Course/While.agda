@@ -4,7 +4,7 @@ open import Relation.Binary.PropositionalEquality
 open import Relation.Nullary
 open import Data.Sum
 open import Data.Empty
---open import Function
+open import Function
 
 module While (Atom : Set) (_≟_atom : Decidable (_≡_ {A = Atom})) where
 
@@ -44,8 +44,8 @@ State = Locs → ℕ
 {-
 
 Either we have to add errors and a map to Maybe ℕ or we have to return some value
-to avoid getting stuck (in the progress theorem below) or we have to draw locations
-from a finite set (perhaps Fin n for some value n). 
+to avoid getting stuck or we have to draw locations from a finite set (perhaps Fin n
+for some value n). 
 
 -}
 empty : State
@@ -244,16 +244,12 @@ data ⟨_,_⟩⇓_com : Com → State → State → Set where
 ⇓-deterministic (B-seq p p₁) (B-seq q q₁) | refl | refl = refl
 ⇓-deterministic (B-if-true x p) (B-if-true x₁ q) with ⇓-deterministic p q
 ⇓-deterministic (B-if-true x p) (B-if-true x₁ q) | refl = refl
-⇓-deterministic (B-if-true x p) (B-if-false x₁ q) with ⇓-deterministic-bool x x₁
-⇓-deterministic (B-if-true x p) (B-if-false x₁ q) | ()
-⇓-deterministic (B-if-false x p) (B-if-true x₁ q) with ⇓-deterministic-bool x x₁
-⇓-deterministic (B-if-false x p) (B-if-true x₁ q) | () 
+⇓-deterministic (B-if-true x p) (B-if-false x₁ q) = (λ ()) $ ⇓-deterministic-bool x x₁
+⇓-deterministic (B-if-false x p) (B-if-true x₁ q) = (λ ()) $ ⇓-deterministic-bool x x₁
 ⇓-deterministic (B-if-false x p) (B-if-false x₁ q) = ⇓-deterministic p q
 ⇓-deterministic (B-while-false x) (B-while-false x₁) = refl
-⇓-deterministic (B-while-false x) (B-while-true x₁ q q₁) with ⇓-deterministic-bool x x₁
-⇓-deterministic (B-while-false x) (B-while-true x₁ q q₁) | ()
-⇓-deterministic (B-while-true x p p₁) (B-while-false x₁) with ⇓-deterministic-bool x x₁
-⇓-deterministic (B-while-true x p p₁) (B-while-false x₁) | ()
+⇓-deterministic (B-while-false x) (B-while-true x₁ q q₁) = (λ ()) $ ⇓-deterministic-bool x x₁
+⇓-deterministic (B-while-true x p p₁) (B-while-false x₁) = (λ ()) $ ⇓-deterministic-bool x x₁
 ⇓-deterministic (B-while-true x p p₁) (B-while-true x₁ q q₁) with ⇓-deterministic p q
 ⇓-deterministic (B-while-true x p p₁) (B-while-true x₁ q q₁) | refl = ⇓-deterministic p₁ q₁
 ⇓-deterministic B-skip B-skip = refl
@@ -349,6 +345,55 @@ progress (while x do C) s with evalBool x s
 progress (while x do C) s | tt , proj₂ = inj₂ ((C , (while x do C)) , s , S-whilte-true proj₂)
 progress (while x do C) s | ff , proj₂ = inj₂ (skip , s , S-whilte-false proj₂)
 
+data ⟨_,_⟩⟶⟨_⟩⟨_,_⟩ : Com → State → ℕ → Com → State → Set where 
+  ⟨⟩⟶⟨⟩z : ∀ {C s} → 
+
+         ---------------------
+         ⟨ C , s ⟩⟶⟨ 0 ⟩⟨ C , s ⟩
+
+  ⟨⟩⟶⟨⟩s : ∀ {C₁ C₁' C₂ s s' s'' k} → 
+
+         ⟨ C₁ , s ⟩⟶⟨ C₁' , s' ⟩ → ⟨ C₁' , s' ⟩⟶⟨ k ⟩⟨ C₂ , s'' ⟩ → 
+         -------------------------------------------------------
+         ⟨ C₁ , s ⟩⟶⟨ 1 + k ⟩⟨ C₂ , s'' ⟩
+
+data ⟨_,_⟩⟶⋆⟨_,_⟩ : Com → State → Com → State → Set where 
+  ⟨⟩⟶⋆⟨⟩ : ∀ {C₁ C₂ s s'} → 
+
+         Σ[ k ∈ ℕ ] ⟨ C₁ , s ⟩⟶⟨ k ⟩⟨ C₂ , s' ⟩ → 
+         -------------------------------------------
+             ⟨ C₁ , s ⟩⟶⋆⟨ C₂ , s' ⟩
+
+⟨⟩⟶⟨⟩deterministic : ∀ {C C₁ C₂ s s₁ s₂} → ⟨ C , s ⟩⟶⟨ C₁ , s₁ ⟩ → ⟨ C , s ⟩⟶⟨ C₂ , s₂ ⟩ → C₁ ≡ C₂ × s₁ ≡ s₂ 
+⟨⟩⟶⟨⟩deterministic (S-assign x) (S-assign x₁) with ⇓-deterministic-arith x x₁ 
+⟨⟩⟶⟨⟩deterministic (S-assign x) (S-assign x₁) | refl = refl , refl
+⟨⟩⟶⟨⟩deterministic (S-cond-true x) (S-cond-true x₁) = refl , refl
+⟨⟩⟶⟨⟩deterministic (S-cond-true x) (S-cond-false x₁) = (λ ()) $ ⇓-deterministic-bool x x₁
+⟨⟩⟶⟨⟩deterministic (S-cond-false x) (S-cond-true x₁) = (λ ()) $ ⇓-deterministic-bool x x₁
+⟨⟩⟶⟨⟩deterministic (S-cond-false x) (S-cond-false x₁) = refl , refl
+⟨⟩⟶⟨⟩deterministic (S-seq-left P) (S-seq-left Q) with ⟨⟩⟶⟨⟩deterministic P Q
+⟨⟩⟶⟨⟩deterministic (S-seq-left P) (S-seq-left Q) | refl , refl = refl , refl
+⟨⟩⟶⟨⟩deterministic (S-seq-left ()) S-seq-right
+⟨⟩⟶⟨⟩deterministic S-seq-right (S-seq-left ())
+⟨⟩⟶⟨⟩deterministic S-seq-right S-seq-right = refl , refl
+⟨⟩⟶⟨⟩deterministic (S-whilte-true x) (S-whilte-true x₁) = refl , refl
+⟨⟩⟶⟨⟩deterministic (S-whilte-true x) (S-whilte-false x₁) = (λ ()) $ ⇓-deterministic-bool x x₁
+⟨⟩⟶⟨⟩deterministic (S-whilte-false x) (S-whilte-true x₁) = (λ ()) $ ⇓-deterministic-bool x x₁
+⟨⟩⟶⟨⟩deterministic (S-whilte-false x) (S-whilte-false x₁) = refl , refl 
+
+{- Same number of steps, same answer -} 
+⟨⟩⟶⋆⟨k⟩⟨⟩deterministic : ∀ {C s k l s₁ s₂} → ⟨ C , s ⟩⟶⟨ k ⟩⟨ skip , s₁ ⟩ → ⟨ C , s ⟩⟶⟨ l ⟩⟨ skip , s₂ ⟩ → k ≡ l × s₁ ≡ s₂ 
+⟨⟩⟶⋆⟨k⟩⟨⟩deterministic ⟨⟩⟶⟨⟩z ⟨⟩⟶⟨⟩z = refl , refl
+⟨⟩⟶⋆⟨k⟩⟨⟩deterministic ⟨⟩⟶⟨⟩z (⟨⟩⟶⟨⟩s () Q)
+⟨⟩⟶⋆⟨k⟩⟨⟩deterministic (⟨⟩⟶⟨⟩s () P) ⟨⟩⟶⟨⟩z
+⟨⟩⟶⋆⟨k⟩⟨⟩deterministic (⟨⟩⟶⟨⟩s x P) (⟨⟩⟶⟨⟩s x₁ Q) with ⟨⟩⟶⟨⟩deterministic x x₁
+⟨⟩⟶⋆⟨k⟩⟨⟩deterministic (⟨⟩⟶⟨⟩s x P) (⟨⟩⟶⟨⟩s x₁ Q) | refl , refl with ⟨⟩⟶⋆⟨k⟩⟨⟩deterministic P Q
+⟨⟩⟶⋆⟨k⟩⟨⟩deterministic (⟨⟩⟶⟨⟩s x P) (⟨⟩⟶⟨⟩s x₁ Q) | refl , refl | refl , refl = refl , refl
+
+⟨⟩⟶⋆⟨⟩deterministic : ∀ {C s s₁ s₂} → ⟨ C , s ⟩⟶⋆⟨ skip , s₁ ⟩ → ⟨ C , s ⟩⟶⋆⟨ skip , s₂ ⟩ → s₁ ≡ s₂
+⟨⟩⟶⋆⟨⟩deterministic (⟨⟩⟶⋆⟨⟩ (k , P)) (⟨⟩⟶⋆⟨⟩ (l , M)) = proj₂ (⟨⟩⟶⋆⟨k⟩⟨⟩deterministic P M)
+
+
 {-
 
 Partiality due to non-termination is somewhat tricky to model in type theory.
@@ -357,7 +402,6 @@ We will use a coinductively defined "Delay" monad.  The Delay monad is defined
 in Delay.agda
 
 -}
-open import Function
 open import Delay
 
 never : ∀ {i A} → ∞Delay A i 
