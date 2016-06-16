@@ -31,8 +31,6 @@ The While programming language and progress proof along with a proof of partial 
 
 The consistency proofs are in the file **WhileConsistency.agda**
 
-The proofs of consistency and 
-
 * **Topic 5:** Handling Exceptions
 
 Not completed
