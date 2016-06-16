@@ -63,6 +63,8 @@ Proof that:
 ⟨ C , s ⟩ ⇓ s' → ⟨ C, s ⟩⟶⋆⟨ skip ,s' ⟩
 
 -}
+
+-- Ugh, this is going to require several context lemmata
 --⟨C₁,s⟩⟶⋆⟨skip,s₂⟩
 
 

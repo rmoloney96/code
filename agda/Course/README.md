@@ -27,7 +27,11 @@ There were no slides for this - PCF would be a possible choice for implementatio
 
 * **Topic 4:** The While programming language
 
-The While programming language and progress proof is in the file: **While.agda**
+The While programming language and progress proof along with a proof of partial correctness is in the file: **While.agda**
+
+The consistency proofs are in the file **WhileConsistency.agda**
+
+The proofs of consistency and 
 
 * **Topic 5:** Handling Exceptions
 
