@@ -7,6 +7,8 @@ module Triples
   (eqAtom : DecEq Atom)
   (eqX : DecEq X)
   (eqD : DecEq D)
+  (DT : Set)
+  (⊢ᵟ_∶_ : D → DT → Set)
   where
 
 open import Relation.Binary.PropositionalEquality hiding (inspect)
@@ -17,75 +19,96 @@ open import Relation.Nullary
 open import Function
 open import Data.Bool
 
-Triple = X × X × (X ⊎ D)
+ObjectTriple = X × X × X
+DataTriple = X × X × D
 
-,-inv1 : ∀ {ℓ m} {A : Set ℓ} {B : Set m} {x y : A} {w z : B} →  ¬ x ≡ y →  ¬ (x , w) ≡ (y , z)
-,-inv1 f refl = f refl
+,-inv₁ : ∀ {ℓ m} {A : Set ℓ} {B : Set m} {x y : A} {w z : B} →  ¬ x ≡ y →  ¬ (x , w) ≡ (y , z)
+,-inv₁ f refl = f refl
 
-,-inv2 : ∀ {ℓ m n} {A : Set ℓ} {B : Set m} {C : Set n} {x y : A} {w z : B} {r s : C} →
-  ¬ w ≡ z →  ¬ (x , w , r) ≡ (y , z , s)
-,-inv2 f refl = f refl
+,-inv₂ : ∀ {ℓ m} {A : Set ℓ} {B : Set m} {x y : A} {w z : B} →
+  ¬ w ≡ z →  ¬ (x , w) ≡ (y , z)
+,-inv₂ f refl = f refl
 
-cong₃ : ∀ {a b c d} {A : Set a} {B : Set b} {C : Set c} {D : Set d}
-        (f : A → B → C → D) {x y u v w z} → x ≡ y → u ≡ v → w ≡ z → f x u w ≡ f y v z
-cong₃ f refl refl refl = refl
+DecEqPair : {A B : Set} → (eqA : DecEq A) → (eqB : DecEq B) → DecEq (A × B)
+DecEqPair eqA eqB (proj₁ , proj₂) (proj₃ , proj₄) with eqA proj₁ proj₃
+DecEqPair eqA eqB (proj₁ , proj₂) (proj₃ , proj₄) | yes p with eqB proj₂ proj₄
+DecEqPair eqA eqB (proj₁ , proj₂) (proj₃ , proj₄) | yes p₁ | yes p = yes (cong₂ _,_ p₁ p)
+DecEqPair eqA eqB (proj₁ , proj₂) (proj₃ , proj₄) | yes p | no ¬p = no (,-inv₂ ¬p)
+DecEqPair eqA eqB (proj₁ , proj₂) (proj₃ , proj₄) | no ¬p = no (,-inv₁ ¬p) 
 
-,-inv3-inj1 : ∀ {ℓ m} {X : Set ℓ} {D : Set m} {a b c d : X} {p q : X × D} → ¬ proj₁ p ≡ proj₁ q → ¬ (a , b , p) ≡ (c , d , q)
-,-inv3-inj1 f refl = f refl
+eqObjectTriple : DecEq ObjectTriple
+eqObjectTriple = DecEqPair eqX (DecEqPair eqX eqX)
 
-_at_ : ∀ (A : Set) → A → A
-A at x = x
+eqDataTriple : DecEq DataTriple
+eqDataTriple = DecEqPair eqX (DecEqPair eqX eqD)
 
-third1 : ∀ {a b c d e f : X} → (a , b , (X ⊎ D ∋ inj₁ c)) ≡ (d , e , (X ⊎ D ∋ inj₁ f)) → c ≡ f
-third1 refl = refl
+Database = FiniteSubSet ObjectTriple eqObjectTriple false × FiniteSubSet DataTriple eqDataTriple false
 
-third1-2 : ∀ {a b c d e : X} {f : D} → ¬ (a , b , (X ⊎ D ∋ inj₁ c)) ≡ (d , e , (X ⊎ D ∋ inj₂ f))
-third1-2 ()
+_∈_obj : ObjectTriple → Database → Set
+o ∈ Γ obj = Σ[ e ∈ Element (proj₁ Γ) ] o ≡ proj₁ e
 
-third2-1 : ∀ {a b d e f : X} {c : D} → ¬ (a , b , (X ⊎ D ∋ inj₂ c)) ≡ (d , e , (X ⊎ D ∋ inj₁ f))
-third2-1 ()
-
-third2 : ∀ {a b d e : X} {c f : D} → (a , b , (X ⊎ D ∋ inj₂ c)) ≡ (d , e , (X ⊎ D ∋ inj₂ f)) → c ≡ f
-third2 refl = refl
-
-EqTriple : DecEq Triple
-EqTriple (proj₁ , proj₂) (proj₃ , proj₄) with eqX proj₁ proj₃
-EqTriple (proj₁ , proj₂ , proj₄) (proj₃ , proj₅ , proj₆) | yes p with eqX proj₂ proj₅
-EqTriple (proj₁ , proj₂ , inj₁ x) (proj₃ , proj₅ , inj₁ x₁) | yes p₁ | yes p with eqX x x₁
-EqTriple (proj₁ , proj₂ , inj₁ x) (proj₃ , proj₅ , inj₁ x₁) | yes p₂ | yes p₁ | yes p = yes (cong₂ _,_ p₂ (cong₂ _,_ p₁ (cong inj₁ p)))
-EqTriple (proj₁ , proj₂ , inj₁ x) (proj₃ , proj₅ , inj₁ x₁) | yes p₁ | yes p | no ¬p = no (¬p ∘ third1)
-EqTriple (proj₁ , proj₂ , inj₁ x) (proj₃ , proj₅ , inj₂ y) | yes p₁ | yes p = no third1-2
-EqTriple (proj₁ , proj₂ , inj₂ y) (proj₃ , proj₅ , inj₁ x) | yes p₁ | yes p = no third2-1
-EqTriple (proj₁ , proj₂ , inj₂ y) (proj₃ , proj₅ , inj₂ y₁) | yes p₁ | yes p with eqD y y₁
-EqTriple (proj₁ , proj₂ , inj₂ y) (proj₃ , proj₅ , inj₂ y₁) | yes p₂ | yes p₁ | yes p = yes (cong₂ _,_ p₂ (cong₂ _,_ p₁ (cong inj₂ p)))
-EqTriple (proj₁ , proj₂ , inj₂ y) (proj₃ , proj₅ , inj₂ y₁) | yes p₁ | yes p | no ¬p = no (¬p ∘ third2)
-EqTriple (proj₁ , proj₂ , proj₄) (proj₃ , proj₅ , proj₆) | yes p | no ¬p = no (,-inv2 ¬p)
-EqTriple (proj₁ , proj₂) (proj₃ , proj₄) | no ¬p = no (,-inv1 ¬p)
-
---_==_ : DecEq Triple
---x == y = EqTriple x y
-
-Database = FiniteSubSet Triple EqTriple false
+_∈_dat : DataTriple → Database → Set
+o ∈ Γ dat = Σ[ e ∈ Element (proj₂ Γ) ] o ≡ proj₁ e
 
 infix 21 _⊕_
 infix 21 _⊗_
 
 data Shape : Set where
-  v : Atom → Shape
-  μ : Atom → Shape → Shape
-  α⟨_⟩_ : X → Shape → Shape
-  ℓ⟨_⟩_ : X → D → Shape
+  α⟨_⟩_ : (a : X) → Shape → Shape
+  α[_]_ : (a : X) → Shape → Shape
+  ℓ⟨_⟩_ : (a : X) → DT → Shape
+  ℓ[_]_ : (a : X) → DT → Shape
   _⊕_ : Shape → Shape → Shape
   _⊗_ : Shape → Shape → Shape
+  -- Loops
+  ν : Atom → Shape → Shape
+  μ : Atom → Shape → Shape
+  -- Negation
+  -_ : Shape → Shape
+
+Interpretation : Set
+Interpretation = Atom → Database
+
+mutual 
+  _[_≔_] : Interpretation → Atom → Shape → Interpretation
+  (i [ X ≔ φ ]) Y with eqAtom X Y
+  (i [ X₁ ≔ φ ]) Y | yes p = {!!} --⟦ φ ⟧ i
+  (i [ X₁ ≔ φ ]) Y | no ¬p = i Y
+
+  ⟦_⟧ : Shape → (i : Interpretation) → (Ξ : Database) → Set
+  ⟦ α⟨ a ⟩ φ ⟧ i = ⟦ φ ⟧ i 
+  ⟦ α[ a ] φ ⟧ i = ⟦ φ ⟧ i
+  ⟦ ℓ⟨ a ⟩ φ ⟧ = {!!}
+  ⟦ ℓ[ a ] φ ⟧ = {!!}
+  ⟦ φ ⊕ φ₁ ⟧ i Ξ = ⟦ φ ⟧ i Ξ ⊎ ⟦ φ₁ ⟧ i Ξ 
+  ⟦ φ ⊗ φ₁ ⟧ i Ξ = ⟦ φ ⟧ i Ξ × ⟦ φ₁ ⟧ i Ξ 
+  ⟦ ν X φ ⟧ i Ξ = ⟦ φ ⟧ (i [ X ≔ φ ]) Ξ
+  ⟦ μ X φ ⟧ i Ξ = {!!}
+  ⟦ - φ ⟧ i Ξ = {!!}
+
+  -- Some possible extensions:
+
+  -- Parametric Shapes
+  --  Π : Atom → Shape → Shape
+  --  _·_ : Shape → Shape → Shape 
   
---_∈_ : ∀ t → Γ → {e : Element Γ} → Set
---t ∈ Γ = proj₁ e ≡ t
+  -- Finite non-looping recursion
+  --  v : Atom → Shape
+  --  μ : Atom → Shape → Shape
 
---test : ∀ x A → x ∈ A
---test x A = {!!}
 
-data _⊢_∶_ : Database → X → Shape → Set₁ where
- I⊕ₗ : ∀ {Γ s τ σ} → Γ ⊢ s ∶ σ → Γ ⊢ s ∶ σ ⊕ τ
- I⊕ᵣ : ∀ {Γ s τ σ} → Γ ⊢ s ∶ τ → Γ ⊢ s ∶ σ ⊕ τ
- I⊗ : ∀ {Γ s τ σ} → Γ ⊢ s ∶ σ → Γ ⊢ s ∶ τ → Γ ⊢ s ∶ σ ⊗ τ
- Ia : ∀ {Γ t p σ} → (e : Element Γ) →   → Γ ⊢ proj₁ e ∶ σ → Γ ⊢ t ∶ (α⟨ p ⟩ σ)
+{-
+open import Data.List
+
+Ctx : Set
+Ctx = List (X × Shape)
+
+data _,_⊢_∶_ : Database → Ctx → X → Shape → Set₁ where
+ I⊕ₗ : ∀ {Ξ Γ s τ σ} → Ξ , Γ ⊢ s ∶ σ → Ξ , Γ ⊢ s ∶ σ ⊕ τ
+ I⊕ᵣ : ∀ {Ξ Γ s τ σ} → Ξ , Γ ⊢ s ∶ τ → Ξ , Γ ⊢ s ∶ σ ⊕ τ
+ I⊗ : ∀ {Ξ Γ s τ σ} → Ξ , Γ ⊢ s ∶ σ → Ξ , Γ ⊢ s ∶ τ → Ξ , Γ ⊢ s ∶ σ ⊗ τ
+ Iα : ∀ {Ξ Γ s p t σ} → (t , p , s) ∈ Ξ obj → Ξ , Γ ⊢ s ∶ σ → Ξ , Γ ⊢ t ∶ (α⟨ p ⟩ σ)
+ Iℓ : ∀ {Ξ Γ d p t σ} → (t , p , d) ∈ Ξ dat → ⊢ᵟ d ∶ σ → Ξ , Γ ⊢ t ∶ (ℓ⟨ p ⟩ σ)
+ Iν : ∀ {Ξ Γ t σ} →  Ξ , (t , σ) ∷ Γ ⊢ t ∶ σ → Ξ , Γ ⊢ t ∶ (ν σ)
+
+-}
