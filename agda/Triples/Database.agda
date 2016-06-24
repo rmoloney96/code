@@ -150,9 +150,11 @@ open Lexicographic (_≺obj_) (λ _ → _≺dat_) renaming (well-founded to well
 wf≺ : Well-founded _≺_
 wf≺ = well-founded-lex wf≺obj wf≺dat
 
+{-
 ⊂⇒≺ : ∀ d c → d ⊂ c → d ≺ c
-⊂⇒≺ d c (inj₁ ((proj₅ , proj₆) , proj₇)) = left {!!}
+⊂⇒≺ (proj₁ , proj₂) (proj₃ , proj₄) (inj₁ ((proj₅ , proj₆) , proj₇)) = left {!!} --left {!!}
 ⊂⇒≺ d c (inj₂ (proj₁ , proj₂ , proj₃)) = {!!}
+-}
 
 _∈op_⇒Π_  : X → Database → Database → Database
 p ∈op (objdb , datadb) ⇒Π (φdb , _) =
