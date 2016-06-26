@@ -24,6 +24,7 @@ open import Data.Bool
 open import Data.List
 open import Induction.WellFounded
 open import Induction.Nat
+open import Utilities.ListProperties
 
 ObjectTriple = X × X × X
 DataTriple = X × X × D
@@ -47,13 +48,21 @@ eqObjectTriple = DecEqPair eqX (DecEqPair eqX eqX)
 eqDataTriple : DecEq DataTriple
 eqDataTriple = DecEqPair eqX (DecEqPair eqX eqD)
 
-Database = FiniteSubSet ObjectTriple eqObjectTriple true × FiniteSubSet DataTriple eqDataTriple true
+ObjectStore = FiniteSubSet ObjectTriple eqObjectTriple true
+DataStore = FiniteSubSet DataTriple eqDataTriple true
+Database =  ObjectStore × DataStore
 
-_∈_obj : ObjectTriple → Database → Set
-o ∈ Γ obj = Σ[ e ∈ Element (proj₁ Γ) ] o ≡ proj₁ e
+_∈obj_ : ObjectTriple → Database → Set
+o ∈obj Γ  = ∥ eq2in eqObjectTriple o (listOf (proj₁ Γ)) ∥
 
-_∈_dat : DataTriple → Database → Set
-o ∈ Γ dat = Σ[ e ∈ Element (proj₂ Γ) ] o ≡ proj₁ e
+_∈dat_ : DataTriple → Database → Set
+o ∈dat Γ  = ∥ eq2in eqDataTriple o (listOf (proj₂ Γ)) ∥
+
+_∈subject_ : X → Database → Set
+x ∈subject Γ = ∥ eq2in eqX x (Data.List.map proj₁ (listOf (proj₁ Γ))) ∥
+
+_∈object_ : X → Database → Set
+x ∈object Γ = ∥ eq2in eqX x (Data.List.map (proj₁ ∘ proj₂) (listOf (proj₁ Γ))) ∥
 
 sub : ∀ {ℓ m n} {A : Set ℓ} {B : Set m} {C : Set n} → A × B × C → A
 sub (o , _ , _) = o
@@ -64,13 +73,19 @@ prop (_ , p , _) = p
 obj : ∀ {ℓ m n} {A : Set ℓ} {B : Set m} {C : Set n} → A × B × C → C
 obj (_ , _ , l) = l
 
---─ : Database → Set
+--─ : Database → Seta
 
 _∪_ : Database → Database → Database
 (proj₁ , proj₂) ∪ (proj₃ , proj₄) = proj₁ ∪ proj₃ fs , proj₂ ∪ proj₄ fs 
 
+_∩sub_ : ∀ {C : Set} {eq : DecEq (X × X × C)} → FiniteSubSet (X × X × C) eq true → FiniteSubSet (X × X × C) eq true → FiniteSubSet (X × X × C) eq true
+S ∩sub T = for x ∈ S as true
+           do for y ∈ T as true
+              do if ⌊ eqX (sub x) (sub y) ⌋
+                 then return {b = true} x
+
 _∩_ : Database → Database → Database
-(proj₁ , proj₂) ∩ (proj₃ , proj₄) = proj₁ ∩ proj₃ fs , proj₂ ∩ proj₄ fs 
+(proj₁ , proj₂) ∩ (proj₃ , proj₄) = proj₁ ∩sub proj₃ , proj₂ ∩sub proj₄
 
 _/_fs : {C : Set}{eq : DecEq C} {b1 b2 : Bool}
   → FiniteSubSet C eq b1 → FiniteSubSet C eq b2
@@ -79,8 +94,13 @@ _/_fs {C} {eq = _==_} {b1} {b2} U S = for u ∈ U as _ do
                                         for s ∈ S as true do
                                           if not ⌊ u == s ⌋ then return {b = true} u
 
+_/sub_ : ∀ {C : Set} {eq : DecEq (X × X × C)} → FiniteSubSet (X × X × C) eq true → FiniteSubSet (X × X × C) eq true → FiniteSubSet (X × X × C) eq true
+U /sub S = for u ∈ U as _
+           do for s ∈ S as true
+              do if not ⌊ eqX (sub u) (sub s) ⌋ then return {b = true} u
+
 _/_ : Database → Database → Database
-(proj₁ , proj₂) / (proj₃ , proj₄) = (proj₁ / proj₃ fs) , (proj₂ / proj₄ fs)
+(proj₁ , proj₂) / (proj₃ , proj₄) = (proj₁ /sub proj₃) , (proj₂ /sub proj₄)
 
 _≈_ : ∀ {C : Set} {eq : DecEq C} → FiniteSubSet C eq true → FiniteSubSet C eq true → Set
 X ≈ Y = (X / Y fs) ≡ mzero × (Y / X fs) ≡ mzero
@@ -93,6 +113,9 @@ S ⊆ T fs = S / T fs ≡ mzero
 
 _⊂_ : Database → Database → Set
 (proj₁ , proj₂) ⊂ (proj₃ , proj₄) = (proj₁ ⊂ proj₃ fs) × proj₂ ⊆ proj₄ fs ⊎ proj₁ ⊆ proj₃ fs × (proj₂ ⊂ proj₄ fs)
+
+∅ : Database
+∅ = mzero , mzero
 
 open import Data.Empty
 
@@ -150,62 +173,38 @@ open Lexicographic (_≺obj_) (λ _ → _≺dat_) renaming (well-founded to well
 wf≺ : Well-founded _≺_
 wf≺ = well-founded-lex wf≺obj wf≺dat
 
-{-
-⊂⇒≺ : ∀ d c → d ⊂ c → d ≺ c
-⊂⇒≺ (proj₁ , proj₂) (proj₃ , proj₄) (inj₁ ((proj₅ , proj₆) , proj₇)) = left {!!} --left {!!}
-⊂⇒≺ d c (inj₂ (proj₁ , proj₂ , proj₃)) = {!!}
--}
+--correct : ∀ (p : X) → Database → Σ[ db ∈ Database ] Σ[ t ∈ X ] Σ[ s ∈ X ] (s ∈subject db → t ∈object db  → (s , p , t) ∈obj db )
+--correct p (odb , ddb) = {!!} , (? , {!!})
 
-_∈op_⇒Π_  : X → Database → Database → Database
-p ∈op (objdb , datadb) ⇒Π (φdb , _) =
-   -- Collect all s =p⇒ t
-  ((for t ∈ φdb as true
-    do for s ∈ objdb as true
-       do if ⌊ eqX (prop s) p ⌋ ∧ ⌊ eqX (obj s) (sub t) ⌋  
-          then return {b = true} s)
-   /
-   -- subtract if s =p⇒ t ∧ (t ⊨ φ) ∧
-   --             s =p⇒ t' ∧ (t ⊨ ¬φ) ∧ 
-   (for t ∈ φdb as true
-    do for ¬t ∈ objdb / φdb fs as true
-       do for s ∈ objdb as true
-          do if ⌊ eqX (prop s) p ⌋ ∧
-                ⌊ eqX (obj s) (sub t) ⌋ ∧
-                ⌊ eqX (obj s) (sub ¬t) ⌋
-             then return {b = true} s)
-   fs
-  , datadb)
-
-_∈op_⇒Σ_  : X → Database → Database → Database
-p ∈op (objdb , datadb) ⇒Σ (φdb , _) =
+Σs∈_⟨s,_,t⟩∧t∈_ : Database → X → Database → Database
+Σs∈ (S , _) ⟨s, a ,t⟩∧t∈ (φdb , _) = 
   (for t ∈ φdb as true
-   do for s ∈ objdb as true
-      do if ⌊ eqX p (prop s) ⌋ ∧ 
+   do for s ∈ S as true
+      do if ⌊ eqX a (prop s) ⌋ ∧ 
             ⌊ eqX (obj s) (sub t) ⌋
          then return {b = true} s                                
-  , datadb)
+  , mzero)
 
-_∈dp_Πis_  : X → Database → DT → Database
-p ∈dp (objdb , datadb) Πis τ = (objdb ,
-                                 (for t ∈ datadb as true
-                                  do if ⌊ eqX p (prop t) ⌋ ∧
-                                        ⌊ typeDec (obj t) τ ⌋
-                                     then return {b = true} t)
-                                 /
-                                 (for t ∈ datadb as true
-                                  do for t' ∈ datadb as true
-                                     do if ⌊ eqX p (prop t) ⌋ ∧
-                                           ⌊ eqX (sub t) (sub t') ⌋ ∧
-                                           ⌊ typeDec (obj t) τ ⌋ ∧
-                                           not ⌊ typeDec (obj t') τ ⌋
-                                        then return {b = true} t)
-                                 fs)
+Πs∈_⟨s,_,t⟩∧t∈_ : Database → X → Database → Database
+Πs∈ S ⟨s, a ,t⟩∧t∈ φstates =
+  (Σs∈ S ⟨s, a ,t⟩∧t∈ φstates) /
+  (Σs∈ S ⟨s, a ,t⟩∧t∈ (S / φstates))
 
-_∈dp_Σis_  : X → Database → DT → Database
-p ∈dp (objdb , datadb) Σis τ = (objdb ,
-                                 for t ∈ datadb as true
-                                 do if ⌊ eqX p (prop t) ⌋ ∧
-                                       ⌊ typeDec (obj t) τ ⌋
-                                    then return {b = true} t)
+Σs∈_⟨s,_,l⟩∧⊢l∶_ : Database → X → DT → Database
+Σs∈ (_ , S) ⟨s, a ,l⟩∧⊢l∶ τ = (mzero ,
+                               for t ∈ S as true
+                               do if ⌊ eqX a (prop t) ⌋ ∧
+                                     ⌊ typeDec (obj t) τ ⌋
+                                  then return {b = true} t)
+
+
+Πs∈_⟨s,_,l⟩∧⊢l∶_ : Database → X → DT → Database
+Πs∈ S ⟨s, a ,l⟩∧⊢l∶ τ = 
+  (Σs∈ S ⟨s, a ,l⟩∧⊢l∶ τ) / 
+  (mzero , for t ∈ proj₂ S as true
+           do if ⌊ eqX a (prop t) ⌋ ∧
+                 not ⌊ typeDec (obj t) τ ⌋
+              then return {b = true} t)
+ 
 
 

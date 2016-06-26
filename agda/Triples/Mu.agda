@@ -25,14 +25,15 @@ open import Data.List
 
 import Database as DB
 module DBmodule = DB Atom X D eqAtom eqX eqD DT ⊢ᵟ_∶_ typeDec
-open DBmodule
+open DBmodule public
 
 Interpretation : Set
 Interpretation = Atom → Database
 
-infix 21 _⊕_
-infix 21 _⊗_
+infixl 21 _⊕_
+infixl 21 _⊗_
 data Shape : Set where
+  ⊥ : Shape
   ⊤ : Shape
   α⟨_⟩_ : (a : X) → Shape → Shape
   α[_]_ : (a : X) → Shape → Shape
@@ -47,11 +48,13 @@ data Shape : Set where
   -- Negation
   -_ : Shape → Shape
 
+
+
 mutual
  
   -- Need a well foundedness proof here over the relation ⊂
   -- but this should be trivial
-  {-# NON_TERMINATING #-}  
+  {-# TERMINATING #-}
   gfp : Atom → Shape → Interpretation → Database → Database
   gfp x φ i T with ⟦ φ ⟧ i T
   gfp x φ i T | T' with T' ⊂? T
@@ -64,11 +67,12 @@ mutual
   (i [ X₁ ≔ T ]) Y | no ¬p = i Y
 
   ⟦_⟧ : Shape → (i : Interpretation) → Database → Database
+  ⟦ ⊥ ⟧ i S = ∅
   ⟦ ⊤ ⟧ i S = S
-  ⟦ α⟨ a ⟩ φ ⟧ i S =  a ∈op S ⇒Σ ⟦ φ ⟧ i S
-  ⟦ α[ a ] φ ⟧ i S = a ∈op S ⇒Π ⟦ φ ⟧ i S
-  ⟦ ℓ⟨ a ⟩ τ ⟧ i S = a ∈dp S Σis τ
-  ⟦ ℓ[ a ] τ ⟧ i S = a ∈dp S Πis τ
+  ⟦ α⟨ a ⟩ φ ⟧ i S = Σs∈ S ⟨s, a ,t⟩∧t∈ (⟦ φ ⟧ i S)
+  ⟦ α[ a ] φ ⟧ i S = Πs∈ S ⟨s, a ,t⟩∧t∈ (⟦ φ ⟧ i S)
+  ⟦ ℓ⟨ a ⟩ τ ⟧ i S = Σs∈ S ⟨s, a ,l⟩∧⊢l∶ τ
+  ⟦ ℓ[ a ] τ ⟧ i S = Πs∈ S ⟨s, a ,l⟩∧⊢l∶ τ
   ⟦ φ ⊕ φ₁ ⟧ i S = (⟦ φ ⟧ i S) ∪ (⟦ φ₁ ⟧ i S) 
   ⟦ φ ⊗ φ₁ ⟧ i S = (⟦ φ ⟧ i S) ∩ (⟦ φ₁ ⟧ i S) 
   ⟦ ν x φ ⟧ i S = gfp x φ i S
@@ -84,3 +88,14 @@ mutual
   -- Finite non-looping recursion
   --  v : Atom → Shape
   --  μ : Atom → Shape → Shape
+
+open import Utilities.ListProperties
+
+_⊢_∶_ : Database → X → Shape → Set
+Ξ ⊢ x ∶ φ = x ∈ Data.List.map proj₁
+                   (listOf (proj₁ (⟦ φ ⟧ (λ _ → Ξ) Ξ)))
+
+
+checkφ : ∀ Ξ x φ → Dec ( Ξ ⊢ x ∶ φ )
+checkφ Ξ x φ with Data.List.map proj₁ $ listOf (proj₁ (⟦ φ ⟧ (λ _ → Ξ) Ξ))
+checkφ Ξ x φ | lst = eq2in eqX x lst
