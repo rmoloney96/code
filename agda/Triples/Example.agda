@@ -10,6 +10,7 @@ open import Data.List
 open import Data.Bool
 open import Relation.Nullary
 open import Relation.Binary.PropositionalEquality
+open import Data.Bool.Properties
 
 Polity : Shape
 Polity = ν "Pol" ((ℓ[ "name" ] Str) ⊗
@@ -33,9 +34,19 @@ checkDB with checkφ DB "seshat:Rome" Polity
 checkDB | yes p = true
 checkDB | no ¬p = false
 
-test : Σ[ db ∈ Database ] "name" ∈dp DB Πis Str ≡ db 
+test : Σ[ db ∈ Database ] Σs∈ DB ⟨s, "name" ,l⟩∧⊢l∶ Str ≡ db 
 test = ({!!} , {!!}) , {!!}
 
+open import Relation.Nullary.Decidable
+open import Data.String renaming (_≟_ to eqString)
+--open import Database
+
+test2 : Database 
+test2 = (mzero , for t ∈ proj₂ DB as true
+                 do if ⌊ eqString "name" (prop t) ⌋ ∧
+                    not ⌊ typeDec (obj t) Str ⌋
+                    then FiniteSubset.return {b = true} t)
+              
 main = run (♯ (putStrLn "Checking to see if Rome is a polity") >>
             ♯ (if checkDB
                then putStrLn "A Polity Exists!"

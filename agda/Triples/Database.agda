@@ -53,7 +53,7 @@ DataStore = FiniteSubSet DataTriple eqDataTriple true
 Database =  ObjectStore × DataStore
 
 _∈obj_ : ObjectTriple → Database → Set
-o ∈obj Γ  = ∥ eq2in eqObjectTriple o (listOf (proj₁ Γ)) ∥
+o ∈obj Γ  = ∥ eq2in eqObjectTriple o (listOf (proj₁ Γ)) ∥ 
 
 _∈dat_ : DataTriple → Database → Set
 o ∈dat Γ  = ∥ eq2in eqDataTriple o (listOf (proj₂ Γ)) ∥
@@ -78,7 +78,7 @@ obj (_ , _ , l) = l
 _∪_ : Database → Database → Database
 (proj₁ , proj₂) ∪ (proj₃ , proj₄) = proj₁ ∪ proj₃ fs , proj₂ ∪ proj₄ fs 
 
-_∩sub_ : ∀ {C : Set} {eq : DecEq (X × X × C)} → FiniteSubSet (X × X × C) eq true → FiniteSubSet (X × X × C) eq true → FiniteSubSet (X × X × C) eq true
+_∩sub_ : ∀ {C D : Set} {eqA : DecEq (X × X × C)} {eqB : DecEq (X × X × D)} → FiniteSubSet (X × X × C) eqA true → FiniteSubSet (X × X × D) eqB true → FiniteSubSet (X × X × C) eqA true
 S ∩sub T = for x ∈ S as true
            do for y ∈ T as true
               do if ⌊ eqX (sub x) (sub y) ⌋
@@ -94,13 +94,15 @@ _/_fs {C} {eq = _==_} {b1} {b2} U S = for u ∈ U as _ do
                                         for s ∈ S as true do
                                           if not ⌊ u == s ⌋ then return {b = true} u
 
-_/sub_ : ∀ {C : Set} {eq : DecEq (X × X × C)} → FiniteSubSet (X × X × C) eq true → FiniteSubSet (X × X × C) eq true → FiniteSubSet (X × X × C) eq true
-U /sub S = for u ∈ U as _
-           do for s ∈ S as true
-              do if not ⌊ eqX (sub u) (sub s) ⌋ then return {b = true} u
-
 _/_ : Database → Database → Database
-(proj₁ , proj₂) / (proj₃ , proj₄) = (proj₁ /sub proj₃) , (proj₂ /sub proj₄)
+(U₁ , U₂) / (S₁ , S₂) = (for u ∈ U₁ as _
+                          do if not ⌊ eq2in eqX (sub u) ((Data.List.map proj₁ (listOf S₁)) ++
+                                                        (Data.List.map proj₁ (listOf S₂))) ⌋
+                          then return {b = true} u ,
+                         for u ∈ U₂ as _
+                          do if not ⌊ eq2in eqX (sub u) ((Data.List.map proj₁ (listOf S₁)) ++
+                                                         (Data.List.map proj₁ (listOf S₂))) ⌋
+                          then return {b = true} u)
 
 _≈_ : ∀ {C : Set} {eq : DecEq C} → FiniteSubSet C eq true → FiniteSubSet C eq true → Set
 X ≈ Y = (X / Y fs) ≡ mzero × (Y / X fs) ≡ mzero
@@ -199,12 +201,20 @@ wf≺ = well-founded-lex wf≺obj wf≺dat
 
 
 Πs∈_⟨s,_,l⟩∧⊢l∶_ : Database → X → DT → Database
-Πs∈ S ⟨s, a ,l⟩∧⊢l∶ τ = 
+Πs∈ S ⟨s, a ,l⟩∧⊢l∶ τ =
   (Σs∈ S ⟨s, a ,l⟩∧⊢l∶ τ) / 
   (mzero , for t ∈ proj₂ S as true
            do if ⌊ eqX a (prop t) ⌋ ∧
                  not ⌊ typeDec (obj t) τ ⌋
               then return {b = true} t)
+
+{-
+test2 : ?
+test2 = for t ∈ proj₂ DB as true
+           do if ⌊ eqX a (prop t) ⌋ ∧
+                 not ⌊ typeDec (obj t) τ ⌋
+              then return {b = true} t
+-}
  
 
 
