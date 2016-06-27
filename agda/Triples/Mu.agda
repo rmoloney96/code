@@ -92,10 +92,10 @@ mutual
 open import Utilities.ListProperties
 
 _⊢_∶_ : Database → X → Shape → Set
-Ξ ⊢ x ∶ φ = x ∈ Data.List.map proj₁
-                   (listOf (proj₁ (⟦ φ ⟧ (λ _ → Ξ) Ξ)))
+Ξ ⊢ x ∶ φ = x ∈ Data.List.map sub
+                   (listOf (⟦ φ ⟧ (λ _ → Ξ) Ξ))
 
 
 checkφ : ∀ Ξ x φ → Dec ( Ξ ⊢ x ∶ φ )
-checkφ Ξ x φ with Data.List.map proj₁ $ listOf (proj₁ (⟦ φ ⟧ (λ _ → Ξ) Ξ))
+checkφ Ξ x φ with Data.List.map sub $ listOf (⟦ φ ⟧ (λ _ → Ξ) Ξ)
 checkφ Ξ x φ | lst = eq2in eqX x lst
