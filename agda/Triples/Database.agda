@@ -14,7 +14,7 @@ module Database
   (typeDec : Decidable (⊢ᵟ_∶_))
   where
 
-open import Relation.Binary.PropositionalEquality hiding (inspect)
+open import Relation.Binary.PropositionalEquality hiding (inspect ; [_])
 open import FiniteSubset renaming (_∪_ to _∪_fs ; _∩_ to _∩_fs) 
 open import Data.Sum renaming ( [_,_] to ⟨_,_⟩ )
 open import Data.Product
@@ -26,6 +26,7 @@ open import Induction.WellFounded
 open import Induction.Nat
 open import Utilities.ListProperties
 open import Data.Empty
+open import FiniteSubsetUtils
 
 Triple = X × X × (X ⊎ D)
 
@@ -35,7 +36,7 @@ Triple = X × X × (X ⊎ D)
 ,-inv₂ : ∀ {ℓ m} {A : Set ℓ} {B : Set m} {x y : A} {w z : B} → ¬ w ≡ z →  ¬ (x , w) ≡ (y , z)
 ,-inv₂ f refl = f refl
 
-inj₁-inv : ∀ {ℓ m} {A : Set ℓ} {B : Set m} {a b : A} → ¬ a ≡ b → ¬ (A ⊎ B ∋ inj₁  a) ≡ inj₁ b
+inj₁-inv : ∀ {ℓ m} {A : Set ℓ} {B : Set m} {a b : A} → ¬ a ≡ b → ¬ (A ⊎ B ∋ inj₁ a) ≡ inj₁ b
 inj₁-inv p refl = p refl
 
 inj₂-inv : ∀ {ℓ m} {A : Set ℓ} {B : Set m} {a b : B} → ¬ a ≡ b → ¬ (A ⊎ B ∋ inj₂ a) ≡ inj₂ b
@@ -67,6 +68,13 @@ eqTriple = DecEqPair eqX (DecEqPair eqX eqThird)
 Database : Set
 Database = FiniteSubSet Triple eqTriple true
 
+Subjects : Set
+Subjects = FiniteSubSet X eqX false
+
+Objects : Set
+Objects = FiniteSubSet (X ⊎ D) eqThird false
+
+
 sub : ∀ {ℓ m n} {A : Set ℓ} {B : Set m} {C : Set n} → A × B × C → A
 sub (o , _ , _) = o
 
@@ -76,31 +84,15 @@ prop (_ , p , _) = p
 obj : ∀ {ℓ m n} {A : Set ℓ} {B : Set m} {C : Set n} → A × B × C → C
 obj (_ , _ , l) = l
 
+𝓓 : Database → Subjects
+𝓓 Ξ = fromList (Data.List.map sub (listOf Ξ)) false
+
+𝓡 : Database → Objects
+𝓡 Ξ = fromList (Data.List.map obj (listOf Ξ)) false
+
 --─ : Database → Seta
-∅ : Database
+∅ : {X : Set}{eq : DecEq X}{b : Bool} → FiniteSubSet X eq b
 ∅ = mzero
-
-_∪_ : Database → Database → Database
-S ∪ T = S ∪ T fs 
-
-_∩_ : Database → Database → Database
-S ∩ T = for x ∈ S as true
-        do for y ∈ T as true
-           do if ⌊ eqX (sub x) (sub y) ⌋
-              then return {b = true} x
-
-_/_ : Database → Database → Database
-S / T = for s ∈ S as _
-        do if not ⌊ eq2in eqX (sub s) (Data.List.map sub (listOf T)) ⌋
-           then return {b = true} s 
-
-{-
-/-subtracts : ∀ X S T → X ∈ listOf (S / T) → X ∈ listOf S × (X ∈ listOf T → ⊥)
-/-subtracts X₁ (fs-plain []) (fs-plain []) P = P , (λ ())
-/-subtracts X₁ (fs-plain []) (fs-plain (x ∷ x₁)) ()
-/-subtracts X₁ (fs-plain (x ∷ x₁)) (fs-plain []) P = {!P!} -- {!P!} , (λ ())
-/-subtracts X₁ (fs-plain (x ∷ x₁)) (fs-plain (x₂ ∷ x₃)) P = {!!}
--}
 
 _⊆_ : Database → Database → Set
 S ⊆ T = S / T ≡ ∅
