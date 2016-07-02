@@ -14,9 +14,16 @@ open import Relation.Nullary
 open import Relation.Binary.PropositionalEquality hiding (inspect)
 open import Data.Nat
 open import Finiteness renaming (∣_∣ to ∣_∣listable)
-
+open import Relation.Nullary.Negation using () renaming (contradiction to _↯_)
+ 
 _∈_ : ∀ {C : Set}{eq : DecEq C} {b : Bool} → C → FiniteSubSet C eq b → Set
 _∈_ {eq = eq} x S = x ∈L (listOf S)
+
+_∉L_ : ∀ {C : Set} → C → List C → Set
+x ∉L S = x ∈L S → ⊥
+
+_∉_ : ∀ {C : Set}{eq : DecEq C} {b : Bool} → C → FiniteSubSet C eq b → Set
+_∉_ {eq = eq} x S = x ∈L (listOf S) → ⊥ 
 
 _∈𝔹_ : ∀ {C : Set}{eq : DecEq C} {b : Bool} → C → FiniteSubSet C eq b → Bool
 _∈𝔹_ {eq = eq} x S = ⌊ eq2in eq x (listOf S ) ⌋
@@ -59,12 +66,42 @@ _⊂_ : ∀ {C : Set}{eq : DecEq C}{b1 b2 : Bool} →
         FiniteSubSet C eq b1 → FiniteSubSet C eq b2 → Set
 S ⊂ T = S ⊆ T × ¬ T ⊆ S 
 
+_⊂L_ : ∀ {C : Set} →
+        List C → List C → Set
+S ⊂L T = S ⊆L T × ¬ T ⊆L S 
+
+_⊂L?_ : ∀ {C : Set}{eq : DecEq C} →
+       Decidable (_⊂L_ {C})
+_⊂L?_ {eq = eq} S T with _⊆L?_ {eq = eq} S T
+_⊂L?_ {eq = eq} S T | yes p with _⊆L?_ {eq = eq} T S
+S ⊂L? T | yes p₁ | yes p = no (λ z → proj₂ z p)
+S ⊂L? T | yes p | no ¬p = yes (p , ¬p)
+S ⊂L? T | no ¬p = no (λ z → ¬p (proj₁ z))
+
+_Σ⊂_ : ∀ {C : Set}{eq : DecEq C}{b1 b2 : Bool} →
+        FiniteSubSet C eq b1 → FiniteSubSet C eq b2 → Set
+_Σ⊂_ {C} S T = Σ[ x ∈ C ] S ⊆ T × x ∈ T × x ∉ S
+
+_Σ⊂L_ : ∀ {C : Set} →
+        List C → List C → Set
+_Σ⊂L_ {C} S T = S ⊆L T × Σ[ x ∈ C ] x ∈L T × x ∉L S
+
+Σ⊂⇒⊂ : ∀ {C : Set}{eq : DecEq C}{b1 b2 : Bool} →
+     (S : FiniteSubSet C eq b1) → (T : FiniteSubSet C eq b2) →
+     (S Σ⊂ T) → S ⊂ T
+Σ⊂⇒⊂ S T (proj₁ , proj₂ , proj₃ , proj₄) = proj₂ , (λ x → proj₄ (x proj₁ proj₃))
+
+⊂⇒Σ⊂ : ∀ {C : Set}{eq : DecEq C}{b1 b2 : Bool} →
+     (S : FiniteSubSet C eq b1) → (T : FiniteSubSet C eq b2) →
+     S ⊂ T → (S Σ⊂ T)
+⊂⇒Σ⊂ S T (proj₁ , proj₂) = {!!} , ({!!} , ({!!} , (λ x → {!x!})))
+
 open import Function
 
+{-
 ∣_∣ : ∀ {C : Set} {eq : DecEq C} {b1 : Bool} →
       FiniteSubSet C eq b1 → ℕ
 ∣ S ∣ = length ∘ proj₁ $ lstbl2nodup (fsListable S)
-
 
 open import Data.Nat
 
@@ -83,8 +120,13 @@ module WF⊆mod (C : Set) (eq : DecEq C) (b : Bool) where
   wf≺ = well-founded-ii-obj <-well-founded
 
   ⊂⇒<′ : ∀ {S T : FiniteSubSet C eq b} → S ⊂ T → S ≺ T
-  ⊂⇒<′ {S} {T} P with listOf S 
-  ⊂⇒<′ {S} {T} P | S' = ?
+  ⊂⇒<′ {S} {T} P with S ⊆? T
+  ⊂⇒<′ {S} {T} P | yes p with T ⊆? S
+  ⊂⇒<′ P | yes p₁ | yes p = {!!}
+  ⊂⇒<′ P | yes p | no ¬p = {!!}
+  ⊂⇒<′ P | no ¬p = {!!}
+
+-}
 
 {-
 open Subrelation {A = Database} {_<₁_ = (_⊂_)} {_<₂_ =  _≺_} ⊂⇒<′

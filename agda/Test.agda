@@ -1,10 +1,8 @@
+module Test where 
 
-module Test where
+data Nat : Set where
+  zero : Nat
+  succ : Nat → Nat 
 
--- This is a test
-import Level
 
-data N : Set where
-  z : N
-  s : N → N
 
