@@ -77,7 +77,7 @@ mutual
   ⟦ φ ⊗ φ₁ ⟧ i S = (⟦ φ ⟧ i S) ∩ (⟦ φ₁ ⟧ i S) 
   ⟦ ν x φ ⟧ i S = gfp x φ i S
   ⟦ v x ⟧ i S = i x 
-  ⟦ - φ ⟧ i S = S / ⟦ φ ⟧ i S
+  ⟦ - φ ⟧ i S = S ̸ ⟦ φ ⟧ i S
 
   -- Some possible extensions:
 

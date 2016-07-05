@@ -36,7 +36,7 @@ let rec fv s ex = match s with
  | Var a -> 
 
 val unify: theta:subst -> s:term -> t:term -> Tot (option term)
-unify (
+
 
 
 (* let rec unify t s = *)
