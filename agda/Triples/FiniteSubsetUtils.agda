@@ -192,6 +192,7 @@ data ∣_∣∶=_ {C : Set} : List C → ℕ → Set where
 ∣_∣⟨_⟩ : ∀ {C : Set} → List C → (eq : DecEq C) → ℕ
 ∣ S ∣⟨ eq ⟩ = length ∘ proj₁ $ strongRemDup (eq2in eq) S
 
+{-
 ∣∣⟨⟩⇒∣∣∶= : ∀ {C} (S : List C) (eq : DecEq C) n → ∣ S ∣⟨ eq ⟩ ≡ n → ∣ S ∣∶= n 
 ∣∣⟨⟩⇒∣∣∶= [] eq zero refl = ∣[]∣
 ∣∣⟨⟩⇒∣∣∶= [] eq (suc n) ()
@@ -207,6 +208,7 @@ data ∣_∣∶=_ {C : Set} : List C → ℕ → Set where
 ∣∣∶=⇒∣∣⟨⟩ _ eq _ (∣x∷L∣+1 P x₁) | res | no ¬p = {!!}
 ∣∣∶=⇒∣∣⟨⟩ _ eq n (∣x∷L∣+0 P x₁) with NoDupInd
 ∣∣∶=⇒∣∣⟨⟩ _ eq n (∣x∷L∣+0 P x₁) | res = {!!}
+-}
 {-
 open import Function
 

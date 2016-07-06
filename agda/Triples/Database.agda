@@ -94,11 +94,13 @@ obj (_ , _ , l) = l
 ∅ : {X : Set}{eq : DecEq X}{b : Bool} → FiniteSubSet X eq b
 ∅ = mzero
 
+{-
 _⊆_ : Database → Database → Set
 S ⊆ T = S / T ≡ ∅
 
 _⊂_ : Database → Database → Set
 S ⊂ T = S / T ≡ ∅ × T / S ≢ ∅ 
+-}
 
 EmptyNotFull : ∀ {C} {eq} {x : C} {x₁} → fs-plain {C} {eq} (x ∷ x₁) ≢ fs-plain []
 EmptyNotFull () 
