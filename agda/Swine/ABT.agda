@@ -10,6 +10,10 @@ module ABT
   (fresh : (xs : List Atom) → Σ[ y ∈ Atom ] y ∉ xs)
   where
 
+import AtomProperties as AP
+module AtomModule = AP Atom eq fresh
+open AtomModule public
+
 open import Relation.Nullary
 --open import Data.Vec
 open import Data.Nat
@@ -17,6 +21,8 @@ open import Data.Unit hiding (_≟_)
 open import Relation.Nullary.Negation using () renaming (contradiction to _↯_)
 open import Relation.Binary
 open import Function
+
+
 
 Arity : Set
 Arity = List ℕ 
@@ -98,13 +104,6 @@ mutual
  x #? (y · a) | no ¬p | yes p = yes (x·y# ¬p p)
  x #? (y · a) | no ¬p₁ | no ¬p = no (¬p ∘ (inv-x#bind ¬p₁))
 
-⟨_↔_⟩ₐ : Atom → Atom → Atom → Atom
-⟨ x ↔ y ⟩ₐ z with eq x z
-⟨ x ↔ y ⟩ₐ z | yes p = y
-⟨ x ↔ y ⟩ₐ z | no ¬p with eq y z
-⟨ x ↔ y ⟩ₐ z | no ¬p | yes p = x
-⟨ x ↔ y ⟩ₐ z | no ¬p₁ | no ¬p = z
-
 mutual
  ⟨_↔_⟩ₗ : Atom → Atom → List Abt → List Abt
  ⟨ x ↔ y ⟩ₗ [] = []
@@ -120,20 +119,6 @@ _─_ : List Atom → Atom → List Atom
 (x ∷ xs) ─ x₁ with eq x x₁
 (x ∷ xs) ─ .x | yes refl = xs ─ x
 (x ∷ xs) ─ x₁ | no ¬p = x ∷ xs ─ x₁
-
-x∉xs━x : ∀ xs x → x ∉ (xs ─ x)
-x∉xs━x [] x () 
-x∉xs━x (x ∷ xs) x₁ q with eq x x₁
-x∉xs━x (x ∷ xs) .x q | yes refl = x∉xs━x xs x q
-x∉xs━x (x ∷ xs) .x here | no x≢x = refl ↯ x≢x
-x∉xs━x (x ∷ xs) x₁ (there q) | no ¬p = x∉xs━x xs x₁ q
-
-y∈xs─x⇒y≢x : ∀ xs x y → y ∈ xs ─ x → y ≢ x
-y∈xs─x⇒y≢x [] x y () y≡x
-y∈xs─x⇒y≢x (x ∷ xs) x₁ y p y≡x with eq x x₁
-y∈xs─x⇒y≢x (x ∷ xs) .x .x p₁ refl | yes refl = x∉xs━x xs x p₁
-y∈xs─x⇒y≢x (y ∷ xs) x₁ .y here y≡x | no ¬p = y≡x ↯ ¬p
-y∈xs─x⇒y≢x (x ∷ xs) x₁ .x₁ (there p) refl | no ¬p = x∉xs━x xs x₁ p
 
 mutual
 
@@ -261,6 +246,9 @@ mutual
   (x · a) ≈α? (y · b) | no ¬p₁ | yes p | no ¬p = no (¬p ∘ inv-·₃ ¬p₁)
   (x · a) ≈α? (y · b) | no ¬p₁ | no ¬p = no (¬p ∘ inv-·₁ ¬p₁)
 
+{-
+Now lives in AtomProperties
+
 ⟨x↔y⟩ₐx≈αy : ∀ x y → name (⟨ x ↔ y ⟩ₐ x) ≈α name y
 ⟨x↔y⟩ₐx≈αy x y with eq x x
 ⟨x↔y⟩ₐx≈αy x y | yes p = name≈α
@@ -272,6 +260,7 @@ mutual
 ⟨x↔y⟩ₐz≈αz x y z x≢z y≢z | no ¬p with eq y z
 ⟨x↔y⟩ₐz≈αz x y .y x≢z y≢z | no ¬p | yes refl = refl ↯ y≢z
 ⟨x↔y⟩ₐz≈αz x y z x≢z y≢z | no ¬p₁ | no ¬p = name≈α
+-}
 
 mutual
   ≈αs-refl : ∀ {x} → x ≈αs x
@@ -285,13 +274,14 @@ mutual
 
 x·a≈αy·⟨x↔y⟩a : ∀ x y a → x ≢ y → y # a → x · a ≈α y · ⟨ x ↔ y ⟩ a
 x·a≈αy·⟨x↔y⟩a x y (name x₁) x≢y (name# x₂) with eq x x₁
-x·a≈αy·⟨x↔y⟩a x₁ y (name .x₁) x≢y (name# x₂) | yes refl = bindx≈yα x≢y (name# x₂) (⟨x↔y⟩ₐx≈αy x₁ y)
+x·a≈αy·⟨x↔y⟩a x₁ y (name _) x≢y (name# x₂) | yes p = bindx≈yα x≢y (name# x₂) {!!} -- (lemma↔ₐ-x≡z x₁ y x₁ refl)
 x·a≈αy·⟨x↔y⟩a x y (name x₁) x≢y (name# x₂) | no ¬p with eq y x₁
 x·a≈αy·⟨x↔y⟩a x x₁ (name .x₁) x≢y (name# x₂) | no ¬p | yes refl = refl ↯ x₂
-x·a≈αy·⟨x↔y⟩a x y (name x₁) x≢y (name# x₂) | no ¬p₁ | no ¬p = bindx≈yα x≢y (name# x₂) (⟨x↔y⟩ₐz≈αz x y x₁ ¬p₁ x₂)
+x·a≈αy·⟨x↔y⟩a x y (name x₁) x≢y (name# x₂) | no ¬p₁ | no ¬p = bindx≈yα x≢y (name# x₂) {!!} -- (lemma↔ₐ-y≢z∧x≢z ?)
 x·a≈αy·⟨x↔y⟩a x y (oper op α abts) x≢y y#a = bindx≈yα x≢y y#a (oper≈α ≈αs-refl)
 x·a≈αy·⟨x↔y⟩a x y (z · a) x≢y y#a = bindx≈yα x≢y y#a ≈α-refl
 
+{-
 ⟨x↔y⟩x≈αy : ∀ x y → name (⟨ x ↔ y ⟩ₐ x) ≈α name y
 ⟨x↔y⟩x≈αy x y with eq x x
 ⟨x↔y⟩x≈αy x y | yes refl = name≈α
@@ -312,6 +302,8 @@ x·a≈αy·⟨x↔y⟩a x y (z · a) x≢y y#a = bindx≈yα x≢y y#a ≈α-re
 ⟨x↔y⟩z≈αz x y z z≢x z≢y | no ¬p with eq y z
 ⟨x↔y⟩z≈αz x y z z≢x z≢y | no ¬p | yes p = sym p ↯ z≢y
 ⟨x↔y⟩z≈αz x y z z≢x z≢y | no ¬p₁ | no ¬p = name≈α
+
+-}
 
 mutual
   ⟨x↔x⟩ₗabts : ∀ x abts → ⟨ x ↔ x ⟩ₗ abts ≡ abts
@@ -350,11 +342,6 @@ mutual
 ⟨↔⟩ₐ-invol x y z | no ¬p₂ | no ¬p₁ | no ¬p | yes p = p ↯ ¬p₁
 ⟨↔⟩ₐ-invol x y z | no ¬p₃ | no ¬p₂ | no ¬p₁ | no ¬p = refl
 
-eq-yes : ∀ {x y} (p : x ≡ y) → eq x y ≡ yes p
-eq-yes {x} refl with eq x x
-eq-yes refl | yes refl = refl
-eq-yes refl | no ¬p = refl ↯ ¬p
-
 
 mutual
   ⟨↔⟩ₗ-invol : ∀ x z abts → ⟨ x ↔ z ⟩ₗ (⟨ x ↔ z ⟩ₗ abts) ≡ abts
@@ -373,7 +360,7 @@ mutual
   ⟨↔⟩-invol x z (.x · a) | yes refl | no ¬p | yes p₁ = refl
   ⟨↔⟩-invol x z (x₁ · a) | yes p | no ¬p | no ¬p₁ = refl ↯ ¬p₁
   ⟨↔⟩-invol x z (x₁ · a) | no ¬p with eq z x₁
-  ⟨↔⟩-invol x z (.z · a) | no ¬p | yes refl rewrite eq-yes (refl {x = x}) = refl
+  ⟨↔⟩-invol x z (.z · a) | no ¬p | yes refl rewrite eq-yes x refl = refl
   ⟨↔⟩-invol x z (x₁ · a) | no ¬p | no ¬p₁ with eq x x₁
   ⟨↔⟩-invol x z (x₁ · a) | no ¬p | no ¬p₁ | yes p = p ↯ ¬p
   ⟨↔⟩-invol x z (x₁ · a) | no ¬p₂ | no ¬p₁ | no ¬p with eq z x₁
@@ -450,7 +437,7 @@ mutual
   ⟨x↔z⟩a≈α⟨y↔z⟩b⇒x·a≈αy·b : ∀ {x y z} a b → x ≢ y → z # a → z # b → ⟨ x ↔ z ⟩ a ≈α ⟨ y ↔ z ⟩ b → x · a ≈α y · b
   ⟨x↔z⟩a≈α⟨y↔z⟩b⇒x·a≈αy·b {x} (name x₁) (name x₂) p q r a≈αb with eq x x₁
   ⟨x↔z⟩a≈α⟨y↔z⟩b⇒x·a≈αy·b {_} {y} (name x) (name x₂) p₁ q r a≈αb | yes refl with eq y x₂ 
-  ⟨x↔z⟩a≈α⟨y↔z⟩b⇒x·a≈αy·b (name x) (name y) p₁ q r a≈αb | yes refl | yes refl = bindx≈yα p₁ (name# (p₁ ∘ sym )) (⟨x↔y⟩x≈αy x y)
+  ⟨x↔z⟩a≈α⟨y↔z⟩b⇒x·a≈αy·b (name x) (name y) p₁ q r a≈αb | yes refl | yes refl = bindx≈yα p₁ (name# (p₁ ∘ sym )) {!!} -- (lemma↔ₐ-x≡z refl x y)
   ⟨x↔z⟩a≈α⟨y↔z⟩b⇒x·a≈αy·b {z = z} (name x) (name x₂) p₁ q r a≈αb | yes refl | no ¬p with eq z x₂
   ⟨x↔z⟩a≈α⟨y↔z⟩b⇒x·a≈αy·b (name x) (name y) p₁ q r name≈α | yes refl | no ¬p | yes refl = r ↯ inv-x#name
   ⟨x↔z⟩a≈α⟨y↔z⟩b⇒x·a≈αy·b (name x) (name z) p₁ q r name≈α | yes refl | no ¬p | no ¬p₂ = r ↯ inv-x#name
@@ -468,7 +455,7 @@ mutual
   ⟨x↔z⟩a≈α⟨y↔z⟩b⇒x·a≈αy·b (name x₁) (name y) p₁ q r name≈α | no ¬p₂ | no ¬p | no ¬p₁ | yes refl = q ↯ inv-x#name
   ⟨x↔z⟩a≈α⟨y↔z⟩b⇒x·a≈αy·b {z = z} (name x₁) (name x₂) p q r a≈αb | no ¬p₃ | no ¬p₁ | no ¬p₂ | no ¬p with eq z x₂
   ⟨x↔z⟩a≈α⟨y↔z⟩b⇒x·a≈αy·b (name y) (name x₂) p₁ q r name≈α | no ¬p₃ | no ¬p₁ | no ¬p₂ | no ¬p | yes refl = r ↯ inv-x#name 
-  ⟨x↔z⟩a≈α⟨y↔z⟩b⇒x·a≈αy·b {x} {y} (name x₂) (name .x₂) p q r name≈α | no ¬p₄ | no ¬p₂ | no ¬p₃ | no ¬p₁ | no ¬p = bindx≈yα p (name# ¬p₁) (⟨x↔y⟩z≈αz x y x₂ (¬p₄ ∘ sym) (¬p₁ ∘ sym))
+  ⟨x↔z⟩a≈α⟨y↔z⟩b⇒x·a≈αy·b {x} {y} (name x₂) (name .x₂) p q r name≈α | no ¬p₄ | no ¬p₂ | no ¬p₃ | no ¬p₁ | no ¬p = bindx≈yα p (name# ¬p₁) {!!} -- (lemma↔ₐ-y≢z∧x≢z x y x₂ (¬p₄ ∘ sym) (¬p₁ ∘ sym))
   ⟨x↔z⟩a≈α⟨y↔z⟩b⇒x·a≈αy·b (name x₁) (oper op α abts) p q r ()
   ⟨x↔z⟩a≈α⟨y↔z⟩b⇒x·a≈αy·b (name x₁) (x₂ · b) p q r ()
   ⟨x↔z⟩a≈α⟨y↔z⟩b⇒x·a≈αy·b (oper op α abts) (name x₁) p q r ()
@@ -478,7 +465,7 @@ mutual
   ⟨x↔z⟩a≈α⟨y↔z⟩b⇒x·a≈αy·b (x₁ · a) (oper op α abts) p q r ()
   ⟨x↔z⟩a≈α⟨y↔z⟩b⇒x·a≈αy·b {x} (x₁ · a) (x₂ · b) p q r a≈αb with eq x x₁
   ⟨x↔z⟩a≈α⟨y↔z⟩b⇒x·a≈αy·b {x} {y} (x₁ · a) (x₂ · b) p₁ q r a≈αb | yes p with eq y x₂
-  ⟨x↔z⟩a≈α⟨y↔z⟩b⇒x·a≈αy·b (x₁ · a) (y · b) p₂ q r (bindx≈xα a≈αb) | yes refl | yes refl rewrite ⟨x↔y⟩ₐx≡y x₁ y =
+  ⟨x↔z⟩a≈α⟨y↔z⟩b⇒x·a≈αy·b (x₁ · a) (y · b) p₂ q r (bindx≈xα a≈αb) | yes refl | yes refl rewrite lemma↔ₐ-x≡z x₁ y x₁ refl  =
     bindx≈yα p₂ (one# p₂ {!!} q r) {!!} -- bindx≈yα p₂ (one# {!!} {!!} q r) {!!}
   ⟨x↔z⟩a≈α⟨y↔z⟩b⇒x·a≈αy·b {x} {y} {z} (x₁ · a) (x₂ · b) p₂ q r (bindx≈yα x₃ x₄ a≈αb) | yes p₁ | yes p = refl ↯ x₃ 
   ⟨x↔z⟩a≈α⟨y↔z⟩b⇒x·a≈αy·b (x₁ · a) (x₂ · b) p₁ q r a≈αb | yes p | no ¬p = {!!}
@@ -488,6 +475,13 @@ mutual
   ⟨x↔z⟩a≈α⟨y↔z⟩b⇒x·a≈αy·b (x₁ · a) (x₂ · b) p₂ q r (bindx≈yα x₃ x₄ a≈αb) | no ¬p | yes p₁ | yes p = {!!}
   ⟨x↔z⟩a≈α⟨y↔z⟩b⇒x·a≈αy·b (x₁ · a) (x₂ · b) p₁ q r a≈αb | no ¬p₁ | yes p | no ¬p = {!!}
   ⟨x↔z⟩a≈α⟨y↔z⟩b⇒x·a≈αy·b (x₁ · a) (x₂ · b) p q r a≈αb | no ¬p₁ | no ¬p = {!!}
+
+
+{-
+
+z · ⟨ x₁ ↔ .z ⟩ a) ≈α
+z · ⟨ y ↔ .z ⟩ b)
+-}
 
 mutual
   ≈αs-sym : ∀ {a b} → a ≈αs b → b ≈αs a
