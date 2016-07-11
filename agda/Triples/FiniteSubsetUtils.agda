@@ -171,44 +171,78 @@ _─_⟨_⟩ : ∀ {C : Set} → (S : List C) → (T : List C) → (eq : DecEq C
                                               in P₁ (subst (λ z → z ∈L _) q x₁)) 
 --  S ⊂L T → NoDupInd S → S ⊂ T
 --open import Data.Sum
-data _#_ {C} : List C → C → Set where
-  []# : ∀ {x} → [] # x 
-  snoc# : ∀ {x y L} → L # x → y ≢ x → (y ∷ L) # x
+data _#_ {C} : C → List C → Set where
+  []# : ∀ {x} → x # [] 
+  snoc# : ∀ {x y L} → x # L → y ≢ x → x # (y ∷ L)
 
 #? : ∀ {C : Set} (eq : DecEq C) → Decidable (_#_ {C})
-#? eq [] x = yes []#
-#? eq (x ∷ L) x₁ with #? eq L x₁ 
-#? eq (x ∷ L) x₁ | yes p with eq x x₁
-#? eq (x₁ ∷ L) .x₁ | yes p₁ | yes refl = no (λ {(snoc# L#x₁ q) → q refl}) 
-#? eq (x ∷ L) x₁ | yes p | no ¬p = yes (snoc# p ¬p)
-#? eq (x ∷ L) x₁ | no ¬p = no (λ { (snoc# L#x₁ q) → ¬p L#x₁})
+#? eq x [] = yes []#
+#? eq x₁ (x ∷ L) with #? eq x₁ L 
+#? eq x₁ (x ∷ L) | yes p with eq x x₁
+#? eq x₁ (.x₁ ∷ L) | yes p₁ | yes refl = no (λ {(snoc# L#x₁ q) → q refl}) 
+#? eq x₁ (x ∷ L) | yes p | no ¬p = yes (snoc# p ¬p)
+#? eq x₁ (x ∷ L) | no ¬p = no (λ { (snoc# L#x₁ q) → ¬p L#x₁})
 
-data ∣_∣∶=_ {C : Set} : List C → ℕ → Set where
-  ∣[]∣ : ∣ [] ∣∶= 0
-  ∣x∷L∣+1 : ∀ {x L n} → ∣ L ∣∶= n → L # x → ∣ x ∷ L ∣∶= suc n 
-  ∣x∷L∣+0 : ∀ {x L n} → ∣ L ∣∶= n → (L # x → ⊥)  → ∣ x ∷ L ∣∶= n 
+∉L⇒# : ∀ {C} → (eq : DecEq C) → ∀ xs (x : C) → x ∉L xs → x # xs
+∉L⇒# eq [] x p = []#
+∉L⇒# eq (x ∷ xs) x₁ p with eq x₁ x
+∉L⇒# eq (x ∷ xs) .x p₁ | yes refl = ⊥-elim (p₁ here)
+∉L⇒# eq (x ∷ xs) x₁ p | no ¬p with ∉L⇒# eq xs x₁ (λ z → p (there z))
+∉L⇒# eq (x ∷ xs) x₁ p | no ¬p | q = snoc# q (¬p ∘ sym)
 
+#-lemma : ∀ {C} → (eq : DecEq C) → ∀ (x y : C) xs → y ∉L xs → y ∈L (x ∷ xs) → x # xs → x ≡ y
+#-lemma eq x y xs p q r with ∉L⇒# eq xs y p
+#-lemma eq y .y xs p here r | res = refl
+#-lemma eq x y xs p (there q) r | res = q ↯ p
 
-∣_∣⟨_⟩ : ∀ {C : Set} → List C → (eq : DecEq C) → ℕ
-∣ S ∣⟨ eq ⟩ = length ∘ proj₁ $ strongRemDup (eq2in eq) S
+#-lemma₁ : ∀ {C} → (eq : DecEq C) → ∀ (x y : C) xs → x # xs → (x # (y ∷ xs) → ⊥) → x ≡ y
+#-lemma₁ eq x y xs p q with eq x y 
+#-lemma₁ eq x .x xs p₁ q | yes refl = refl
+#-lemma₁ eq x y xs p q | no ¬p = let h = snoc# p (¬p ∘ sym) in h ↯ q
 
-{-
-∣∣⟨⟩⇒∣∣∶= : ∀ {C} (S : List C) (eq : DecEq C) n → ∣ S ∣⟨ eq ⟩ ≡ n → ∣ S ∣∶= n 
-∣∣⟨⟩⇒∣∣∶= [] eq zero refl = ∣[]∣
-∣∣⟨⟩⇒∣∣∶= [] eq (suc n) ()
-∣∣⟨⟩⇒∣∣∶= (x ∷ S) eq n x₁ with ∣∣⟨⟩⇒∣∣∶= S eq n
-∣∣⟨⟩⇒∣∣∶= (x ∷ S) eq n x₁ | res = {!!}
+¬#⇒∈L : ∀ {C} → (eq : DecEq C) → ∀ xs (x : C) → (x # xs → ⊥) → x ∈L xs
+¬#⇒∈L eq [] x p = ⊥-elim (p []#)
+¬#⇒∈L eq (x ∷ xs) x₁ p with #? eq x₁ xs 
+¬#⇒∈L eq (x ∷ xs) x₁ p₁ | yes p with #-lemma₁ eq x₁ x xs p p₁
+¬#⇒∈L eq (x ∷ xs) .x p₁ | yes p | refl = here
+¬#⇒∈L eq (x ∷ xs) x₁ p | no ¬p with ¬#⇒∈L eq xs x₁ ¬p
+¬#⇒∈L eq (x ∷ xs) x₁ p | no ¬p | res = there res
 
-∣∣∶=⇒∣∣⟨⟩ : ∀ {C} (S : List C) (eq : DecEq C) n → ∣ S ∣∶= n  → ∣ S ∣⟨ eq ⟩ ≡ n 
-∣∣∶=⇒∣∣⟨⟩ .[] eq .0 ∣[]∣ = refl
-∣∣∶=⇒∣∣⟨⟩ _ eq _ (∣x∷L∣+1 {x'} {L} {n} P x₁) with ∣∣∶=⇒∣∣⟨⟩ L eq n P
-∣∣∶=⇒∣∣⟨⟩ _ eq _ (∣x∷L∣+1 {x'} {L} {n} P x₁) | res with eq2in eq x' L
-∣∣∶=⇒∣∣⟨⟩ _ eq _ (∣x∷L∣+1 P (snoc# x₁ x₂)) | refl | yes here = refl ↯ x₂
-∣∣∶=⇒∣∣⟨⟩ _ eq _ (∣x∷L∣+1 P x₁) | refl | yes (there p) = {!refl!}
-∣∣∶=⇒∣∣⟨⟩ _ eq _ (∣x∷L∣+1 P x₁) | res | no ¬p = {!!}
-∣∣∶=⇒∣∣⟨⟩ _ eq n (∣x∷L∣+0 P x₁) with NoDupInd
-∣∣∶=⇒∣∣⟨⟩ _ eq n (∣x∷L∣+0 P x₁) | res = {!!}
--}
+data ∣_∣=_ {C : Set} : List C → ℕ → Set where
+  ∣[]∣ : ∣ [] ∣= 0
+  ∣x∷L∣ : ∀ {x L n} → ∣ L ∣= n → x # L → ∣ x ∷ L ∣= suc n 
+
+convert : ∀ {C} → (eq : DecEq C) → List C → Σ[ xs ∈ List C ] Σ[ n ∈ ℕ ] ∣ xs ∣= n
+convert eq [] = [] , zero , ∣[]∣
+convert eq (x ∷ l) with convert eq l
+convert eq (x ∷ l) | xs , n , P with #? eq x xs
+convert eq (x ∷ l) | xs , n , P | yes p = x ∷ xs , suc n , ∣x∷L∣ P p
+convert eq (x ∷ l) | xs , n , P | no ¬p = xs , n , P
+
+convert-sound : ∀ {C} → (eq : DecEq C) → ∀ xs y → y ∈L proj₁ (convert eq xs) → y ∈L xs
+convert-sound eq [] y p = p
+convert-sound eq (x ∷ xs) y p with ∈L? eq y $ proj₁ (convert eq xs) 
+convert-sound eq (x ∷ xs) y p₁ | yes p with convert-sound eq xs y p
+convert-sound eq (x ∷ xs) y p₁ | yes p | res = there res
+convert-sound eq (x ∷ xs) y p | no ¬p with #? eq x (proj₁ (convert eq xs))
+convert-sound eq (x ∷ xs) y p₁ | no ¬p | yes p with #-lemma eq x y (proj₁ (convert eq xs)) ¬p p₁ p
+convert-sound eq (x ∷ xs) .x p₁ | no ¬p | yes p | refl = here
+convert-sound eq (x ∷ xs) y p | no ¬p₁ | no ¬p = p ↯ ¬p₁ 
+
+convert-complete : ∀ {C} → (eq : DecEq C) → ∀ xs y → y ∈L xs → y ∈L proj₁ (convert eq xs)
+convert-complete eq [] y ()
+convert-complete eq (x ∷ xs) y p with ∈L? eq y $ proj₁ (convert eq xs) | #? eq x (proj₁ (convert eq xs))
+convert-complete eq (x ∷ xs) y p₂ | yes p | yes p₁ = there p
+convert-complete eq (x ∷ xs) y p₁ | yes p | no ¬p = p
+convert-complete eq (y ∷ xs) .y here | no ¬p | yes p = here
+convert-complete eq (x ∷ xs) y (there p₁) | no ¬p | yes p = there (convert-complete eq xs y p₁)
+convert-complete eq (y ∷ xs) .y here | no ¬p | no ¬p₁ = ¬#⇒∈L eq (proj₁ (convert eq xs)) y ¬p₁
+convert-complete eq (x ∷ xs) y (there p) | no ¬p | no ¬p₁ = convert-complete eq xs y p
+
+{- Strict subset based on cardinality - easier to do well founded induction with -}
+_⊂ᶜ_ : ∀ {C} {eq : DecEq C} → List C → List C → Set
+S ⊂ᶜ T = S ⊆L T × Σ[ n ∈ ℕ ] Σ[ m ∈ ℕ ] ∣ S ∣= n × ∣ T ∣= m × n < m 
+
 {-
 open import Function
 
