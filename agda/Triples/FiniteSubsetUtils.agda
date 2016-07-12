@@ -67,9 +67,11 @@ _⊆?_ : ∀ {C : Set}{eq : DecEq C}{b1 b2 : Bool} →
        Decidable (_⊆_ {C} {eq} {b1} {b2})
 _⊆?_ {eq = eq} S T = _⊆L?_ {eq = eq} (listOf S) (listOf T)
 
+{-
 _⊂_ : ∀ {C : Set}{eq : DecEq C}{b1 b2 : Bool} →
         FiniteSubSet C eq b1 → FiniteSubSet C eq b2 → Set
 S ⊂ T = S ⊆ T × ¬ T ⊆ S 
+-}
 
 _⊂L_ : ∀ {C : Set} →
         List C → List C → Set
@@ -92,10 +94,12 @@ _Σ⊂L_ : ∀ {C : Set} →
         List C → List C → Set
 _Σ⊂L_ {C} S T = S ⊆L T × Σ[ x ∈ C ] x ∈L T × x ∉L S
 
+{-
 Σ⊂⇒⊂ : ∀ {C : Set}{eq : DecEq C}{b1 b2 : Bool} →
      (S : FiniteSubSet C eq b1) → (T : FiniteSubSet C eq b2) →
      (S Σ⊂ T) → S ⊂ T
 Σ⊂⇒⊂ S T (proj₁ , proj₂ , proj₃ , proj₄) = proj₁ , (λ x → proj₄ (x proj₂ proj₃))
+-}
 
 open import Utilities.ListsAddition -- Utilities.ListAddition
 
@@ -240,8 +244,55 @@ convert-complete eq (y ∷ xs) .y here | no ¬p | no ¬p₁ = ¬#⇒∈L eq (pro
 convert-complete eq (x ∷ xs) y (there p) | no ¬p | no ¬p₁ = convert-complete eq xs y p
 
 {- Strict subset based on cardinality - easier to do well founded induction with -}
-_⊂ᶜ_ : ∀ {C} {eq : DecEq C} → List C → List C → Set
-S ⊂ᶜ T = S ⊆L T × Σ[ n ∈ ℕ ] Σ[ m ∈ ℕ ] ∣ S ∣= n × ∣ T ∣= m × n < m 
+_⊂ᶜ_[_] : ∀ {C} → List C → List C → (DecEq C) → Set
+S ⊂ᶜ T [ eq ] = S ⊆L T × Σ[ n ∈ ℕ ] Σ[ m ∈ ℕ ] (∣ S ∣= n) × (∣ T ∣= m) × n <′ m 
+
+_⊂_ : ∀ {C : Set}{eq : DecEq C}{b1 b2 : Bool} →
+        FiniteSubSet C eq b1 → FiniteSubSet C eq b2 → Set
+_⊂_ {eq = eq} F G = listOf F ⊂ᶜ listOf G [ eq ]
+
+n≤m⇒1+n≤1+m : ∀ n m → n ≤′ m → suc n ≤′ suc m
+n≤m⇒1+n≤1+m n .n ≤′-refl = ≤′-refl
+n≤m⇒1+n≤1+m n₁ _ (≤′-step p) with n≤m⇒1+n≤1+m n₁ _ p
+n≤m⇒1+n≤1+m n₁ _ (≤′-step p) | res = ≤′-step res 
+
+1+n≤1+m⇒n≤m : ∀ n m → suc n ≤′ suc m → n ≤′ m 
+1+n≤1+m⇒n≤m n .n ≤′-refl = ≤′-refl
+1+n≤1+m⇒n≤m n zero (≤′-step ())
+1+n≤1+m⇒n≤m n (suc m) (≤′-step p) = ≤′-step (1+n≤1+m⇒n≤m n m p) 
+
+_<?_ : ∀ n m → Dec (n <′ m)
+zero <? zero = no (λ ())
+zero <? suc m = yes (aux m)
+  where aux : ∀ m → zero <′ suc m
+        aux zero = ≤′-refl
+        aux (suc m₁) = ≤′-step (aux m₁)
+suc n <? zero = no (aux n)
+  where aux : ∀ n → suc n <′ zero → ⊥
+        aux n₁ ()
+suc n <? suc m with n <? m
+suc n <? suc m | yes p = yes (n≤m⇒1+n≤1+m _ _ p)
+suc n <? suc m | no ¬p = no (λ x → ¬p (1+n≤1+m⇒n≤m (suc n) m x))
+
+_⊂?_ : ∀ {C} {eq : DecEq C} {b1 b2} → (F : FiniteSubSet C eq b1) → (G : FiniteSubSet C eq b2) → Dec (F ⊂ G)
+_⊂?_ {eq = eq} F G with _⊆L?_ {eq = eq} (listOf F) (listOf G)
+_⊂?_ {eq = eq} F G | yes p with convert eq (listOf F) | convert eq (listOf G)
+F ⊂? G | yes p | L , n , N | L' , m , M with n <? m
+F ⊂? G | yes p₁ | L , n , N | L' , m , M | yes p = yes (p₁ , n , m , {!!} , {!!} , p)
+F ⊂? G | yes p | L , n , N | L' , m , M | no ¬p = {!!}
+F ⊂? G | no ¬p = no (λ P → ¬p (proj₁ P))
+
+open import Induction.WellFounded
+
+--<-well-founded
+
+{-
+ℕ-wf : Well-founded _<′_
+ℕ-wf n = acc (aux n)
+  where aux : ∀ x y → y <′ x → Acc _<′_ y
+        aux .(suc y) y ≤′-refl = ℕ-wf y
+        aux .(suc x) y (≤′-step {x} p) = aux x y p 
+-}
 
 {-
 open import Function

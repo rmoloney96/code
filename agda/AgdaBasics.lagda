@@ -6,6 +6,10 @@ data Bool : Set where
   true : Bool 
   false : Bool
 
+myFun : Bool → Bool
+myFun true = false
+myFun false = false
+
 not : Bool -> Bool 
 not true = false 
 not false = true
@@ -20,4 +24,11 @@ succ n + m = succ (n + m)
 
 \end{code}
 
-This is not code. 
+This is not code.
+
+I can say anything I want here...
+
+\begin{code}
+-- This is code...
+
+\end{code}
