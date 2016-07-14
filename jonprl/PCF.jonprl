@@ -1,0 +1,74 @@
+||| Let's build up PCF
+
+Operator pcfF : (0).
+              ||| var   false  true  if           zero   succ   case        rec 
+[pcfF(X)] =def= [ nat + unit + unit + X * X * X + unit + X    + X * X * X + X]. 
+
+Theorem pcfF-wf : [{A:U{i}} pcfF(A) ∈ U{i}] {
+ unfold <pcfF> ; auto
+}.
+
+Operator var : (0).
+[var(N)] =def= [inl(N)].
+
+Theorem var-wf : [{A:U{i}} {N:nat} var(N) ∈ pcfF(A)]{ 
+  unfold <var pcfF> ; auto 
+}.
+
+Operator false : ().
+[false] =def= [inr(inl(<>))].
+
+Theorem false-wf : [{A:U{i}} false ∈ pcfF(A)] {
+  unfold <pcfF false> ; auto
+}.
+
+Operator true : ().
+[true] =def= [inr(inr(inl(<>)))].
+
+Theorem true-wf : [{A:U{i}} true ∈ pcfF(A)] {
+  unfold <pcfF true> ; auto
+}.
+
+Operator if : (0;0;0).
+[if(N;M;O)] =def= [inr(inr(inr(inl( <N,<M,O>> ))))].
+
+Theorem if-wf : [{A:U{i}} {M:A} {N:A} {O:A} if(M;N;O) ∈ pcfF(A)] {
+  unfold <pcfF if> ; auto
+}.
+
+Operator zip : ().
+[zip] =def= [inr(inr(inr(inr(inl(<>)))))].
+
+Theorem zip-wf : [{A:U{i}} zip ∈ pcfF(A)] {
+  unfold <pcfF zip> ; auto
+}.
+
+Operator add1 : (0).
+[add1(N)] =def= [inr(inr(inr(inr(inr(inl(N))))))]. 
+
+Theorem add1-wf : [{A:U{i}} {M:A} add1(M) ∈ pcfF(A)] {
+  unfold <pcfF add1> ; auto
+}.
+
+Operator case : (0;0;0).
+[case(N;O;P)] =def= [inr(inr(inr(inr(inr(inr(inl( <N,<O,P>> )))))))].
+
+Theorem case-wf : [{A:U{i}} {N:A} {O:A} {P:A} case(N;O;P) ∈ pcfF(A)] {
+  unfold <pcfF case> ; auto
+}.
+
+Operator rec : (0).
+[rec(N)] =def= [inr(inr(inr(inr(inr(inr(inr(N)))))))].
+
+Theorem rec-wf : [{A:U{i}} {O:A} rec(O) ∈ pcfF(A)] {
+  unfold <pcfF rec> ; auto
+}.
+
+
+Resource wf += { wf-lemma <pcfF-wf> }.
+Resource wf += { wf-lemma <true-wf> }.
+Resource wf += { wf-lemma <false-wf> }.
+Resource wf += { wf-lemma <if-wf> }.
+Resource wf += { wf-lemma <zip-wf> }.
+Resource wf += { wf-lemma <add1-wf> }.
+
