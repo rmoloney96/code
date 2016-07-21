@@ -3,7 +3,7 @@ module Example where
 
 open import IO
 open import Coinduction
-open import RDF hiding (_>>_)
+open import RDF
 open import FiniteSubset hiding (_∩_)
 open import Data.Product
 open import Data.List
@@ -22,33 +22,23 @@ Polity = ν "Pol" ((ℓ[ "name" ] Str) ⊗
 Thing : Shape
 Thing = (ℓ⟨ "thingy" ⟩ Str)
 
-DB : Database
-DB = fs-plain (("seshat:Rome" , "neighbouringPolity" , inj₁ "seshat:Rome") ∷ 
-              (("seshat:Rome" , "name" , inj₂ (s "Rome")) ∷
-              (("seshat:Rome" , "name" , inj₂ (s "That")) ∷
-              (("seshat:Rome" , "population" , inj₂ (n 1000)) ∷ 
-              (("seshat:AThing" , "thingy", inj₂ (s "Foo")) ∷ [])))))
-
-another : Database
-another = fromList ((listOf DB) ++ (listOf DB)) true
-
-test : Database
-test = (fs-plain (("seshat:Rome" , "name" , inj₂ (s "test")) ∷ []))
-     ∩ 
-       (fs-plain (("seshat:Rome" , "name" , inj₂ (s "test")) ∷ []))
+DB : Transitions
+DB = (("seshat:Rome" , "neighbouringPolity" , inj₁ "seshat:Rome") ∷ 
+     (("seshat:Rome" , "name" , inj₂ (s "Rome")) ∷
+     (("seshat:Rome" , "name" , inj₂ (s "That")) ∷
+     (("seshat:Rome" , "population" , inj₂ (n 1000)) ∷ 
+     (("seshat:AThing" , "thingy", inj₂ (s "Foo")) ∷ [])))))
 
 
-{-
 checkDB : Bool
 checkDB with checkφ DB "seshat:Rome" Polity
 checkDB | yes p = true
 checkDB | no ¬p = false
--}
 
 open import Relation.Nullary.Decidable
 open import Data.String renaming (_≟_ to eqString) hiding (_++_)
 
 main = run (♯ (putStrLn "Checking to see if Rome is a polity") >>
-            ♯ (if true -- checkDB
+            ♯ (if checkDB
                then putStrLn "A Polity Exists!"
                else putStrLn "No elements of this formula exist"))

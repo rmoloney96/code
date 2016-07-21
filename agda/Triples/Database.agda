@@ -129,7 +129,7 @@ _∈trans?_ : (x : Transition) → (L : Transitions) → Dec (x ∈ L)
 x ∈trans? S = eq2in eqTrans x S
 
 _∪_ : List X → List X → List X
-S ∪ T = S ++ T
+S ∪ T = ⟪ s ∈ (S ++ T) ∣ true ⟫ 
 
 _∩_ : List X → List X → List X
 S ∩ T = ⟪ s ∈ S ∣ ⌊ s ∈? T ⌋ ⟫

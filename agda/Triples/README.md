@@ -30,7 +30,7 @@ RDF object meets a mu-calculus specification.  We see below a
 specification of a `Polity` which shows that a polity is such that all
 of it's "name" properties are strings, that there exists a
 "population" which is a natural number and there exists a
-"neighbouringPoity" which is, itself, a `Polity`. 
+"neighbouringPolity" which is, itself, a `Polity`. 
 
 ~~~agda
 

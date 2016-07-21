@@ -6,7 +6,8 @@ open import Data.Product
 open import Data.Vec
 open import Data.Nat
 open import Relation.Nullary
-open import Relation.Binary
+open import Relation.Binary hiding (_⇒_)
+open import Data.Bool
 
 ⇒ : ∀ {n} → Vec Set (suc n) → Set
 ⇒ (A ∷ []) = A
@@ -28,3 +29,7 @@ n≤m⇒1+n≤1+m n₁ _ (≤′-step p) | res = ≤′-step res
 1+n≤1+m⇒n≤m n .n ≤′-refl = ≤′-refl
 1+n≤1+m⇒n≤m n zero (≤′-step ())
 1+n≤1+m⇒n≤m n (suc m) (≤′-step p) = ≤′-step (1+n≤1+m⇒n≤m n m p) 
+
+infix 6 _⇒_
+_⇒_ : Bool → Bool → Bool
+P ⇒ Q = not P ∨ Q

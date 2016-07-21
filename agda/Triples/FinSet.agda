@@ -187,21 +187,11 @@ module WF⊂mod (C : Set) (eq : DecEq C) where
   
   wf⊂ : Well-founded _⊂_ 
   wf⊂ = well-founded-sub wf≺
-  
-open import Data.Unit
 
-∥_∥ : ∀ {p} → {S : Set p} → Dec S → Set
-∥ yes _ ∥  = ⊤
-∥ no  _ ∥  = ⊥
+  comprehension-syntax : ∀ (S : List C) → (P : C → Bool) → List C
+  comprehension-syntax [] P = []
+  comprehension-syntax (x ∷ S) P = let l = comprehension-syntax S P
+                                    in proj₁ (dedup eq (if P x then (x ∷ l) else l))
 
-
-comprehension-syntax : ∀ {C : Set} → (S : List C) → (P : C → Bool) → List C
-comprehension-syntax [] P = []
-comprehension-syntax (x ∷ S) P = let l = comprehension-syntax S P
-                                  in if P x then (x ∷ l) else l
-
-syntax comprehension-syntax S (λ x → B) = ⟪ x ∈ S ∣ B ⟫
-
-open import Induction.WellFounded
-open import Induction.Nat
+  syntax comprehension-syntax S (λ x → B) = ⟪ x ∈ S ∣ B ⟫
 

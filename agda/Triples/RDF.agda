@@ -70,5 +70,3 @@ eqD (s o) (b x) = no (λ ())
 import Mu
 module MuMod = Mu String String D eqString eqString eqD DT ⊢ᵟ_∶_ typeDec
 open MuMod public
-
-
