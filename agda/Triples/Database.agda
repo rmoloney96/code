@@ -15,7 +15,7 @@ module Database
   where
 
 open import Relation.Binary.PropositionalEquality hiding (inspect ; [_])
-open import FiniteSubset renaming (_∪_ to _∪_fs ; _∩_ to _∩_fs) 
+--open import FiniteSubset renaming (_∪_ to _∪_fs ; _∩_ to _∩_fs) 
 open import Data.Sum renaming ( [_,_] to ⟨_,_⟩ )
 open import Data.Product
 open import Relation.Nullary
@@ -24,11 +24,12 @@ open import Data.Bool
 open import Data.List
 open import Induction.WellFounded
 open import Induction.Nat
-open import Utilities.ListProperties
+--open import Utilities.ListProperties
 open import Data.Empty
-open import FiniteSubsetUtils
+--open import FiniteSubsetUtils
+open import FinSet
 
-Triple = X × X × (X ⊎ D)
+Transition = X × X × (X ⊎ D)
 
 ,-inv₁ : ∀ {ℓ m} {A : Set ℓ} {B : Set m} {x y : A} {w z : B} →  ¬ x ≡ y →  ¬ (x , w) ≡ (y , z)
 ,-inv₁ f refl = f refl
@@ -62,18 +63,20 @@ DecEqSum eqA eqB (inj₂ y) (inj₂ y₁) | no ¬p = no (inj₂-inv ¬p)
 eqThird : DecEq (X ⊎ D)
 eqThird = DecEqSum eqX eqD
 
-eqTriple : DecEq Triple
-eqTriple = DecEqPair eqX (DecEqPair eqX eqThird)
+eqTrans : DecEq Transition
+eqTrans = DecEqPair eqX (DecEqPair eqX eqThird)
 
-Database : Set
-Database = FiniteSubSet Triple eqTriple true
+Transitions : Set
+Transitions = List Transition
 
 Subjects : Set
-Subjects = FiniteSubSet X eqX false
+Subjects = List X
 
 Objects : Set
-Objects = FiniteSubSet (X ⊎ D) eqThird false
+Objects = List (X ⊎ D)
 
+Literals : Set
+Literals = List D
 
 sub : ∀ {ℓ m n} {A : Set ℓ} {B : Set m} {C : Set n} → A × B × C → A
 sub (o , _ , _) = o
@@ -84,109 +87,52 @@ prop (_ , p , _) = p
 obj : ∀ {ℓ m n} {A : Set ℓ} {B : Set m} {C : Set n} → A × B × C → C
 obj (_ , _ , l) = l
 
-𝓓 : Database → Subjects
-𝓓 Ξ = fromList (Data.List.map sub (listOf Ξ)) false
+uri : X → X ⊎ D
+uri = inj₁
 
-𝓡 : Database → Objects
-𝓡 Ξ = fromList (Data.List.map obj (listOf Ξ)) false
+lit : D → X ⊎ D
+lit = inj₂
 
---─ : Database → Seta
-∅ : {X : Set}{eq : DecEq X}{b : Bool} → FiniteSubSet X eq b
-∅ = mzero
+∅ : ∀ {ℓ} {C : Set ℓ} → List C
+∅ = []
 
-{-
-_⊆_ : Database → Database → Set
-S ⊆ T = S / T ≡ ∅
+𝓓 : Transitions → Subjects
+𝓓 Ξ = Data.List.map sub Ξ
 
-_⊂_ : Database → Database → Set
-S ⊂ T = S / T ≡ ∅ × T / S ≢ ∅ 
--}
+𝓡ₛ : Transitions → Subjects
+𝓡ₛ Ξ = foldr (λ x r → ( ⟨ (λ u → [ u ]) , (λ l → []) ⟩ x) ++ r) [] (Data.List.map obj Ξ) 
 
-EmptyNotFull : ∀ {C} {eq} {x : C} {x₁} → fs-plain {C} {eq} (x ∷ x₁) ≢ fs-plain []
-EmptyNotFull () 
-
-_⊂?_ : Decidable (_⊂_)
-S ⊂? T with S / T
-S ⊂? T | fs-plain [] with T / S
-S ⊂? T | fs-plain [] | fs-plain [] = no (λ z → proj₂ z refl)
-S ⊂? T | fs-plain [] | fs-plain (x ∷ x₁) = yes (refl , (λ ()))
-S ⊂? T | fs-plain (x ∷ x₁) = no (λ x → EmptyNotFull (proj₁ x)) 
-
-{-
-_⊆?_fs : Decidable (_⊆_)
-S ⊆? T fs with S / T
-S ⊆? T fs | fs-plain [] = yes refl
-S ⊆? T fs | fs-plain (x ∷ x₁) = no (λ ())
+𝓡ₗ : Transitions → Literals
+𝓡ₗ Ξ = foldr (λ x r → ( ⟨ (λ u → []) , (λ l → [ l ]) ⟩ x) ++ r) [] (Data.List.map obj Ξ) 
 
 open import Data.List
-open import Data.Nat
 
-∣_∣ : Database → ℕ
-∣ x ∣ = length (listOf x)
+any-syntax = any
+all-syntax = all
 
-_≺_ : Database → Database → Set
-x ≺ y = ∣ x ∣ <′ ∣ y ∣
+syntax any-syntax (λ x → B) S = ∃[ x ∈ S ] B
+syntax all-syntax (λ x → B) S = Π[ x ∈ S ] B
 
-open Inverse-image {_<_ = _<′_} (∣_∣) renaming (well-founded to well-founded-ii-obj)
-{- The inverse image of a well founded relation is well founded. -}
-wf≺ : Well-founded _≺_
-wf≺ = well-founded-ii-obj <-well-founded
+infix 2 any-syntax
+infix 2 all-syntax
 
-⊂⇒<′ : ∀ {S T} → S ⊂ T → S ≺ T
-⊂⇒<′ {S} {T} (proj₁ , proj₂) with S / T
-⊂⇒<′ {S} {T} (proj₁ , proj₂) | fs-plain [] with T / S
-⊂⇒<′ (proj₁ , proj₂) | fs-plain [] | fs-plain [] = ⊥-elim (proj₂ proj₁)
-⊂⇒<′ (proj₁ , proj₂) | fs-plain [] | fs-plain (x ∷ x₁) = {!yes!}
-⊂⇒<′ (() , proj₂) | fs-plain (x ∷ x₁)
+_⊂_ : (S : List X) → (T : List X) → Set
+S ⊂ T = S ⊂⟨ eqX ⟩ T
 
+_⊂?_ : (S : List X) → (T : List X) → Dec (S ⊂ T)
+S ⊂? T = S ⊂⟨ eqX ⟩? T
 
-{-
-open Subrelation {A = Database} {_<₁_ = (_⊂_)} {_<₂_ =  _≺_} ⊂⇒<′
-  renaming (well-founded to well-founded-subrelation)
+_∈?_ : (x : X) → (L : List X) → Dec (x ∈ L)
+x ∈? S = eq2in eqX x S
 
-{- The sub relation of a well-founded relation is well founded -}
-wf⊂ : Well-founded _⊂_ 
-wf⊂ = well-founded-subrelation wf≺
--}
+_∈trans?_ : (x : Transition) → (L : Transitions) → Dec (x ∈ L)
+x ∈trans? S = eq2in eqTrans x S
 
-{-
-open Inverse-image {_<_ = _<′_} (∣_∣ {true} {DataTriple} {eqDataTriple}) renaming (well-founded to well-founded-ii-dat)
-{- The inverse image of a well founded relation is well founded. -}
-wf≺dat : Well-founded _≺dat_
-wf≺dat = well-founded-ii-dat <-well-founded
+_∪_ : List X → List X → List X
+S ∪ T = S ++ T
 
-open Lexicographic (_≺obj_) (λ _ → _≺dat_) renaming (well-founded to well-founded-lex ; _<_ to _≺_)
-wf≺ : Well-founded _≺_
-wf≺ = well-founded-lex wf≺obj wf≺dat
+_∩_ : List X → List X → List X
+S ∩ T = ⟪ s ∈ S ∣ ⌊ s ∈? T ⌋ ⟫
 
---correct : ∀ (p : X) → Database → Σ[ db ∈ Database ] Σ[ t ∈ X ] Σ[ s ∈ X ] (s ∈subject db → t ∈object db  → (s , p , t) ∈obj db )
---correct p (odb , ddb) = {!!} , (? , {!!})
--}
--}
-
-Σs∈_⟨s,_,t⟩∧t∈_ : Database → X → Database → Database
-Σs∈ S ⟨s, a ,t⟩∧t∈ φdb = 
-   for t ∈ φdb as true
-   do for s ∈ S as true
-      do if ⌊ eqX a (prop s) ⌋ ∧ 
-            ⌊ eqThird (obj s) (inj₁ (sub t)) ⌋
-         then return {b = true} s                                
-
-Πs∈_⟨s,_,t⟩∧t∈_ : Database → X → Database → Database
-Πs∈ S ⟨s, a ,t⟩∧t∈ φstates =
-  (Σs∈ S ⟨s, a ,t⟩∧t∈ φstates) /
-  (Σs∈ S ⟨s, a ,t⟩∧t∈ (S / φstates))
-
-Σs∈_⟨s,_,l⟩∧⊢l∶_ : Database → X → DT → Database
-Σs∈ S ⟨s, a ,l⟩∧⊢l∶ τ = for t ∈ S as true
-                        do if ⌊ eqX a (prop t) ⌋ ∧
-                              (⟨ (λ anObject → false) , (λ l → ⌊ typeDec l τ ⌋) ⟩ (obj t))
-                           then return {b = true} t
-
-Πs∈_⟨s,_,l⟩∧⊢l∶_ : Database → X → DT → Database
-Πs∈ S ⟨s, a ,l⟩∧⊢l∶ τ =
-  (Σs∈ S ⟨s, a ,l⟩∧⊢l∶ τ) / 
-  (for t ∈ S as true
-   do if ⌊ eqX a (prop t) ⌋ ∧
-         not (⟨ (λ anObject → false) , (λ l → ⌊ typeDec l τ ⌋) ⟩ (obj t))
-      then return {b = true} t)
+_̸_ : List X → List X → List X
+S ̸ T = ⟪ s ∈ S ∣ not ⌊ s ∈? T ⌋ ⟫ 

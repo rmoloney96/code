@@ -71,4 +71,10 @@ Resource wf += { wf-lemma <false-wf> }.
 Resource wf += { wf-lemma <if-wf> }.
 Resource wf += { wf-lemma <zip-wf> }.
 Resource wf += { wf-lemma <add1-wf> }.
+Resource wf += { wf-lemma <case-wf> }.
+Resource wf += { wf-lemma <rec-wf> }.
 
+Infix 20 "~>"
+Operator red :(0,0)
+[red] =def= 
+Theorem

@@ -28,7 +28,7 @@ module DBmodule = DB Atom X D eqAtom eqX eqD DT ⊢ᵟ_∶_ typeDec
 open DBmodule public
 
 Interpretation : Set
-Interpretation = Atom → Database
+Interpretation = Atom → Subjects
 
 infixl 21 _⊕_
 infixl 21 _⊗_
@@ -48,36 +48,36 @@ data Shape : Set where
   -- Negation
   -_ : Shape → Shape
 
-
+open import FinSet
 
 mutual
  
   -- Need a well foundedness proof here over the relation ⊂
   -- but this should be trivial
   {-# TERMINATING #-}
-  gfp : Atom → Shape → Interpretation → Database → Database
-  gfp x φ i T with ⟦ φ ⟧ i T
-  gfp x φ i T | T' with T' ⊂? T
-  gfp x φ i T | T' | yes p = gfp x φ (i [ x ≔ T ]) T'
-  gfp x φ i T | T' | no ¬p = T
+  fp : Atom → Shape → Interpretation → Subjects → Transitions → Subjects
+  fp x φ i S 𝓣 with ⟦ φ ⟧ i S 𝓣
+  fp x φ i S 𝓣 | S' with S' ⊂? S
+  fp x φ i S 𝓣 | S' | yes p = fp x φ (i [ x ≔ S ]) S' 𝓣
+  fp x φ i S 𝓣 | S' | no ¬p = S
   
-  _[_≔_] : Interpretation → Atom → Database → Interpretation
+  _[_≔_] : Interpretation → Atom → Subjects → Interpretation
   (i [ X ≔ T ]) Y with eqAtom X Y
   (i [ X₁ ≔ T ]) Y | yes p = T
   (i [ X₁ ≔ T ]) Y | no ¬p = i Y
 
-  ⟦_⟧ : Shape → (i : Interpretation) → Database → Database
-  ⟦ ⊥ ⟧ i S = ∅
-  ⟦ ⊤ ⟧ i S = S
-  ⟦ α⟨ a ⟩ φ ⟧ i S = Σs∈ S ⟨s, a ,t⟩∧t∈ (⟦ φ ⟧ i S)
-  ⟦ α[ a ] φ ⟧ i S = Πs∈ S ⟨s, a ,t⟩∧t∈ (⟦ φ ⟧ i S)
-  ⟦ ℓ⟨ a ⟩ τ ⟧ i S = Σs∈ S ⟨s, a ,l⟩∧⊢l∶ τ
-  ⟦ ℓ[ a ] τ ⟧ i S = Πs∈ S ⟨s, a ,l⟩∧⊢l∶ τ
-  ⟦ φ ⊕ φ₁ ⟧ i S = (⟦ φ ⟧ i S) ∪ (⟦ φ₁ ⟧ i S) 
-  ⟦ φ ⊗ φ₁ ⟧ i S = (⟦ φ ⟧ i S) ∩ (⟦ φ₁ ⟧ i S) 
-  ⟦ ν x φ ⟧ i S = gfp x φ i S
-  ⟦ v x ⟧ i S = i x 
-  ⟦ - φ ⟧ i S = S ̸ ⟦ φ ⟧ i S
+  ⟦_⟧ : Shape → (i : Interpretation) → Subjects → Transitions → Subjects
+  ⟦ ⊥ ⟧ i S 𝓣 = ∅
+  ⟦ ⊤ ⟧ i S 𝓣 = S
+  ⟦ α⟨ a ⟩ φ ⟧ i S 𝓣 = ⟪ s ∈ S ∣ ∃[ t ∈ (⟦ φ ⟧ i S 𝓣) ] ⌊ (s , a , uri t) ∈trans? 𝓣 ⌋ ⟫
+  ⟦ α[ a ] φ ⟧ i S 𝓣 = ⟪ s ∈ S ∣ Π[ t ∈ (⟦ φ ⟧ i S 𝓣) ] ⌊ (s , a , uri t) ∈trans? 𝓣 ⌋ ⟫
+  ⟦ ℓ⟨ a ⟩ τ ⟧ i S 𝓣 =  ⟪ s ∈ S ∣ ∃[ l ∈ (𝓡ₗ 𝓣) ] (⌊ (s , a , lit l) ∈trans? 𝓣 ⌋ ∧ ⌊ typeDec l τ ⌋) ⟫ 
+  ⟦ ℓ[ a ] τ ⟧ i S 𝓣 = ⟪ s ∈ S ∣ Π[ l ∈ 𝓡ₗ 𝓣 ] (⌊ (s , a , lit l) ∈trans? 𝓣 ⌋ ∧ ⌊ typeDec l τ ⌋) ⟫ 
+  ⟦ φ ⊕ φ₁ ⟧ i S 𝓣 = (⟦ φ ⟧ i S 𝓣) ∪ (⟦ φ₁ ⟧ i S 𝓣) 
+  ⟦ φ ⊗ φ₁ ⟧ i S 𝓣 = (⟦ φ ⟧ i S 𝓣) ∩ (⟦ φ₁ ⟧ i S 𝓣) 
+  ⟦ ν x φ ⟧ i S 𝓣 = fp x φ i S 𝓣
+  ⟦ v x ⟧ i S 𝓣 = i x 
+  ⟦ - φ ⟧ i S 𝓣 = 𝓓 𝓣 ̸ ⟦ φ ⟧ i S 𝓣
 
   -- Some possible extensions:
 
@@ -89,13 +89,9 @@ mutual
   --  v : Atom → Shape
   --  μ : Atom → Shape → Shape
 
-open import Utilities.ListProperties
 
-_⊢_∶_ : Database → X → Shape → Set
-Ξ ⊢ x ∶ φ = x ∈ Data.List.map sub
-                   (listOf (⟦ φ ⟧ (λ _ → Ξ) Ξ))
+_⊢_∶_ : Transitions → X → Shape → Set
+𝓣 ⊢ x ∶ φ = x ∈ ⟦ φ ⟧ (λ _ → (𝓓 𝓣)) (𝓓 𝓣) 𝓣
 
-
-checkφ : ∀ Ξ x φ → Dec ( Ξ ⊢ x ∶ φ )
-checkφ Ξ x φ with Data.List.map sub $ listOf (⟦ φ ⟧ (λ _ → Ξ) Ξ)
-checkφ Ξ x φ | lst = eq2in eqX x lst
+checkφ : ∀ 𝓣 x φ → Dec ( 𝓣 ⊢ x ∶ φ )
+checkφ 𝓣 x φ = x ∈? ⟦ φ ⟧ (λ _ → (𝓓 𝓣)) (𝓓 𝓣) 𝓣
