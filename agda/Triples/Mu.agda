@@ -22,6 +22,7 @@ open import Relation.Nullary
 open import Function
 open import Data.Bool
 open import Data.List
+open import Induction.WellFounded
 
 import Database as DB
 module DBmodule = DB Atom X D eqAtom eqX eqD DT ⊢ᵟ_∶_ typeDec
@@ -52,14 +53,14 @@ open import FinSet
 
 mutual
  
-  -- Need a well foundedness proof here over the relation ⊂
-  -- but this should be trivial
-  {-# TERMINATING #-}
+  fpWF : Atom → Shape → Interpretation → (S : Subjects) → Transitions → (Acc _⊂_ S) → Subjects
+  fpWF x φ i S 𝓣 a with ⟦ φ ⟧ i S 𝓣
+  fpWF x φ i S 𝓣 a | S' with S' ⊂? S
+  fpWF x φ i S 𝓣 (acc rs) | S' | yes p = fpWF x φ ((i [ x ≔ S ])) S' 𝓣 (rs S' p)
+  fpWF x φ i S 𝓣 a | S' | no ¬p = S
+
   fp : Atom → Shape → Interpretation → Subjects → Transitions → Subjects
-  fp x φ i S 𝓣 with ⟦ φ ⟧ i S 𝓣
-  fp x φ i S 𝓣 | S' with S' ⊂? S
-  fp x φ i S 𝓣 | S' | yes p = fp x φ (i [ x ≔ S ]) S' 𝓣
-  fp x φ i S 𝓣 | S' | no ¬p = S
+  fp x φ i S 𝓣 = fpWF x φ i S 𝓣 (wf⊂ S)
   
   _[_≔_] : Interpretation → Atom → Subjects → Interpretation
   (i [ X ≔ T ]) Y with eqAtom X Y

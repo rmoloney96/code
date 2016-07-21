@@ -163,7 +163,7 @@ open import Induction.WellFounded
         aux .(suc y) y ≤′-refl = ℕ-wf y
         aux .(suc x) y (≤′-step {x} p) = aux x y p 
 
-module WF⊆mod (C : Set) (eq : DecEq C) where
+module WF⊂mod (C : Set) (eq : DecEq C) where
 
   ∣_∣ : List C → ℕ
   ∣ S ∣ = ∣ S ∣⟨ eq ⟩ 

@@ -116,8 +116,8 @@ syntax all-syntax (λ x → B) S = Π[ x ∈ S ] B
 infix 2 any-syntax
 infix 2 all-syntax
 
-_⊂_ : (S : List X) → (T : List X) → Set
-S ⊂ T = S ⊂⟨ eqX ⟩ T
+module WF = FinSet.WF⊂mod X eqX
+open WF public
 
 _⊂?_ : (S : List X) → (T : List X) → Dec (S ⊂ T)
 S ⊂? T = S ⊂⟨ eqX ⟩? T
@@ -136,3 +136,4 @@ S ∩ T = ⟪ s ∈ S ∣ ⌊ s ∈? T ⌋ ⟫
 
 _̸_ : List X → List X → List X
 S ̸ T = ⟪ s ∈ S ∣ not ⌊ s ∈? T ⌋ ⟫ 
+
