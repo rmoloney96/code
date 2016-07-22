@@ -46,13 +46,13 @@ We can then check this against a Database (which currently must be
 given explicitly as a list), using the `checkφ` function.
 
 ~~~agda 
-DB : Database
-DB = fs-plain (("seshat:Rome" , "neighbouringPolity" , inj₁ "seshat:Rome") ∷ 
-              (("seshat:Rome" , "name" , inj₂ (s "Rome")) ∷
-              (("seshat:Rome" , "name" , inj₂ (s "That")) ∷
-              (("seshat:Rome" , "population" , inj₂ (n 1000)) ∷ 
-              (("seshat:AThing" , "thingy", inj₂ (s "Foo")) ∷ [])))))
-
+DB : Transitions
+DB = ("seshat:Rome" , "neighbouringPolity" , inj₁ "seshat:Rome") ∷ 
+     ("seshat:Rome" , "name" , inj₂ (s "Rome")) ∷
+     ("seshat:Rome" , "name" , inj₂ (s "That")) ∷
+     ("seshat:Rome" , "population" , inj₂ (n 1000)) ∷ 
+     ("seshat:Rome" , "population" , inj₂ (s "bar")) ∷ 
+     ("seshat:AThing" , "thingy", inj₂ (s "Foo")) ∷ []
 
 checkDB : Bool
 checkDB with checkφ DB "seshat:Rome" Polity

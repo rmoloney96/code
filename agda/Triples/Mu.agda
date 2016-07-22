@@ -57,8 +57,6 @@ P ⇒ Q = not P ∨ Q
 
 mutual
  
-  -- Need a well foundedness proof here over the relation ⊂
-  -- but this should be trivial
   fpWF : Atom → Shape → Interpretation → (S : Subjects) → Transitions → (Acc _⊂_ S) → Subjects
   fpWF x φ i S 𝓣 a with ⟦ φ ⟧ i S 𝓣
   fpWF x φ i S 𝓣 a | S' with S' ⊂? S
@@ -75,11 +73,11 @@ mutual
 
   ⟦_⟧ : Shape → (i : Interpretation) → Subjects → Transitions → Subjects
   ⟦ ⊥ ⟧ i S 𝓣 = ∅
-  ⟦ ⊤ ⟧ i S 𝓣 = S
-  ⟦ α⟨ a ⟩ φ ⟧ i S 𝓣 = ⟪ s ∈ S ∣ ∃[ t ∈ S ] (⌊ (s , a , uri t) ∈trans? 𝓣 ⌋ ∧ ⌊ t ∈? (⟦ φ ⟧ i S 𝓣) ⌋) ⟫
-  ⟦ α[ a ] φ ⟧ i S 𝓣 = ⟪ s ∈ S ∣ Π[ t ∈ S ] (⌊ (s , a , uri t) ∈trans? 𝓣 ⌋ ⇒ ⌊ t ∈? (⟦ φ ⟧ i S 𝓣) ⌋)  ⟫
-  ⟦ ℓ⟨ a ⟩ τ ⟧ i S 𝓣 =  ⟪ s ∈ S ∣ ∃[ l ∈ 𝓡ₗ 𝓣 ] (⌊ (s , a , lit l) ∈trans? 𝓣 ⌋ ∧ ⌊ typeDec l τ ⌋) ⟫ 
-  ⟦ ℓ[ a ] τ ⟧ i S 𝓣 = ⟪ s ∈ S ∣ Π[ l ∈ 𝓡ₗ 𝓣 ] (⌊ (s , a , lit l) ∈trans? 𝓣 ⌋ ⇒ ⌊ typeDec l τ ⌋) ⟫
+  ⟦ ⊤ ⟧ i S 𝓣 = 𝓓 𝓣
+  ⟦ α⟨ a ⟩ φ ⟧ i S 𝓣 = ⟪ s ∈ S ∣ ∃[ t ∈ S ] ⌊ (s , a , uri t) ∈trans? 𝓣 ⌋ ∧ ⌊ t ∈? (⟦ φ ⟧ i S 𝓣) ⌋ ⟫
+  ⟦ α[ a ] φ ⟧ i S 𝓣 = ⟪ s ∈ S ∣ Π[ t ∈ S ] ⌊ (s , a , uri t) ∈trans? 𝓣 ⌋ ⇒ ⌊ t ∈? (⟦ φ ⟧ i S 𝓣) ⌋ ⟫
+  ⟦ ℓ⟨ a ⟩ τ ⟧ i S 𝓣 = ⟪ s ∈ S ∣ ∃[ l ∈ 𝓡ₗ 𝓣 ] ⌊ (s , a , lit l) ∈trans? 𝓣 ⌋ ∧ ⌊ typeDec l τ ⌋ ⟫
+  ⟦ ℓ[ a ] τ ⟧ i S 𝓣 = ⟪ s ∈ S ∣ Π[ l ∈ 𝓡ₗ 𝓣 ] ⌊ (s , a , lit l) ∈trans? 𝓣 ⌋ ⇒ ⌊ typeDec l τ ⌋ ⟫
   ⟦ φ ⊕ φ₁ ⟧ i S 𝓣 = (⟦ φ ⟧ i S 𝓣) ∪ (⟦ φ₁ ⟧ i S 𝓣) 
   ⟦ φ ⊗ φ₁ ⟧ i S 𝓣 = (⟦ φ ⟧ i S 𝓣) ∩ (⟦ φ₁ ⟧ i S 𝓣) 
   ⟦ ν x φ ⟧ i S 𝓣 = fp x φ i S 𝓣
