@@ -9,10 +9,6 @@ open import Relation.Nullary
 open import Relation.Binary hiding (_⇒_)
 open import Data.Bool
 
-⇒ : ∀ {n} → Vec Set (suc n) → Set
-⇒ (A ∷ []) = A
-⇒ (A ∷ (B ∷ w)) = A → (⇒ (B ∷ w))
-
 ≡n : ∀ {n} → Vec Set (suc n) → Set
 ≡n (A ∷ []) = {x y : A} → x ≡ y
 ≡n (A ∷ (B ∷ w)) = {x y : A} → x ≡ y → (≡n (B ∷ w))
@@ -33,3 +29,4 @@ n≤m⇒1+n≤1+m n₁ _ (≤′-step p) | res = ≤′-step res
 infix 6 _⇒_
 _⇒_ : Bool → Bool → Bool
 P ⇒ Q = not P ∨ Q
+

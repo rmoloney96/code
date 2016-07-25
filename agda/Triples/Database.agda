@@ -1,4 +1,4 @@
-open import Utilities.Logic
+open import Utils
 open import Relation.Nullary.Decidable
 open import Relation.Binary
 

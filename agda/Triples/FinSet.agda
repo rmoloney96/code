@@ -14,7 +14,6 @@ open import Data.Empty
 open import Relation.Nullary
 open import Relation.Binary.PropositionalEquality hiding (inspect)
 open import Data.Nat
-open import Finiteness renaming (∣_∣ to ∣_∣listable)
 open import Relation.Nullary.Negation using () renaming (contradiction to _↯_)
 open import Function
 

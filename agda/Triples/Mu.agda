@@ -1,4 +1,5 @@
-open import Utilities.Logic
+--open import Utilities.Logic
+open import Utils
 open import Relation.Binary hiding (_⇒_)
 open import Relation.Nullary.Decidable
 
@@ -15,7 +16,6 @@ module Mu
   where
 
 open import Relation.Binary.PropositionalEquality hiding (inspect)
-open import FiniteSubset renaming (_∪_ to _∪_fs ; _∩_ to _∩_fs) 
 open import Data.Sum
 open import Data.Product
 open import Relation.Nullary
@@ -51,9 +51,6 @@ data Shape : Set where
 
 open import FinSet
 
-infixr 5 _⇒_
-_⇒_ : Bool → Bool → Bool
-P ⇒ Q = not P ∨ Q
 
 mutual
  
