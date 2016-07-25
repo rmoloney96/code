@@ -30,6 +30,9 @@ comment =
   tok '\n'                 >>= λ _ →
   return tt
 
+isnt : Char → Char → Maybe Char
+isnt x y = if x == y then nothing else just y
+
 isSpace : Char → Bool
 isSpace c = (c == ' ') ∨ (c == '\t') ∨ (c == '\n') ∨ (c == '\r')
 
@@ -37,7 +40,7 @@ dataChar : Parser Char Char _
 dataChar = sat (λ c → if isSpace c ∨ (c == '"') then nothing else just c)
 
 pointChar : Parser Char Char _
-pointChar = sat (λ c → if isSpace c ∨ (c == '>') then nothing else just c)
+pointChar = sat (isnt '>')
 
 match : String → Parser Char ⊤ _
 match str = matchAuxOne (String.toList str)
@@ -96,24 +99,29 @@ point∣lit = point >>= λ p →
           ∣ literal >>= λ l →
             return (inj₂ l)
 
-triples : Parser Char (String × String × (String ⊎ D)) _
-triples = point >>= λ p₁ →
-          whitespace >>= λ _ →
-          point >>= λ p₂ →
-          whitespace >>= λ _ →
-          point∣lit >>= λ p₃ →
-          return (p₁ , p₂ , p₃)
+triple : Parser Char (String × String × (String ⊎ D)) _
+triple = whitespace ⋆ >>= λ _ →
+         point >>= λ p₁ →
+         whitespace ⋆ >>= λ _ →
+         point >>= λ p₂ →
+         whitespace ⋆ >>= λ _ →
+         point∣lit >>= λ p₃ →
+         whitespace ⋆ >>= λ _ →
+         tok '.' >>= λ _ → 
+         return (p₁ , p₂ , p₃)
 
-ntriples : Parser Char Transitions _
-ntriples = triples ⋆
+end = match "END"
+
+triples : Parser Char Transitions _
+triples = triple + 
 
 showTransitions : Transitions → String
 showTransitions [] = ""
-showTransitions ((proj₁ , proj₂ , inj₁ x) ∷ l) = "<" ++ proj₁ ++ "> <" ++ proj₂ ++ "> <" ++ x ++ ">\n" ++
+showTransitions ((proj₁ , proj₂ , inj₁ x) ∷ l) = "<" ++ proj₁ ++ "> <" ++ proj₂ ++ "> <" ++ x ++ "> .\n" ++
                                                   showTransitions l 
-showTransitions ((proj₁ , proj₂ , inj₂ (n x)) ∷ l) = "<" ++ proj₁ ++ "> <" ++ proj₂ ++ "> \"" ++ showℕ x ++ "\"^^xsd:integer\n" ++
+showTransitions ((proj₁ , proj₂ , inj₂ (n x)) ∷ l) = "<" ++ proj₁ ++ "> <" ++ proj₂ ++ "> \"" ++ showℕ x ++ "\"^^xsd:integer .\n" ++
                                                   showTransitions l 
-showTransitions ((proj₁ , proj₂ , inj₂ (b x)) ∷ l) = "<" ++ proj₁ ++ "> <" ++ proj₂ ++ "> \"" ++ show𝔹 x ++ "\"^^xsd:boolean\n" ++
+showTransitions ((proj₁ , proj₂ , inj₂ (b x)) ∷ l) = "<" ++ proj₁ ++ "> <" ++ proj₂ ++ "> \"" ++ show𝔹 x ++ "\"^^xsd:boolean .\n" ++
                                                   showTransitions l 
-showTransitions ((proj₁ , proj₂ , inj₂ (s x)) ∷ l) = "<" ++ proj₁ ++ "> <" ++ proj₂ ++ "> " ++ x ++ "@en\n" ++
+showTransitions ((proj₁ , proj₂ , inj₂ (s x)) ∷ l) = "<" ++ proj₁ ++ "> <" ++ proj₂ ++ "> " ++ x ++ "@en .\n" ++
                                                   showTransitions l  -- 

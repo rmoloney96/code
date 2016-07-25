@@ -13,11 +13,21 @@ open import Data.Bool.Properties
 open import Data.Sum
 open import Data.List
 open import RDFParser
+open import TotalParserCombinators.BreadthFirst using (parse)
+open import Data.String
+open import Data.Maybe
+open import Function
+
+tryparse : String → Transitions
+tryparse str with parse triples (toList str)
+...          | [] = []
+...          | (h ∷ t) = h
 
 main = run (♯ readFiniteFile "output.ntp" >>= λ s → 
-            let DB = parse ntriples (String.toList s)
-            in
-            ♯ putStrLn (shows)
+            let mdb = tryparse s
+            in ♯ putStrLn (showTransitions mdb))
+
+
 {-
 Polity : Shape
 Polity = ν "Pol" ((ℓ[ "name" ] Str) ⊗
