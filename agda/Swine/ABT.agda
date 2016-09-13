@@ -371,7 +371,9 @@ mutual
 ⟨↔⟩-# : ∀ x y z a b → ⟨ x ↔ y ⟩ (⟨ x ↔ z ⟩ a) ≈α b → z # ⟨ x ↔ y ⟩ a → y # ⟨ x ↔ z ⟩ a
 ⟨↔⟩-# x y z (name x₁) b P Q with ⟨ x ↔ y ⟩ₐ x₁ | lemma↔ₐ x y x₁
 ⟨↔⟩-# x y z (name .x) b P (name# f) | .y | inj₁ (refl , refl) rewrite eq-yes x refl = name# (f ∘ sym)
-⟨↔⟩-# x y z (name .y) b P Q | .x | inj₂ (inj₁ (refl , proj₁ , refl)) = {!!}
+⟨↔⟩-# x y z (name .y) b P Q | .x | inj₂ (inj₁ (refl , proj₁ , refl)) with eq x y
+⟨↔⟩-# x y z (name .y) b P Q | .x | inj₂ (inj₁ (refl , proj₁ , refl)) | yes p = {!!}
+⟨↔⟩-# x y z (name .y) b P Q | .x | inj₂ (inj₁ (refl , proj₁ , refl)) | no ¬p = {!!}
 ⟨↔⟩-# x y z (name x₁) b P Q | e | inj₂ (inj₂ y₁) = {!!}
 ⟨↔⟩-# x y z (oper op α abts) b P Q = {!!}
 ⟨↔⟩-# x y z (x₁ · a) b P Q = {!!}
@@ -435,8 +437,11 @@ mutual
   ⟨x↔y⟩a≈αb⇒x#b x y _ _ x≢y (x·y# x₁ y#a) (bindx≈yα x₂ x₃ a≈b) | no ¬p | yes refl = refl ↯ x₁
   ⟨x↔y⟩a≈αb⇒x#b x y _ _ x≢y (x·y# {_} {y₁} x₁ y#a) (bindx≈yα {_} {y₂} x₂ x₃ a≈b) | no ¬p₁ | no ¬p with eq y y₁
   ⟨x↔y⟩a≈αb⇒x#b x y _ _ x≢y (x·y# x₁ y#a) (bindx≈yα x₂ x₃ a≈b) | no ¬p₁ | no ¬p | yes refl = refl ↯ x₁
-  ⟨x↔y⟩a≈αb⇒x#b x y _ _ x≢y (x·y# {_} {y₁} {a} x₁ y#a) (bindx≈yα {_} {y₂} x₂ x₃ a≈b) | no ¬p₂ | no ¬p₁ | no ¬p
-    rewrite ⟨↔⟩-comm y₂ y₁ (⟨ x ↔ y ⟩ a) = x·y# {!!} {!!} {-
+  ⟨x↔y⟩a≈αb⇒x#b x y _ _ x≢y (x·y# {_} {y₁} {a} x₁ y#a) (bindx≈yα {_} {y₂} x₂ x₃ a≈b) | no ¬p₂ | no ¬p₁ | no ¬p with eq x y₂
+  ⟨x↔y⟩a≈αb⇒x#b x y _ _ x≢y (x·y# {_} {y₁} {a} x₁ y#a) (bindx≈yα {_} {.x} x₂ x₃ a≈b) | no ¬p₂ | no ¬p₁ | no ¬p | yes refl = x·x# 
+  ⟨x↔y⟩a≈αb⇒x#b x y _ _ x≢y (x·y# {_} {y₁} {a} x₁ y#a) (bindx≈yα {_} {y₂} x₂ x₃ a≈b) | no ¬p₂ | no ¬p₁ | no ¬p | no ¬p₃ 
+    rewrite ⟨↔⟩-comm y₁ y₂ (⟨ x ↔ y ⟩ a) = x·y# ¬p₃ (⟨x↔y⟩a≈αb⇒x#b x y₂ _ _ ¬p₃ x₃ {!!}) -- (⟨x↔y⟩a≈αb⇒x#b x y _ _ x≢y {!!} {!!})
+{-
     rewrite ⟨↔⟩-dist y₁ y₂ x y a with ⟨ y₁ ↔ y₂ ⟩ₐ x | lemma↔ₐ y₁ y₂ x | ⟨ y₁ ↔ y₂ ⟩ₐ y | lemma↔ₐ y₁ y₂ y 
   ⟨x↔y⟩a≈αb⇒x#b x y _ _ x≢y (x·y# {_} {.y} x₁ y#a) (bindx≈yα {_} {y₂} x₂ x₃ a≈b) | no ¬p₂ | no ¬p₁ | no ¬p | e | res | .y₂ | inj₁ (refl , refl) = refl ↯ ¬p
   ⟨x↔y⟩a≈αb⇒x#b x y _ _ x≢y (x·y# {_} {.x} x₁ y#a) (bindx≈yα {_} {.y} x₂ x₃ a≈b) | no ¬p₂ | no ¬p₁ | no ¬p | e | inj₁ (refl , m) | .x | inj₂ (inj₁ (refl , r , refl)) = refl ↯ ¬p₂
