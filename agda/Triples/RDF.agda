@@ -67,6 +67,6 @@ eqD (s o) (s p) | no ¬p = no (λ seq → ¬p (sinv seq))
 eqD (s o) (n m) = no (λ ())
 eqD (s o) (b x) = no (λ ())
 
-import Mu
+import MuPlus
 module MuMod = Mu String String D eqString eqString eqD DT ⊢ᵟ_∶_ typeDec
 open MuMod public

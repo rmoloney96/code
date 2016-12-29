@@ -5,13 +5,8 @@ open import Relation.Binary
 module Database
   (Atom : Set)
   (X : Set)
-  (D : Set)
   (eqAtom : DecEq Atom)
   (eqX : DecEq X)
-  (eqD : DecEq D)
-  (DT : Set)
-  (⊢ᵟ_∶_ : D → DT → Set)
-  (typeDec : Decidable (⊢ᵟ_∶_))
   where
 
 open import Relation.Binary.PropositionalEquality hiding (inspect ; [_])
@@ -29,7 +24,7 @@ open import Data.Empty
 --open import FiniteSubsetUtils
 open import FinSet
 
-Transition = X × X × (X ⊎ D)
+Transition = X × X × X
 
 ,-inv₁ : ∀ {ℓ m} {A : Set ℓ} {B : Set m} {x y : A} {w z : B} →  ¬ x ≡ y →  ¬ (x , w) ≡ (y , z)
 ,-inv₁ f refl = f refl
@@ -60,14 +55,11 @@ DecEqSum eqA eqB (inj₂ y) (inj₂ y₁) with eqB y y₁
 DecEqSum eqA eqB (inj₂ y) (inj₂ y₁) | yes p = yes (cong inj₂ p)
 DecEqSum eqA eqB (inj₂ y) (inj₂ y₁) | no ¬p = no (inj₂-inv ¬p)
 
-Object : Set
-Object = X ⊎ D
-
-eqThird : DecEq Object
-eqThird = DecEqSum eqX eqD
+eqThird : DecEq X
+eqThird = eqX
 
 eqTrans : DecEq Transition
-eqTrans = DecEqPair eqX (DecEqPair eqX eqThird)
+eqTrans = DecEqPair eqX (DecEqPair eqX eqX)
 
 Transitions : Set
 Transitions = List Transition
@@ -76,10 +68,7 @@ Subjects : Set
 Subjects = List X
 
 Objects : Set
-Objects = List Objects
-
-Literals : Set
-Literals = List D
+Objects = List X
 
 sub : ∀ {ℓ m n} {A : Set ℓ} {B : Set m} {C : Set n} → A × B × C → A
 sub (o , _ , _) = o
@@ -90,23 +79,14 @@ prop (_ , p , _) = p
 obj : ∀ {ℓ m n} {A : Set ℓ} {B : Set m} {C : Set n} → A × B × C → C
 obj (_ , _ , l) = l
 
-uri : X → X ⊎ D
-uri = inj₁
-
-lit : D → X ⊎ D
-lit = inj₂
-
 ∅ : ∀ {ℓ} {C : Set ℓ} → List C
 ∅ = []
 
 𝓓 : Transitions → Subjects
 𝓓 Ξ = Data.List.map sub Ξ
 
-𝓡ₛ : Transitions → Subjects
-𝓡ₛ Ξ = foldr (λ x r → ( ⟨ (λ u → [ u ]) , (λ l → []) ⟩ x) ++ r) [] (Data.List.map obj Ξ) 
-
-𝓡ₗ : Transitions → Literals
-𝓡ₗ Ξ = foldr (λ x r → ( ⟨ (λ u → []) , (λ l → [ l ]) ⟩ x) ++ r) [] (Data.List.map obj Ξ) 
+𝓡 : Transitions → Subjects
+𝓡 Ξ = Data.List.map obj Ξ
 
 open import Data.List
 
@@ -119,32 +99,8 @@ syntax all-syntax (λ x → B) S = Π[ x ∈ S ] B
 infix 2 any-syntax
 infix 2 all-syntax
 
-module WF = FinSet.WF⊂mod X eqX
-open WF public
-
-_⊂?_ : (S : List X) → (T : List X) → Dec (S ⊂ T)
-S ⊂? T = S ⊂⟨ eqX ⟩? T
-
-_∈?_ : (x : X) → (L : List X) → Dec (x ∈ L)
-x ∈? S = eq2in eqX x S
-
 _∈trans?_ : (x : Transition) → (L : Transitions) → Dec (x ∈ L)
 x ∈trans? S = eq2in eqTrans x S
-
-_∪_ : List X → List X → List X
-S ∪ T = ⟪ s ∈ (S ++ T) ∣ true ⟫ 
-
-_∩_ : List X → List X → List X
-S ∩ T = ⟪ s ∈ S ∣ ⌊ s ∈? T ⌋ ⟫
-
-_̸_ : List X → List X → List X
-S ̸ T = ⟪ s ∈ S ∣ not ⌊ s ∈? T ⌋ ⟫ 
-
-
-open import Algebra
-open import Level
-import Algebra.Monoid-solver
-module LM = Monoid (monoid X)
 
 {-
 comprehension-id : ∀ S → ⟪ s ∈ S ∣ true ⟫ ⊆ S

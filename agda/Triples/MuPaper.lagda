@@ -113,12 +113,62 @@ Trinity College Dublin}
 %% 7. (NB most impt q) What is the key benefit for readers?(25 words)
 %% 8. What remains unresolved (no word limit)
 
-\begin{abstract}
-Provided that we view triple-stores and linked data as transition systems then a number of well studied calculi can be used to specify properties of these graphs. A very expressive language of this type is the Modal μ-calculus.  We have implemented a denotational semantics of μ-calculus formulae. This can be used either as a query-language, finding all URIs which meet some formula, or as a {\em type checker}, which tells us if a given URI satisfies the formula of interest. This implementation was
-\end{abstract}
+\begin{abstract} The Linked Data community has made use of storage
+formats which are abstractly representations of labelled
+multidigraphs. In order to constrain or check the properties of these graphs
+various techniques have been used including approaches such as OWL,
+based on description logics, and SHACL which is a more constraint
+based approach.
+
+Practitioners have found that for certain data storage and
+data-quality needs, the constraint based approach is more
+natural. Since finite graphs can be viewed as a labelled transition
+system we can make use of the well studied Modal μ-calculus to provide
+succinct descriptions of graph properties with a constraint based
+approach. We demonstrate an implementation of an interpreter for the
+Modal μ-calculus in the Agda proof-assistant which functions over RDF
+triples and literals. The language can be used either as a query
+language, showing all subject URIs which satisfy some formula, or as a
+checker which determines whether some URI satisfies a
+formula.\end{abstract}
 
 \section{Introduction}
 
+Triple stores present a database-like storage solution for Linked
+Data. When we have already accumulated some fragment of the web of
+data, it can be useful to reason about this data such that we can
+check for consistency or data quality. Such applications however are
+not well suited to open-world interpretations of data using ontology
+modelling languages such as OWL.  Instead, in these cases, reasoning
+is more naturally done using constraint based approaches which take a
+closed-world view of data. Practitioners in the field have developed
+SHACL as an answer to the need for such a language.
+
+The Modal μ-calculus can describe properties of labelled transition
+systems with a concise and expressive language. Since labelled
+transition systems are formally equivalent to labelled graphs, these
+approaches can be repurposed for the specification of properties and
+constraints for graphs.
+
+
+We
+show that SHACL .
+
+However, practioners have
+recognised the need for constraint languages for triple stores. For
+certain industry and applications
+
+
+Once data is being evaluated
+and queried it is no longer as useful to take an {\em open world }
+view on data.
+
+For instance, cardinality has a very weak meaning when interpreted as
+open world.
+
+
+For this reason, languages such as SHACL have been developed in order
+to ensure that 
 
 
 \section{Acknowledgement}

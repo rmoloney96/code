@@ -28,11 +28,10 @@ main = run (♯ readFiniteFile "output.ntp" >>= λ s →
             in ♯ putStrLn (showTransitions mdb))
 
 
-{-
 Polity : Shape
 Polity = ν "Pol" ((ℓ[ "name" ] Str) ⊗
                   (ℓ⟨ "population" ⟩ Natural) ⊗
-                  (α⟨ "neighbouringPolity" ⟩ (v "Pol")))
+                  ((α⟨ "neighbouringPolity" ⟩ (v "Pol")) has 1))
 
 Thing : Shape
 Thing = (ℓ⟨ "thingy" ⟩ Str)
@@ -65,4 +64,3 @@ main = run (♯ (putStrLn "Checking to see if Rome is a polity") >>
             ♯ (if checkCarthage
                then putStrLn "Carthage is a Polity!"
                else putStrLn "No elements of this formula exist"))
--}
