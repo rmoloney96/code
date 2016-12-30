@@ -14,9 +14,8 @@ the the power set of a set U the following hold:
 
 ~~~
 
-f(X) ≡ ⟦ φ ⟧(X)
-
 X ⊆ Y → ⟦ φ ⟧(X) ⊆ ⟦ φ ⟧(Y)
+
 ~~~
 
 With this fact we have well defined fixed points such that: 
@@ -31,9 +30,11 @@ In order to define show montonicity, we also need antitonicity as negation
 will induce an inversion of the principle such that: 
 
 ~~~
+
 (∀ X Y → Y ⊆ X → ⟦ φ ⟧(X) ⊆ ⟦ φ ⟧(Y))
  → 
 (∀ X Y → X ⊆ Y → ⟦ ¬φ ⟧(X) ⊆ ⟦ ¬φ ⟧(Y))
+
 ~~~
 
 In order to show montonicity and antitonicity we can impose a
@@ -48,7 +49,9 @@ The Polarity of a term gives a set of all variables (from 𝓥) which occur
 in a positive context and all variables in a negative context for a given term. 
 
 ~~~
+
 Polarity : Φ → 𝒫(𝓥) → 𝒫(𝓥) → Set
+
 ~~~
 
 Since it is possible to have variables in a mixed polarity (both
@@ -57,7 +60,9 @@ usefully be defined as a polarity in which the variable is not in a
 negative poliarity for the formaule.
 
 ~~~
+
 Positive x φ ≔ Polarity φ 𝓟 𝓝 ∧ x ∉ 𝓝
+
 ~~~
 
 Given a positive formulae φ we can ensure monotonicity and thereby
