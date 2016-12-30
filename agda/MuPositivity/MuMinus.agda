@@ -109,6 +109,9 @@ mutual
 
   𝓥 : Predicate → Subjects → Subjects
   𝓥 f S = ⟪ s ∈ S ∣ f s ⟫
+
+  𝓤 : Transitions → Subjects
+  𝓤 𝓣 = 𝓓 𝓣 ∪ 𝓡 𝓣 
   
   fpWF : Atom → Shape → Interpretation → (S : Subjects) → Transitions → (Acc _⊂_ S) → Subjects
   fpWF x φ i S 𝓣 a with ⟦ φ ⟧ i S 𝓣
@@ -130,7 +133,7 @@ mutual
   ⟦ φ ⊗ φ₁ ⟧ i S 𝓣 = (⟦ φ ⟧ i S 𝓣) ∩ (⟦ φ₁ ⟧ i S 𝓣)
   ⟦ μ x φ ⟧ i S 𝓣 = fp x φ i S 𝓣
   ⟦ v x ⟧ i S 𝓣 = i x 
-  ⟦ - φ ⟧ i S 𝓣 = 𝓓 𝓣 ̸ ⟦ φ ⟧ i S 𝓣
+  ⟦ - φ ⟧ i S 𝓣 = 𝓤 𝓣 ̸ ⟦ φ ⟧ i S 𝓣
 
 open Positivity
 
@@ -149,9 +152,9 @@ mutual
     WFX.IntersectionLaw (Monotone i S 𝓣 X Y a s (NotInUnionLeft n₂ nin) pos sub)
                         (Monotone i S 𝓣 X Y a s₁ (NotInUnionRight n₁ nin) pos₁ sub)
   Monotone i S 𝓣 X Y a (μ x s) nin (Mu pos x₁) sub = {!!}
-  Monotone i S 𝓣 X Y a (- s) nin (Not pos) sub with Antitone i S 𝓣 X Y a s nin pos sub
-  Monotone i S 𝓣 X Y a (- s) nin (Not pos) sub | res = λ x inX → {!!}
-
+  Monotone i S 𝓣 X Y a (- s) nin (Not pos) sub =
+    WFX.NegationLaw (𝓤 𝓣) (Antitone i S 𝓣 X Y a s nin pos sub)
+  
   {- A ⊆ B → C ⊆ D → A ∩ C ⊆ B ∩ D -}
   {- A ⊆ B → (S / A) ⊆ (S / B) -}
   
@@ -159,13 +162,18 @@ mutual
     (a : Atom) → (φ : Shape) → a ∉ p → Polarity φ p n → X ⊆ Y →
     ---------------------------------------------------
     ⟦ φ ⟧ (i [ a ≔ Y ]) S 𝓣 ⊆ ⟦ φ ⟧ (i [ a ≔ X ]) S 𝓣
-  Antitone i S 𝓣 X₁ Y a (v x) nip Var sub = {!!}
-  Antitone i S 𝓣 X₁ Y a (P x) nip pos sub = {!!}
-  Antitone i S 𝓣 X₁ Y a (α[ a₁ ] s) nip pos sub = {!!}
-  Antitone i S 𝓣 X₁ Y a (s ⊗ s₁) nip pos sub = {!!}
-  Antitone i S 𝓣 X₁ Y a (μ x s) nip pos sub = {!!}
-  Antitone i S 𝓣 X₁ Y a (- s) nip pos sub = {!!}  
-
+  Antitone i S 𝓣 X Y a (v x) nip Var sub with eqAtom a x
+  Antitone i S 𝓣 X Y x (v .x) nip Var sub | yes refl = ⊥-elim $ nip here
+  Antitone i S 𝓣 X Y a (v x) nip Var sub | no ¬p = λ x₁ z → z
+  Antitone i S 𝓣 X Y a (P x) nip pos sub = λ x₁ z → z
+  Antitone i S 𝓣 X Y a (α[ a₁ ] s) nip pos sub = {!!}
+  Antitone i S 𝓣 X Y a (s ⊗ s₁) nip (And {.s} {.s₁} {p₁} {p₂} {n₁} {n₂} pos pos₁) sub =
+    WFX.IntersectionLaw (Antitone i S 𝓣 X Y a s (NotInUnionLeft p₂ nip) pos sub)
+                        (Antitone i S 𝓣 X Y a s₁ (NotInUnionRight p₁ nip) pos₁ sub) 
+  Antitone i S 𝓣 X Y a (μ x s) nip pos sub = {!!}
+  Antitone i S 𝓣 X Y a (- s) nip (Not pos) sub =
+    WFX.NegationLaw (𝓤 𝓣) (Monotone i S 𝓣 X Y a s nip pos sub)
+    
 --a ⟦ φ ⟧ i S 𝓣  
 --Monotonic s f = ?
 

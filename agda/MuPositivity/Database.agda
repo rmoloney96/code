@@ -22,7 +22,8 @@ open import Induction.Nat
 --open import Utilities.ListProperties
 open import Data.Empty
 --open import FiniteSubsetUtils
-open import FinSet
+--open import FinSet
+open import Membership
 
 Transition = X × X × X
 

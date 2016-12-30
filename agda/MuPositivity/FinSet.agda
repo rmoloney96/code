@@ -16,143 +16,7 @@ open import Relation.Nullary.Negation using () renaming (contradiction to _↯_)
 open import Function
 open import Data.Unit
 open import Data.Sum
-
-data _∈_  {C : Set} : (x : C) → (L : List C) → Set where
-  here : ∀ {x L} → x ∈ (x ∷ L)
-  there : ∀ {x y L} → x ∈ L → x ∈ (y ∷ L)
-
-_∉_ : ∀ {C : Set} → C → List C → Set
-x ∉ S = x ∈ S → ⊥
-
-eq2in : ∀ {C : Set} → (eq : DecEq C) → (x : C) → (L : List C) → Dec (x ∈ L)
-eq2in eq₁ x [] = no (λ ())
-eq2in eq₁ x (x₁ ∷ L) with eq2in eq₁ x L
-eq2in eq₁ x (x₁ ∷ L) | yes p = yes (there p)
-eq2in eq₁ x (x₁ ∷ L) | no ¬p with eq₁ x x₁
-eq2in eq₁ x (.x ∷ L) | no ¬p | yes refl = yes here
-eq2in eq₁ x (x₁ ∷ L) | no ¬p₁ | no ¬p = no (aux ¬p₁ ¬p)
-  where aux : ∀ {C} {x x₁ : C} {L} → x ∉ L → x ≢ x₁ → x ∉ (x₁ ∷ L)
-        aux p q here = q refl
-        aux p q (there r) = p r
-
---∈? : ∀ {X} (eq : DecEq X}} (x : X) S → Dec (x ∈ S)
---∈? eq x S = eq2in eq x S
-
-DecIn : ∀ (X : Set) → Set
-DecIn X = ∀ (x : X) (L : List X) → Dec (x ∈ L)
-
-data _#_ {C} : C → List C → Set where
-  []# : ∀ {x} → x # [] 
-  snoc# : ∀ {x y L} → x # L → y ≢ x → x # (y ∷ L)
-
-#? : ∀ {C : Set} (eq : DecEq C) → Decidable (_#_ {C})
-#? eq x [] = yes []#
-#? eq x₁ (x ∷ L) with #? eq x₁ L 
-#? eq x₁ (x ∷ L) | yes p with eq x x₁
-#? eq x₁ (.x₁ ∷ L) | yes p₁ | yes refl = no (λ {(snoc# L#x₁ q) → q refl}) 
-#? eq x₁ (x ∷ L) | yes p | no ¬p = yes (snoc# p ¬p)
-#? eq x₁ (x ∷ L) | no ¬p = no (λ { (snoc# L#x₁ q) → ¬p L#x₁})
-
-∉⇒# : ∀ {C} → (eq : DecEq C) → ∀ xs (x : C) → x ∉ xs → x # xs
-∉⇒# eq [] x p = []#
-∉⇒# eq (x ∷ xs) x₁ p with eq x₁ x
-∉⇒# eq (x ∷ xs) .x p₁ | yes refl = ⊥-elim (p₁ here)
-∉⇒# eq (x ∷ xs) x₁ p | no ¬p with ∉⇒# eq xs x₁ (λ z → p (there z))
-∉⇒# eq (x ∷ xs) x₁ p | no ¬p | q = snoc# q (¬p ∘ sym)
-
-#-lemma : ∀ {C} → (eq : DecEq C) → ∀ (x y : C) xs → y ∉ xs → y ∈ (x ∷ xs) → x # xs → x ≡ y
-#-lemma eq x y xs p q r with ∉⇒# eq xs y p
-#-lemma eq y .y xs p here r | res = refl
-#-lemma eq x y xs p (there q) r | res = q ↯ p
-
-#-lemma₁ : ∀ {C} → (eq : DecEq C) → ∀ (x y : C) xs → x # xs → (x # (y ∷ xs) → ⊥) → x ≡ y
-#-lemma₁ eq x y xs p q with eq x y 
-#-lemma₁ eq x .x xs p₁ q | yes refl = refl
-#-lemma₁ eq x y xs p q | no ¬p = let h = snoc# p (¬p ∘ sym) in h ↯ q
-
-¬#⇒∈ : ∀ {C} → (eq : DecEq C) → ∀ xs (x : C) → (x # xs → ⊥) → x ∈ xs
-¬#⇒∈ eq [] x p = ⊥-elim (p []#)
-¬#⇒∈ eq (x ∷ xs) x₁ p with #? eq x₁ xs 
-¬#⇒∈ eq (x ∷ xs) x₁ p₁ | yes p with #-lemma₁ eq x₁ x xs p p₁
-¬#⇒∈ eq (x ∷ xs) .x p₁ | yes p | refl = here
-¬#⇒∈ eq (x ∷ xs) x₁ p | no ¬p with ¬#⇒∈ eq xs x₁ ¬p
-¬#⇒∈ eq (x ∷ xs) x₁ p | no ¬p | res = there res
-
-_⊆_ : ∀ {C : Set} (xs ys : List C) → Set
-S ⊆ T = ∀ x → x ∈ S → x ∈ T
-
-_⊆⟨_⟩?_ : ∀ {C : Set} (xs : List C) (eq : DecEq C) (ys : List C) → Dec (xs ⊆ ys)
-[] ⊆⟨ eq ⟩? T = yes (λ x → λ ())
-(x ∷ S) ⊆⟨ eq ⟩? T with S ⊆⟨ eq ⟩? T
-(x ∷ S) ⊆⟨ eq ⟩? T | yes p with eq2in eq x T
-(x ∷ S) ⊆⟨ eq ⟩? T | yes p₁ | yes p = yes (λ x₁ x₂ → aux p x₂ p₁)
-  where aux : ∀ {C : Set} {T S : List C} {x y : C} → x ∈ T → y ∈ (x ∷ S) → S ⊆ T → y ∈ T
-        aux P here R = P
-        aux P (there Q) R = R _ Q
-(x ∷ S) ⊆⟨ eq ⟩? T | yes p | no ¬p = no (λ z → ¬p (z x here))
-(x ∷ S) ⊆⟨ eq ⟩? T | no ¬p = no (λ z → ¬p (λ x₁ z₁ → z x₁ (there z₁)))
-
-_≈_ : ∀ {C : Set} (xs ys : List C) → Set
-S ≈ T = S ⊆ T × T ⊆ S
-
-data NoDup {C : Set} : List C → Set where
-  [] : NoDup []
-  _∷_ : ∀ {x L} → x # L → NoDup L → NoDup (x ∷ L)
-
-dedup : ∀ {C : Set} → (eq : DecEq C) → (L : List C) → Σ[ S ∈ List C ] NoDup S
-dedup eq [] = [] , []
-dedup eq (x ∷ L) with dedup eq L
-dedup eq (x ∷ L) | L' , P with #? eq x L'
-dedup eq (x ∷ L) | L' , P | yes p = x ∷ L' , p ∷ P
-dedup eq (x ∷ L) | L' , P | no ¬p = L' , P
-
-dedup-sound : ∀ {C} → (eq : DecEq C) → ∀ xs y → y ∈ proj₁ (dedup eq xs) → y ∈ xs
-dedup-sound eq [] y y∈dedup = y∈dedup
-dedup-sound eq (x ∷ xs) y y∈dedup with dedup eq xs | dedup-sound eq xs y
-dedup-sound eq (x ∷ xs) y y∈dedup | S , P | Q with #? eq x S
-dedup-sound eq (y ∷ xs) .y here | S , P | Q | yes p = here
-dedup-sound eq (x ∷ xs) y (there y∈dedup) | S , P | Q | yes p = there (Q y∈dedup)
-dedup-sound eq (x ∷ xs) y y∈dedup | S , P | Q | no ¬p = there (Q y∈dedup)
-
-dedup-complete : ∀ {C} → (eq : DecEq C) → ∀ xs y → y ∈ xs → y ∈ proj₁ (dedup eq xs)
-dedup-complete eq [] y y∈xs = y∈xs
-dedup-complete eq (x ∷ xs) y y∈xs with dedup eq xs | dedup-complete eq xs y 
-dedup-complete eq (x ∷ xs) y y∈xs | S , P | Q with #? eq x S
-dedup-complete eq (y ∷ xs) .y here | S , P | Q | yes p = here
-dedup-complete eq (x ∷ xs) y (there y∈xs) | S , P | Q | yes p = there (Q y∈xs)
-dedup-complete eq (y ∷ xs) .y here | S , P | Q | no ¬p = ¬#⇒∈ eq S y ¬p
-dedup-complete eq (x ∷ xs) y (there y∈xs) | S , P | Q | no ¬p = Q y∈xs
-
-dedup-≈ : ∀ {C} → ∀ xs (eq : DecEq C) → proj₁ (dedup eq xs) ≈ xs
-dedup-≈ xs eq = dedup-sound eq xs , dedup-complete eq xs 
-
-∣_∣⟨_⟩ : {C : Set} → List C → (eq : DecEq C) → ℕ
-∣ S ∣⟨ eq ⟩ = length (proj₁ (dedup eq S))
-
---open import Data.Nat
-
-_≺⟨_⟩_ : {C : Set} → List C → (eq : DecEq C) → List C → Set
-S ≺⟨ eq ⟩ T = ∣ S ∣⟨ eq ⟩ <′ ∣ T ∣⟨ eq ⟩
-
-_⊂⟨_⟩_ : {C : Set} → List C → (eq : DecEq C) → List C → Set
-S ⊂⟨ eq ⟩ T = S ⊆ T × S ≺⟨ eq ⟩ T
-
-_<?_ : ∀ n m → Dec (n <′ m)
-zero <? zero = no (λ ())
-zero <? suc m = yes (aux m)
-  where aux : ∀ m → zero <′ suc m
-        aux zero = ≤′-refl
-        aux (suc m₁) = ≤′-step (aux m₁)
-suc n <? zero = no (λ ())
-suc n <? suc m with n <? m
-suc n <? suc m | yes p = yes (n≤m⇒1+n≤1+m _ _ p)
-suc n <? suc m | no ¬p = no (λ x → ¬p (1+n≤1+m⇒n≤m (suc n) m x))
-
-_⊂⟨_⟩?_ : {C : Set} → (S : List C) → (eq : DecEq C) → (T : List C) → Dec (S ⊂⟨ eq ⟩ T)
-S ⊂⟨ eq ⟩? T with S ⊆⟨ eq ⟩? T | ∣ S ∣⟨ eq ⟩ <? ∣ T ∣⟨ eq ⟩
-S ⊂⟨ eq ⟩? T | yes p | yes p₁ = yes (p , p₁)
-S ⊂⟨ eq ⟩? T | yes p | no ¬p = no (¬p ∘ proj₂)
-S ⊂⟨ eq ⟩? T | no ¬p | res₂ = no (¬p ∘ proj₁)
+open import Membership
 
 open import Induction.WellFounded
 
@@ -289,8 +153,43 @@ module WF⊂mod (C : Set) (eq : DecEq C) where
        in let x∈D = C⊆D x x∈C
            in BothIntersection x∈B x∈D 
 
---  NegationLaw : ∀ {S A B} → A ⊆ S → B ⊆ S → A ⊆ B → (S ̸ A) ⊆ (S ̸ B)
---  NegationLaw {[]} A⊆S B⊆S A⊆B = {!!}
---  NegationLaw {x ∷ S} A⊆S B⊆S A⊆B = {!!}
+  LessEmptyIsEmpty : ∀ {A : List C} → A ⊆ [] → A ≡ []
+  LessEmptyIsEmpty {[]} p = refl
+  LessEmptyIsEmpty {x ∷ A} p with p x here
+  LessEmptyIsEmpty {x ∷ A} p | ()
+
+  NegationLaw : ∀ S {A B} → A ⊆ B → (S ̸ B) ⊆ (S ̸ A)
+  NegationLaw [] A⊆B x x∈S̸B = x∈S̸B
+  NegationLaw (x ∷ S) {A} {B} A⊆B with x ∈? A
+  NegationLaw (x ∷ S) {A} {B} A⊆B | yes p with A⊆B x p
+  NegationLaw (x ∷ S) {A} {B} A⊆B | yes p | res with x ∈? B
+  NegationLaw (x ∷ S) A⊆B | yes p₁ | res | yes p = NegationLaw S A⊆B
+  NegationLaw (x ∷ S) A⊆B | yes p | res | no ¬p = res ↯ ¬p
+  NegationLaw (x ∷ S) {A} {B} A⊆B | no ¬p with x ∈? B
+  NegationLaw (x ∷ S) A⊆B | no ¬p | yes p = λ y y∈S̸B → there $ NegationLaw S A⊆B y y∈S̸B
+  NegationLaw (x ∷ S) A⊆B | no ¬p₁ | no ¬p with NegationLaw S A⊆B
+  NegationLaw (x ∷ S) A⊆B | no ¬p₁ | no ¬p | res = λ y y∈S̸B → hereOrThere S A⊆B y∈S̸B
+    where hereOrThere : ∀ S {A B x y} → A ⊆ B → y ∈ (x ∷ (S ̸ B)) → y ∈ (x ∷ (S ̸ A))
+          hereOrThere S A⊆B here = here
+          hereOrThere S A⊆B (there y∈S̸B) = there $ NegationLaw S A⊆B _ y∈S̸B
+
+  open import Database
+  {-
+  _∈trans?_ : (x : Transition) → (L : Transitions) → Dec (x ∈ L)
+  x ∈trans? S = eq2in eqTrans x S
+  -} 
+  ComprehensionLaw : ∀ {S A B a} → A ⊆ B → (comprehension-syntax S (λ s → (all (λ t → ⌊ (s , a , t) ∈trans? 𝓣 ⌋ ⇒ ⌊ t ∈? A ⌋) S))) ⊆ (comprehension-syntax S (λ s → all (λ t → ⌊ (s , a , t) ∈trans? 𝓣 ⌋ ⇒ ⌊ t ∈? A ⌋) S))
+  ComprehensionLaw A⊆B = ?
+
+{-
+  ComprehensionLaw : ∀ {S A B} → A ⊆ B →
+   ⟪ s ∈ S ∣ Π[ t ∈ S ] ⌊ (s , a , t) ∈trans? 𝓣 ⌋ ⇒ ⌊ t ∈? A ⌋ ⟫ ⊆
+   ⟪ s ∈ S ∣ Π[ t ∈ S ] ⌊ (s , a , t) ∈trans? 𝓣 ⌋ ⇒ ⌊ t ∈? B ⌋ ⟫
+  ComprehensionLaw A⊆B = ?
+mbda
+-}
 
 
+-- All subsets are drawn from the bounding set U
+--module BoundingSet (C : Set) (eq : DecEq C) (U : List C) where
+  
