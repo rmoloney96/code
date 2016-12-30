@@ -5,13 +5,14 @@ open import Relation.Nullary.Decidable
 
 module MuMinus
   (Atom : Set)
-  (X : Set)
+  (C : Set)
   (D : Set)
   (eqAtom : DecEq Atom)
-  (eqX : DecEq X)
+  (eqC : DecEq C)
   where
 
 open import Relation.Binary.PropositionalEquality hiding (inspect ; [_])
+open import Relation.Nullary.Negation using () renaming (contradiction to _↯_)
 open import Data.Sum
 open import Data.Product
 open import Relation.Nullary
@@ -26,26 +27,24 @@ open import FinSet
 open import Membership
 
 import Database as DB
-module DBmodule = DB Atom X eqAtom eqX
+module DBmodule = DB Atom C eqAtom eqC
 open DBmodule public
 
 Interpretation : Set
 Interpretation = Atom → Subjects
 
 Predicate : Set
-Predicate = X → Bool
+Predicate = C → Bool
 
 
 infixl 21 _⊗_
 data Shape : Set where
   v : Atom → Shape
   P : Predicate → Shape
-  α[_]_ : (a : X) → Shape → Shape
+  α[_]_ : (a : C) → Shape → Shape
   _⊗_ : Shape → Shape → Shape
   --_has_ : Shape → ℕ → Shape
-  -- Loops
-  μ : Atom → Shape → Shape
-  -- Negation
+  ν : Atom → Shape → Shape
   -_ : Shape → Shape
 
 
@@ -65,7 +64,7 @@ module Positivity where
   fvs (P x) = []
   fvs (α[ a ] s) = fvs s
   fvs (s ⊗ s₁) = fvs s ∪ fvs s₁
-  fvs (μ x s) = fvs s ⊸ x
+  fvs (ν x s) = fvs s ⊸ x
   fvs (- s) = fvs s
 
   polarities : Shape → List Atom × List Atom ⊎ ⊤
@@ -76,11 +75,11 @@ module Positivity where
   polarities (s ⊗ s₁) | inj₁ (p₁ , n₁) | inj₁ (p₂ ,  n₂) = inj₁ $ p₁ ∪ p₂ , n₁ ∪ n₂
   polarities (s ⊗ s₁) | inj₁ x | inj₂ tt = inj₂ tt
   polarities (s ⊗ s₁) | inj₂ tt | res₂ = inj₂ tt 
-  polarities (μ x s) with polarities s
-  polarities (μ x s) | inj₁ (p , n) with x ∈? n
-  polarities (μ x s) | inj₁ (p , n) | yes q = inj₂ tt 
-  polarities (μ x s) | inj₁ (p , n) | no ¬q = inj₁ (p ⊸ x , n)
-  polarities (μ x s) | inj₂ tt = inj₂ tt
+  polarities (ν x s) with polarities s
+  polarities (ν x s) | inj₁ (p , n) with x ∈? n
+  polarities (ν x s) | inj₁ (p , n) | yes q = inj₂ tt 
+  polarities (ν x s) | inj₁ (p , n) | no ¬q = inj₁ (p ⊸ x , n)
+  polarities (ν x s) | inj₂ tt = inj₂ tt
   polarities (- s) with polarities s
   polarities (- s) | inj₁ (p , n) = inj₁ (n , p)
   polarities (- s) | inj₂ y = inj₂ tt
@@ -97,88 +96,101 @@ module Positivity where
     Prop : ∀ {p} → Polarity (P p) [] []
     Alpha : ∀ {s a p n} → Polarity s p n → Polarity (α[ a ] s) p n
     And : ∀ {s₁ s₂ p₁ p₂ n₁ n₂} → Polarity s₁ p₁ n₁ → Polarity s₂ p₂ n₂ → Polarity (s₁ ⊗ s₂) (p₁ ∪ p₂) (n₁ ∪ n₂)
-    Mu : ∀ {x s p n} → Polarity s p n → x ∉ n → Polarity (μ x s) (p ⊸ x) n
+    Nu : ∀ {x s p n} → Polarity s p n → x ∉ n → Polarity (ν x s) (p ⊸ x) n
     Not : ∀ {s p n} → Polarity s p n → Polarity (- s) n p
   
   PositiveIn : Atom → Shape → Set
   PositiveIn a s = ∀ {a p n} → a ∉ n → Polarity s p n
 
-module WFX = FinSet.WF⊂mod X eqX
+module WFX = FinSet.WF⊂mod C eqC
 open WFX hiding (NotInUnionLeft ; NotInUnionRight)
 
-mutual
+module ModalTransitionSystem (𝓣 : Transitions) where
 
-  𝓥 : Predicate → Subjects → Subjects
-  𝓥 f S = ⟪ s ∈ S ∣ f s ⟫
+  S : Subjects
+  S = 𝓓 𝓣 ∪ 𝓡 𝓣 
+   
+  𝓥 : Predicate → Subjects
+  𝓥 f = ⟪ s ∈ S ∣ f s ⟫
 
-  𝓤 : Transitions → Subjects
-  𝓤 𝓣 = 𝓓 𝓣 ∪ 𝓡 𝓣 
-  
-  fpWF : Atom → Shape → Interpretation → (S : Subjects) → Transitions → (Acc _⊂_ S) → Subjects
-  fpWF x φ i S 𝓣 a with ⟦ φ ⟧ i S 𝓣
-  fpWF x φ i S 𝓣 a | S' with S' ⊂? S
-  fpWF x φ i S 𝓣 (acc rs) | S' | yes p = fpWF x φ ((i [ x ≔ S ])) S' 𝓣 (rs S' p)
-  fpWF x φ i S 𝓣 a | S' | no ¬p = S
-
-  fp : Atom → Shape → Interpretation → Subjects → Transitions → Subjects
-  fp x φ i S 𝓣 = fpWF x φ i S 𝓣 (wf⊂ S)
-  
   _[_≔_] : Interpretation → Atom → Subjects → Interpretation
   (i [ X ≔ T ]) Y with eqAtom X Y
   (i [ X₁ ≔ T ]) Y | yes p = T
   (i [ X₁ ≔ T ]) Y | no ¬p = i Y
 
-  ⟦_⟧ : Shape → (i : Interpretation) → Subjects → Transitions → Subjects
-  ⟦ P p ⟧ i S 𝓣 = 𝓥 p S 
-  ⟦ α[ a ] φ ⟧ i S 𝓣 = ⟪ s ∈ S ∣ Π[ t ∈ S ] ⌊ (s , a , t) ∈trans? 𝓣 ⌋ ⇒ ⌊ t ∈? (⟦ φ ⟧ i S 𝓣) ⌋ ⟫
-  ⟦ φ ⊗ φ₁ ⟧ i S 𝓣 = (⟦ φ ⟧ i S 𝓣) ∩ (⟦ φ₁ ⟧ i S 𝓣)
-  ⟦ μ x φ ⟧ i S 𝓣 = fp x φ i S 𝓣
-  ⟦ v x ⟧ i S 𝓣 = i x 
-  ⟦ - φ ⟧ i S 𝓣 = 𝓤 𝓣 ̸ ⟦ φ ⟧ i S 𝓣
-
-open Positivity
-
-mutual 
-  Monotone : ∀ i S 𝓣 X Y {p n} →
-    (a : Atom) → (φ : Shape) → a ∉ n → Polarity φ p n → X ⊆ Y →
-    ---------------------------------------------------
-    ⟦ φ ⟧ (i [ a ≔ X ]) S 𝓣 ⊆ ⟦ φ ⟧ (i [ a ≔ Y ]) S 𝓣
-  Monotone i S 𝓣 X Y a (v x) nin pos sub with eqAtom a x
-  Monotone i S 𝓣 X Y a (v .a) nin pos sub | yes refl = sub
-  Monotone i S 𝓣 X Y a (v x) nin pos sub | no ¬p = λ x₁ z → z
-  Monotone i S 𝓣 X Y a (P x) nin pos sub = λ x₁ z → z
-  Monotone i S 𝓣 X Y a (α[ a₁ ] s) nin (Alpha pos) sub =
-    WFX.ComprehensionLaw {S} {𝓣 = 𝓣} (Monotone i S 𝓣 X Y a s nin pos sub)
-  Monotone i S 𝓣 X Y a (s ⊗ s₁) nin (And {.s} {.s₁} {p₁} {p₂} {n₁} {n₂} pos pos₁) sub =
-    WFX.IntersectionLaw (Monotone i S 𝓣 X Y a s (NotInUnionLeft n₂ nin) pos sub)
-                        (Monotone i S 𝓣 X Y a s₁ (NotInUnionRight n₁ nin) pos₁ sub)
-  Monotone i S 𝓣 X Y a (μ x s) nin (Mu pos x₁) sub = {!!}
-  Monotone i S 𝓣 X Y a (- s) nin (Not pos) sub =
-    WFX.NegationLaw (𝓤 𝓣) (Antitone i S 𝓣 X Y a s nin pos sub)
+  mapsToSelf : ∀ i S' x → S' ≡ (i [ x ≔ S' ]) x
+  mapsToSelf i S' x with eqAtom x x
+  mapsToSelf i S' x | yes p = refl
+  mapsToSelf i S' x | no ¬p = refl ↯ ¬p
   
-  {- A ⊆ B → C ⊆ D → A ∩ C ⊆ B ∩ D -}
-  {- A ⊆ B → (S / A) ⊆ (S / B) -}
+  mutual
+
+    gfpWF : (a : Atom) → Shape → (i : Interpretation) → (Acc _⊂_ (i a)) → Subjects
+    gfpWF x φ i ac with ⟦ φ ⟧ i
+    gfpWF x φ i ac | S' with S' ⊂? (i x)
+    gfpWF x φ i (acc rs) | S' | yes p rewrite (mapsToSelf i S' x) =
+      let ac = rs ((i [ x ≔ S' ]) x) p
+      in gfpWF x φ (i [ x ≔ S' ]) ac
+    gfpWF x φ i ac | S' | no ¬p = (i x)
+
+    gfp : Atom → Shape → Interpretation → Subjects
+    gfp x φ i = gfpWF x φ (i [ x ≔ S ]) (wf⊂ ((i [ x ≔ S ]) x))
+
+    ⟦_⟧ : Shape → (i : Interpretation) → Subjects
+    ⟦ P p ⟧ i = 𝓥 p
+    ⟦ α[ a ] φ ⟧ i = ⟪ s ∈ S ∣ Π[ t ∈ S ] ⌊ (s , a , t) ∈trans? 𝓣 ⌋ ⇒ ⌊ t ∈? (⟦ φ ⟧ i) ⌋ ⟫
+    ⟦ φ ⊗ φ₁ ⟧ i = (⟦ φ ⟧ i) ∩ (⟦ φ₁ ⟧ i)
+    ⟦ ν x φ ⟧ i = gfp x φ i
+    ⟦ v x ⟧ i = i x 
+    ⟦ - φ ⟧ i = S ̸ ⟦ φ ⟧ i
+
   
-  Antitone : ∀ i S 𝓣 X Y {p n} →
-    (a : Atom) → (φ : Shape) → a ∉ p → Polarity φ p n → X ⊆ Y →
-    ---------------------------------------------------
-    ⟦ φ ⟧ (i [ a ≔ Y ]) S 𝓣 ⊆ ⟦ φ ⟧ (i [ a ≔ X ]) S 𝓣
-  Antitone i S 𝓣 X Y a (v x) nip Var sub with eqAtom a x
-  Antitone i S 𝓣 X Y x (v .x) nip Var sub | yes refl = ⊥-elim $ nip here
-  Antitone i S 𝓣 X Y a (v x) nip Var sub | no ¬p = λ x₁ z → z
-  Antitone i S 𝓣 X Y a (P x) nip pos sub = λ x₁ z → z
-  Antitone i S 𝓣 X Y a (α[ a₁ ] s) nip (Alpha pos) sub =
-    WFX.ComprehensionLaw {S} {𝓣 = 𝓣} (Antitone i S 𝓣 X Y a s nip pos sub)
-  Antitone i S 𝓣 X Y a (s ⊗ s₁) nip (And {.s} {.s₁} {p₁} {p₂} {n₁} {n₂} pos pos₁) sub =
-    WFX.IntersectionLaw (Antitone i S 𝓣 X Y a s (NotInUnionLeft p₂ nip) pos sub)
-                        (Antitone i S 𝓣 X Y a s₁ (NotInUnionRight p₁ nip) pos₁ sub) 
-  Antitone i S 𝓣 X Y a (μ x s) nip pos sub = {!!}
-  Antitone i S 𝓣 X Y a (- s) nip (Not pos) sub =
-    WFX.NegationLaw (𝓤 𝓣) (Monotone i S 𝓣 X Y a s nip pos sub)
+  open Positivity
+
+  mutual
+
+    gfpMonotonic : ∀ i X Y {p n} →
+      (a x : Atom) → (φ : Shape) → a ∉ n → Polarity φ p n → X ⊆ Y →
+      ------------------------------------------------------------
+           gfp x φ (i [ a ≔ X ]) ⊆ gfp x φ (i [ a ≔ Y ])
+    gfpMonotonic i X Y a x φ nin pos X⊆Y with eqAtom a x
+    gfpMonotonic i X Y a .a φ nin pos X⊆Y | yes refl = {!!}
+    gfpMonotonic i X Y a x φ nin pos X⊆Y | no ¬p = {!!}
     
---a ⟦ φ ⟧ i S 𝓣  
---Monotonic s f = ?
-
+    Monotone : ∀ i X Y {p n} →
+      (a : Atom) → (φ : Shape) → a ∉ n → Polarity φ p n → X ⊆ Y →
+      ---------------------------------------------------
+            ⟦ φ ⟧ (i [ a ≔ X ]) ⊆ ⟦ φ ⟧ (i [ a ≔ Y ]) 
+    Monotone i X Y a (v x) nin pos sub with eqAtom a x
+    Monotone i X Y a (v .a) nin pos sub | yes refl = sub
+    Monotone i X Y a (v x) nin pos sub | no ¬p = λ x₁ z → z
+    Monotone i X Y a (P x) nin pos sub = λ x₁ z → z
+    Monotone i X Y a (α[ a₁ ] s) nin (Alpha pos) sub =
+      WFX.ComprehensionLaw {S} {𝓣 = 𝓣} (Monotone i X Y a s nin pos sub)
+    Monotone i X Y a (s ⊗ s₁) nin (And {.s} {.s₁} {p₁} {p₂} {n₁} {n₂} pos pos₁) sub =
+      WFX.IntersectionLaw (Monotone i X Y a s (NotInUnionLeft n₂ nin) pos sub)
+                          (Monotone i X Y a s₁ (NotInUnionRight n₁ nin) pos₁ sub)
+    Monotone i X Y a (ν x s) nin (Nu pos x₁) sub = gfpMonotonic i X Y a x s nin pos sub
+    Monotone i X Y a (- s) nin (Not pos) sub =
+      WFX.NegationLaw S (Antitone i X Y a s nin pos sub)
+  
+    Antitone : ∀ i X Y {p n} →
+      (a : Atom) → (φ : Shape) → a ∉ p → Polarity φ p n → X ⊆ Y →
+      ---------------------------------------------------
+      ⟦ φ ⟧ (i [ a ≔ Y ]) ⊆ ⟦ φ ⟧ (i [ a ≔ X ]) 
+    Antitone i X Y a (v x) nip Var sub with eqAtom a x
+    Antitone i X Y x (v .x) nip Var sub | yes refl = ⊥-elim $ nip here
+    Antitone i X Y a (v x) nip Var sub | no ¬p = λ x₁ z → z
+    Antitone i X Y a (P x) nip pos sub = λ x₁ z → z
+    Antitone i X Y a (α[ a₁ ] s) nip (Alpha pos) sub =
+      WFX.ComprehensionLaw {S} {𝓣 = 𝓣} (Antitone i X Y a s nip pos sub)
+    Antitone i X Y a (s ⊗ s₁) nip (And {.s} {.s₁} {p₁} {p₂} {n₁} {n₂} pos pos₁) sub =
+      WFX.IntersectionLaw (Antitone i X Y a s (NotInUnionLeft p₂ nip) pos sub)
+                          (Antitone i X Y a s₁ (NotInUnionRight p₁ nip) pos₁ sub) 
+    Antitone i X Y a (ν x s) nip (Nu pos x₁) sub = {!!}
+    Antitone i X Y a (- s) nip (Not pos) sub =
+      WFX.NegationLaw S (Monotone i X Y a s nip pos sub)
+    
 {-
 
 _⊢_∶_ : Transitions → X → Shape → Set

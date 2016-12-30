@@ -1,8 +1,9 @@
-Exploring Cardinality in the Modal Mu-Calculus 
+Exploring Cardinality in the Modal μ-Calculus 
 ==============================================
 
-This is an exploration of the meaning of cardinality constraints in the
-Modal Mu-Calculus. It implements an interpreter for modal mu formulae.
+This is an exploration of the meaning of cardinality constraints in
+the Modal μ-Calculus when applied to finite transition systems. It
+implements an interpreter for Modal μ-formulae.
 
 Monotonicity 
 ============
