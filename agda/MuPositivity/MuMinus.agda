@@ -23,6 +23,7 @@ open import Data.Nat
 open import Data.Unit
 open import Data.Empty
 open import FinSet
+open import Membership
 
 import Database as DB
 module DBmodule = DB Atom X eqAtom eqX
@@ -146,8 +147,8 @@ mutual
   Monotone i S 𝓣 X Y a (v .a) nin pos sub | yes refl = sub
   Monotone i S 𝓣 X Y a (v x) nin pos sub | no ¬p = λ x₁ z → z
   Monotone i S 𝓣 X Y a (P x) nin pos sub = λ x₁ z → z
-  Monotone i S 𝓣 X Y a (α[ a₁ ] s) nin (Alpha pos) sub with Monotone i S 𝓣 X Y a s nin pos sub
-  Monotone i S 𝓣 X Y a (α[ a₁ ] s) nin (Alpha pos) sub | res = λ x x₁ → {!!}
+  Monotone i S 𝓣 X Y a (α[ a₁ ] s) nin (Alpha pos) sub =
+    WFX.ComprehensionLaw {S} {𝓣 = 𝓣} (Monotone i S 𝓣 X Y a s nin pos sub)
   Monotone i S 𝓣 X Y a (s ⊗ s₁) nin (And {.s} {.s₁} {p₁} {p₂} {n₁} {n₂} pos pos₁) sub =
     WFX.IntersectionLaw (Monotone i S 𝓣 X Y a s (NotInUnionLeft n₂ nin) pos sub)
                         (Monotone i S 𝓣 X Y a s₁ (NotInUnionRight n₁ nin) pos₁ sub)
@@ -166,7 +167,8 @@ mutual
   Antitone i S 𝓣 X Y x (v .x) nip Var sub | yes refl = ⊥-elim $ nip here
   Antitone i S 𝓣 X Y a (v x) nip Var sub | no ¬p = λ x₁ z → z
   Antitone i S 𝓣 X Y a (P x) nip pos sub = λ x₁ z → z
-  Antitone i S 𝓣 X Y a (α[ a₁ ] s) nip pos sub = {!!}
+  Antitone i S 𝓣 X Y a (α[ a₁ ] s) nip (Alpha pos) sub =
+    WFX.ComprehensionLaw {S} {𝓣 = 𝓣} (Antitone i S 𝓣 X Y a s nip pos sub)
   Antitone i S 𝓣 X Y a (s ⊗ s₁) nip (And {.s} {.s₁} {p₁} {p₂} {n₁} {n₂} pos pos₁) sub =
     WFX.IntersectionLaw (Antitone i S 𝓣 X Y a s (NotInUnionLeft p₂ nip) pos sub)
                         (Antitone i S 𝓣 X Y a s₁ (NotInUnionRight p₁ nip) pos₁ sub) 

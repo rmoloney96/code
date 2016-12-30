@@ -100,7 +100,7 @@ module WF⊂mod (C : Set) (eq : DecEq C) where
   NotInUnionRight S {S₁} p q = p $ InUnionRight S {S₁} q
 
   _⟶_ : ∀ (P Q : C → Bool) → Set
-  P ⟶ Q = ∀ {s : C} → T (P s ⇒ Q s)
+  P ⟶ Q = ∀ {s : C} → T (P s) → T (Q s)
 
   BoolImp : ∀ (P Q : C → Bool) → ∀ (s : C) → T (P s ⇒ Q s) → T (P s) → T (Q s)
   BoolImp P Q s Ps⇒Qs Ps with P s | Q s
@@ -108,14 +108,14 @@ module WF⊂mod (C : Set) (eq : DecEq C) where
   BoolImp P Q s () Ps | true | false
   BoolImp P Q s Ps⇒Qs Ps | true | true = tt
 
-  impBool : ∀ (P Q : C → Bool) → ∀ (s : C) → (T (P s) → T (Q s)) → T (P s ⇒ Q s) 
-  impBool P Q s Ps⇒Qs with P s | Q s 
-  impBool P Q s Ps⇒Qs | false | Qs = tt
-  impBool P Q s Ps⇒Qs | true | Qs = Ps⇒Qs tt
+  ImpBool : ∀ (P Q : C → Bool) → ∀ (s : C) → (T (P s) → T (Q s)) → T (P s ⇒ Q s) 
+  ImpBool P Q s Ps⇒Qs with P s | Q s 
+  ImpBool P Q s Ps⇒Qs | false | Qs = tt
+  ImpBool P Q s Ps⇒Qs | true | Qs = Ps⇒Qs tt
   
-  ImplicationLawRaw : ∀ (S : List C) → (P Q : C → Bool) → P ⟶ Q → comprehension-raw S P ⊆ comprehension-raw S Q
+  ImplicationLawRaw : ∀ (S : List C) → (P Q : C → Bool) → P ⟶ Q → comprehension-raw S P ⊆ comprehension-raw S Q 
   ImplicationLawRaw [] P Q imp x ()
-  ImplicationLawRaw (x ∷ S) P Q imp x₁ inS with imp {x}
+  ImplicationLawRaw (x ∷ S) P Q imp x₁ inS with ImpBool P Q x (imp {x})
   ImplicationLawRaw (x ∷ S) P Q imp x₁ inS | ix with P x | Q x
   ImplicationLawRaw (x ∷ S) P Q imp x₁ inS | ix | false | false = ImplicationLawRaw S P Q imp x₁ inS
   ImplicationLawRaw (x ∷ S) P Q imp x₁ inS | ix | false | true = there $ ImplicationLawRaw S P Q imp x₁ inS
@@ -173,23 +173,46 @@ module WF⊂mod (C : Set) (eq : DecEq C) where
           hereOrThere S A⊆B here = here
           hereOrThere S A⊆B (there y∈S̸B) = there $ NegationLaw S A⊆B _ y∈S̸B
 
-  open import Database
-  {-
-  _∈trans?_ : (x : Transition) → (L : Transitions) → Dec (x ∈ L)
-  x ∈trans? S = eq2in eqTrans x S
-  -} 
-  ComprehensionLaw : ∀ {S A B a} → A ⊆ B → (comprehension-syntax S (λ s → (all (λ t → ⌊ (s , a , t) ∈trans? 𝓣 ⌋ ⇒ ⌊ t ∈? A ⌋) S))) ⊆ (comprehension-syntax S (λ s → all (λ t → ⌊ (s , a , t) ∈trans? 𝓣 ⌋ ⇒ ⌊ t ∈? A ⌋) S))
-  ComprehensionLaw A⊆B = ?
+  open import Database C C eq eq
 
-{-
-  ComprehensionLaw : ∀ {S A B} → A ⊆ B →
+  ImpliesSub : ∀ {A t B s a 𝓣} → A ⊆ B →
+      T (⌊ (s , a , t) ∈trans? 𝓣 ⌋ ⇒ ⌊ t ∈? A ⌋) → 
+      T (⌊ (s , a , t) ∈trans? 𝓣 ⌋ ⇒ ⌊ t ∈? B ⌋)
+  ImpliesSub {A} {t} A⊆B t∈A with t ∈? A
+  ImpliesSub {A} {t} {B} A⊆B t∈A | yes p with t ∈? B
+  ImpliesSub A⊆B t∈A | yes p₁ | yes p = t∈A
+  ImpliesSub {A} {t} A⊆B t∈A | yes p | no ¬p = ⊥-elim (¬p (A⊆B t p))
+  ImpliesSub {A} {t} {B} A⊆B t∈A | no ¬p with t ∈? B
+  ImpliesSub {A} {t} {B} {s} {a} {𝓣} A⊆B t∈A | no ¬p | yes p with (s , a , t) ∈trans? 𝓣
+  ImpliesSub A⊆B t∈A | no ¬p | yes p₁ | yes p = ⊥-elim t∈A
+  ImpliesSub A⊆B t∈A | no ¬p₁ | yes p | no ¬p = tt
+  ImpliesSub A⊆B t∈A | no ¬p₁ | no ¬p = t∈A 
+
+  ImpliesAllSub : ∀ {S A B a 𝓣} → A ⊆ B → ∀ {s} → 
+     T (Π[ t ∈ S ] ⌊ (s , a , t) ∈trans? 𝓣 ⌋ ⇒ ⌊ t ∈? A ⌋) → 
+     T (Π[ t ∈ S ] ⌊ (s , a , t) ∈trans? 𝓣 ⌋ ⇒ ⌊ t ∈? B ⌋)
+  ImpliesAllSub {[]} A⊆B = λ _ → tt
+  ImpliesAllSub {x ∷ S} {A} {B} {a} {𝓣} A⊆B {s} premise with ImpliesSub {A} {x} {B} {s} {a} {𝓣} A⊆B
+  ImpliesAllSub {x ∷ S} {A} {B} {a} {𝓣} A⊆B {s} premise | res with ⌊ (s , a , x) ∈trans? 𝓣 ⌋ ⇒ ⌊ x ∈? A ⌋
+  ImpliesAllSub {x ∷ S} A⊆B () | res | false
+  ImpliesAllSub {x ∷ S} A⊆B premise | res | true with res tt
+  ImpliesAllSub {x ∷ S} {A} {B} {a} {𝓣} A⊆B {s} premise | res | true | res₂ with ⌊ (s , a , x) ∈trans? 𝓣 ⌋ ⇒ ⌊ x ∈? B ⌋
+  ImpliesAllSub {x ∷ S} A⊆B {s} premise | res | true | () | false
+  ImpliesAllSub {x ∷ S} {A} {B} {a} {𝓣} A⊆B {s} premise | res | true | res₂ | true = ImpliesAllSub {S} {A} {B} {a} {𝓣} A⊆B {s} premise
+
+  ComprehensionLaw : ∀ {S A B a} {𝓣 : Transitions} → A ⊆ B →
    ⟪ s ∈ S ∣ Π[ t ∈ S ] ⌊ (s , a , t) ∈trans? 𝓣 ⌋ ⇒ ⌊ t ∈? A ⌋ ⟫ ⊆
    ⟪ s ∈ S ∣ Π[ t ∈ S ] ⌊ (s , a , t) ∈trans? 𝓣 ⌋ ⇒ ⌊ t ∈? B ⌋ ⟫
-  ComprehensionLaw A⊆B = ?
-mbda
--}
-
-
+  ComprehensionLaw {S} {A} {B} {a} {𝓣} A⊆B =
+     ImplicationLawRaw S (λ s → Π[ t ∈ S ] ⌊ (s , a , t) ∈trans? 𝓣 ⌋ ⇒ ⌊ t ∈? A ⌋)
+                         (λ s → Π[ t ∈ S ] ⌊ (s , a , t) ∈trans? 𝓣 ⌋ ⇒ ⌊ t ∈? B ⌋)
+          (ImpliesAllSub {S} {A} {B} {a} {𝓣} A⊆B) 
+  
+{- with ImpliesAllSub {x ∷ S} {A} {B} {x} {a} {𝓣} (A⊆B) | Π[ t ∈ (x ∷ S) ] ⌊ (x , a , t) ∈trans? 𝓣 ⌋ ⇒ ⌊ t ∈? A ⌋
+  ComprehensionLaw {x ∷ S} A⊆B | f | false = λ x₁ x₂ → {!!}
+  ComprehensionLaw {x ∷ S} A⊆B | f | true = {!!}  -}
+  
 -- All subsets are drawn from the bounding set U
 --module BoundingSet (C : Set) (eq : DecEq C) (U : List C) where
   
+--∀ (S : List C) → (P Q : C → Bool) → P ⟶ Q 

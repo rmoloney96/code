@@ -102,20 +102,3 @@ infix 2 all-syntax
 
 _∈trans?_ : (x : Transition) → (L : Transitions) → Dec (x ∈ L)
 x ∈trans? S = eq2in eqTrans x S
-
-{-
-comprehension-id : ∀ S → ⟪ s ∈ S ∣ true ⟫ ⊆ S
-comprehension-id [] s P = P
-comprehension-id (x ∷ S) s P with comprehension-id S s | #? eqX x (proj₁ (dedup eqX (comprehension-syntax S (λ s₁ → true))))
-comprehension-id (s ∷ S) .s here | f | yes p = here
-comprehension-id (x ∷ S) s (there P) | f | yes p = there {!!}
-comprehension-id (x ∷ S) s P | f | no ¬p = {!!}
-
-∈∪lemma : ∀ x S T → x ∈ (S ∪ T) → x ∈ T ⊎ x ∈ S
-∈∪lemma x S T x∈ with dedup eqX (S ++ T) | dedup-sound eqX (S ++ T) x
-∈∪lemma x S T x∈ | U | res = {!!}
-
-∪comm : ∀ S T → (S ∪ T) ⊆ (T ∪ S)
-∪comm S T x x∈ with S ++ T
-∪comm S T x x∈ | res = {!!}
--}
