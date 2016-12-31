@@ -56,9 +56,9 @@ Polarity : Φ → 𝒫(𝓥) → 𝒫(𝓥) → Set
 ~~~
 
 Since it is possible to have variables in a mixed polarity (both
-positive and negative), posivity for a free variable x can most
-usefully be defined as a polarity in which the variable is not in a
-negative poliarity for the formaule.
+positive and negative), posivity for a free variable x can be defined
+as a polarity in which the variable is not in a negative poliarity for
+the formula.
 
 ~~~
 

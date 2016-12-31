@@ -59,6 +59,12 @@ module Positivity where
   _⊸_ : List Atom → Atom → List Atom
   _⊸_ X x = ⟪ y ∈ X ∣ not ⌊ (eqAtom x y) ⌋ ⟫ 
 
+  NotInToNeq : ∀ {p x a} → x ∈ p → a ∉ (p ⊸ x) → x ≢ a ⊎ a ∈ p
+  NotInToNeq {[]} () a∉p⊸x
+  NotInToNeq {y ∷ p} {x} x∈p a∉p⊸x with eqAtom x y
+  NotInToNeq {y ∷ p₁} x∈p a∉p⊸x | yes refl = {!!}
+  NotInToNeq {y ∷ p} x∈p a∉p⊸x | no ¬p = {!!} 
+  
   fvs : Shape → List Atom
   fvs (v x) = [ x ] 
   fvs (P x) = []
@@ -96,7 +102,7 @@ module Positivity where
     Prop : ∀ {p} → Polarity (P p) [] []
     Alpha : ∀ {s a p n} → Polarity s p n → Polarity (α[ a ] s) p n
     And : ∀ {s₁ s₂ p₁ p₂ n₁ n₂} → Polarity s₁ p₁ n₁ → Polarity s₂ p₂ n₂ → Polarity (s₁ ⊗ s₂) (p₁ ∪ p₂) (n₁ ∪ n₂)
-    Nu : ∀ {x s p n} → Polarity s p n → x ∉ n → Polarity (ν x s) (p ⊸ x) n
+    Nu : ∀ {x s p n} → Polarity s p n → x ∈ p → x ∉ n → Polarity (ν x s) (p ⊸ x) n
     Not : ∀ {s p n} → Polarity s p n → Polarity (- s) n p
   
   PositiveIn : Atom → Shape → Set
@@ -125,7 +131,8 @@ module ModalTransitionSystem (𝓣 : Transitions) where
   
   mutual
 
-    gfpWF : (a : Atom) → Shape → (i : Interpretation) → (Acc _⊂_ (i a)) → Subjects
+{-
+    gfpWF : (x : Atom) → Shape → (i : Interpretation) → (Acc _⊂_ (i x)) → Subjects
     gfpWF x φ i ac with ⟦ φ ⟧ i
     gfpWF x φ i ac | S' with S' ⊂? (i x)
     gfpWF x φ i (acc rs) | S' | yes p rewrite (mapsToSelf i S' x) =
@@ -135,6 +142,7 @@ module ModalTransitionSystem (𝓣 : Transitions) where
 
     gfp : Atom → Shape → Interpretation → Subjects
     gfp x φ i = gfpWF x φ (i [ x ≔ S ]) (wf⊂ ((i [ x ≔ S ]) x))
+-}
 
     ⟦_⟧ : Shape → (i : Interpretation) → Subjects
     ⟦ P p ⟧ i = 𝓥 p
@@ -144,19 +152,47 @@ module ModalTransitionSystem (𝓣 : Transitions) where
     ⟦ v x ⟧ i = i x 
     ⟦ - φ ⟧ i = S ̸ ⟦ φ ⟧ i
 
-  
+    gfpWF : (x : Atom) → (φ : Shape) → (i : Interpretation) → (F : Subjects) → (Acc _⊂_ F) →
+      Σ[ R ∈ Subjects ] Σ[ S' ∈ Subjects ] ⟦ φ ⟧ (i [ x ≔ S' ]) ≡ R
+    gfpWF x φ i F ac with ⟦ φ ⟧ (i [ x ≔ F ])
+    gfpWF x φ i F ac | S' with S' ⊂? F
+    gfpWF x φ i F (acc rs) | S' | yes p = gfpWF x φ i S' (rs S' p)
+    gfpWF x φ i F ac | S' | no ¬p = ⟦ φ ⟧ (i [ x ≔ S' ]) , S' , refl
+
+    gfp : Atom → Shape → Interpretation → Subjects
+    gfp x φ i = proj₁ $ gfpWF x φ i S (wf⊂ S) -- 
+
+    gfpProof : ∀ x φ i →  Σ[ S' ∈ Subjects ] ⟦ φ ⟧ (i [ x ≔ S' ]) ≡ gfp x φ i
+    gfpProof x φ i = proj₂ $ gfpWF x φ i S (wf⊂ S) 
+    
   open Positivity
 
   mutual
 
+    overWrite : ∀ i x X Y → ((i [ x ≔ X ]) [ x ≔ Y ]) x ≡ (i [ x ≔ Y ]) x
+    overWrite i x X Y with eqAtom x x
+    overWrite i x X Y | yes refl = refl
+    overWrite i x X Y | no ¬p = refl ↯ ¬p
+    
+    Stable : ∀ i X Y →
+               (φ : Shape) →  (a x : Atom) → a ≡ x →
+      ------------------------------------------------------------
+           gfp x φ (i [ a ≔ X ]) ≡ gfp x φ (i [ a ≔ Y ])
+    Stable i X Y φ a .a refl = {!!}
+
     gfpMonotonic : ∀ i X Y {p n} →
-      (a x : Atom) → (φ : Shape) → a ∉ n → Polarity φ p n → X ⊆ Y →
+      (a x : Atom) → (φ : Shape) → a ∉ n → Polarity φ p n → X ⊆ Y → x ∉ n →
       ------------------------------------------------------------
            gfp x φ (i [ a ≔ X ]) ⊆ gfp x φ (i [ a ≔ Y ])
-    gfpMonotonic i X Y a x φ nin pos X⊆Y with eqAtom a x
-    gfpMonotonic i X Y a .a φ nin pos X⊆Y | yes refl = {!!}
-    gfpMonotonic i X Y a x φ nin pos X⊆Y | no ¬p = {!!}
-    
+    gfpMonotonic i X Y a x φ nin pos X⊆Y xnin = {!!} 
+
+    gfpAntitonic : ∀ i X Y {p n} →
+      (a x : Atom) → (φ : Shape) → a ∉ p → Polarity φ p n → X ⊆ Y → x ∉ n →
+      ------------------------------------------------------------
+           gfp x φ (i [ a ≔ Y ]) ⊆ gfp x φ (i [ a ≔ X ])
+    gfpAntitonic i X Y a x φ nin pos X⊆Y xnin with Antitone i X Y a φ nin pos X⊆Y
+    gfpAntitonic i X Y a x φ nin pos X⊆Y xnin | res = {!!} 
+
     Monotone : ∀ i X Y {p n} →
       (a : Atom) → (φ : Shape) → a ∉ n → Polarity φ p n → X ⊆ Y →
       ---------------------------------------------------
@@ -170,7 +206,7 @@ module ModalTransitionSystem (𝓣 : Transitions) where
     Monotone i X Y a (s ⊗ s₁) nin (And {.s} {.s₁} {p₁} {p₂} {n₁} {n₂} pos pos₁) sub =
       WFX.IntersectionLaw (Monotone i X Y a s (NotInUnionLeft n₂ nin) pos sub)
                           (Monotone i X Y a s₁ (NotInUnionRight n₁ nin) pos₁ sub)
-    Monotone i X Y a (ν x s) nin (Nu pos x₁) sub = gfpMonotonic i X Y a x s nin pos sub
+    Monotone i X Y a (ν x s) nin (Nu pos xinp xnin) sub = {!!}
     Monotone i X Y a (- s) nin (Not pos) sub =
       WFX.NegationLaw S (Antitone i X Y a s nin pos sub)
   
@@ -187,7 +223,7 @@ module ModalTransitionSystem (𝓣 : Transitions) where
     Antitone i X Y a (s ⊗ s₁) nip (And {.s} {.s₁} {p₁} {p₂} {n₁} {n₂} pos pos₁) sub =
       WFX.IntersectionLaw (Antitone i X Y a s (NotInUnionLeft p₂ nip) pos sub)
                           (Antitone i X Y a s₁ (NotInUnionRight p₁ nip) pos₁ sub) 
-    Antitone i X Y a (ν x s) nip (Nu pos x₁) sub = {!!}
+    Antitone i X Y a (ν x s) nip (Nu pos xinp xnin) sub = {!!}
     Antitone i X Y a (- s) nip (Not pos) sub =
       WFX.NegationLaw S (Monotone i X Y a s nip pos sub)
     
