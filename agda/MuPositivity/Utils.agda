@@ -4,10 +4,10 @@ module Utils where
 open import Relation.Binary.PropositionalEquality hiding (inspect)
 open import Data.Product
 open import Data.Vec
-open import Data.Nat
+open import Data.Nat hiding (_≟_)
 open import Relation.Nullary
 open import Relation.Binary hiding (_⇒_)
-open import Data.Bool
+open import Data.Bool hiding (_≟_)
 
 ≡n : ∀ {n} → Vec Set (suc n) → Set
 ≡n (A ∷ []) = {x y : A} → x ≡ y
@@ -30,3 +30,16 @@ infix 6 _⇒_
 _⇒_ : Bool → Bool → Bool
 P ⇒ Q = not P ∨ Q
 
+open import Level 
+record DecTotalOrderEq (C : Set) (_≼_ : Rel C Level.zero) : Set where
+  field
+    tri : Trichotomous _≡_ _≼_
+    tran : Transitive _≼_
+    _≼?_ : Decidable _≼_
+
+  _≟_ : ∀ x y → Dec (x ≡ y)
+  x ≟ y with tri x y
+  x ≟ y | tri< a ¬b ¬c = no ¬b
+  x ≟ y | tri≈ ¬a b ¬c = yes b
+  x ≟ y | tri> ¬a ¬b c = no ¬b 
+  
