@@ -2,12 +2,15 @@
 open import Utils
 open import Relation.Binary hiding (_⇒_)
 open import Relation.Nullary.Decidable
+open import Level
 
 module MuMinus
   (Atom : Set)
   (C : Set)
   (D : Set)
-  (eqAtom : DecEq Atom)
+  (Atom : Set)
+  (_≼_ : Rel Atom zero)
+  (tdoe : DecTotalOrderEq Atom _≼_)
   (eqC : DecEq C)
   where
 
@@ -26,12 +29,18 @@ open import Data.Empty
 open import FinSet
 open import Membership
 
+open import Assoc (List C) Atom [] _≼_ tdoe
+
+eqAtom : ∀ x y → Dec (x ≡ y)
+eqAtom = DecTotalOrderEq._≟_ tdoe
+
+
 import Database as DB
 module DBmodule = DB Atom C eqAtom eqC
 open DBmodule public
 
 Interpretation : Set
-Interpretation = Atom → Subjects
+Interpretation = Assoc
 
 Predicate : Set
 Predicate = C → Bool
@@ -119,6 +128,7 @@ module ModalTransitionSystem (𝓣 : Transitions) where
   𝓥 : Predicate → Subjects
   𝓥 f = ⟪ s ∈ S ∣ f s ⟫
 
+  {-
   _[_≔_] : Interpretation → Atom → Subjects → Interpretation
   (i [ X ≔ T ]) Y with eqAtom X Y
   (i [ X₁ ≔ T ]) Y | yes p = T
@@ -128,7 +138,8 @@ module ModalTransitionSystem (𝓣 : Transitions) where
   mapsToSelf i S' x with eqAtom x x
   mapsToSelf i S' x | yes p = refl
   mapsToSelf i S' x | no ¬p = refl ↯ ¬p
-  
+  -} 
+
   mutual
 
 {-
@@ -149,7 +160,7 @@ module ModalTransitionSystem (𝓣 : Transitions) where
     ⟦ α[ a ] φ ⟧ i = ⟪ s ∈ S ∣ Π[ t ∈ S ] ⌊ (s , a , t) ∈trans? 𝓣 ⌋ ⇒ ⌊ t ∈? (⟦ φ ⟧ i) ⌋ ⟫
     ⟦ φ ⊗ φ₁ ⟧ i = (⟦ φ ⟧ i) ∩ (⟦ φ₁ ⟧ i)
     ⟦ ν x φ ⟧ i = gfp x φ i
-    ⟦ v x ⟧ i = i x 
+    ⟦ v x ⟧ i = i ⟨ x ⟩ 
     ⟦ - φ ⟧ i = S ̸ ⟦ φ ⟧ i
 
     gfpWF : (x : Atom) → (φ : Shape) → (i : Interpretation) → (F : Subjects) → (Acc _⊂_ F) →
@@ -160,7 +171,7 @@ module ModalTransitionSystem (𝓣 : Transitions) where
     gfpWF x φ i F ac | S' | no ¬p = ⟦ φ ⟧ (i [ x ≔ S' ]) , S' , refl
 
     gfp : Atom → Shape → Interpretation → Subjects
-    gfp x φ i = proj₁ $ gfpWF x φ i S (wf⊂ S) -- 
+    gfp x φ i = proj₁ $ gfpWF x φ i S (wf⊂ S)
 
     gfpProof : ∀ x φ i →  Σ[ S' ∈ Subjects ] ⟦ φ ⟧ (i [ x ≔ S' ]) ≡ gfp x φ i
     gfpProof x φ i = proj₂ $ gfpWF x φ i S (wf⊂ S) 
@@ -169,11 +180,7 @@ module ModalTransitionSystem (𝓣 : Transitions) where
 
   mutual
 
-    overWrite : ∀ i x X Y → ((i [ x ≔ X ]) [ x ≔ Y ]) x ≡ (i [ x ≔ Y ]) x
-    overWrite i x X Y with eqAtom x x
-    overWrite i x X Y | yes refl = refl
-    overWrite i x X Y | no ¬p = refl ↯ ¬p
-    
+{-
     Stable : ∀ i X Y →
                (φ : Shape) →  (a x : Atom) → a ≡ x →
       ------------------------------------------------------------
@@ -191,22 +198,35 @@ module ModalTransitionSystem (𝓣 : Transitions) where
       ------------------------------------------------------------
            gfp x φ (i [ a ≔ Y ]) ⊆ gfp x φ (i [ a ≔ X ])
     gfpAntitonic i X Y a x φ nin pos X⊆Y xnin with Antitone i X Y a φ nin pos X⊆Y
-    gfpAntitonic i X Y a x φ nin pos X⊆Y xnin | res = {!!} 
+    gfpAntitonic i X Y a x φ nin pos X⊆Y xnin | res = {!res!} 
+
+    gfpAntitonic : ∀ i X Y {p n} →
+      (a x : Atom) → (φ : Shape) → a ∉ p → Polarity φ p n → X ⊆ Y → x ∉ n →
+           ⟦ φ ⟧ (i [ x ≔ S ]) ⊆ 
+           gfp x φ (i [ a ≔ Y ]) ⊆ gfp x φ (i [ a ≔ X ])
+      ------------------------------------------------------------
+           gfp x φ (i [ a ≔ Y ]) ⊆ gfp x φ (i [ a ≔ X ])
+    gfpAntitonic i X Y a x φ nin pos X⊆Y xnin = {!!}
+-}
 
     Monotone : ∀ i X Y {p n} →
       (a : Atom) → (φ : Shape) → a ∉ n → Polarity φ p n → X ⊆ Y →
       ---------------------------------------------------
             ⟦ φ ⟧ (i [ a ≔ X ]) ⊆ ⟦ φ ⟧ (i [ a ≔ Y ]) 
     Monotone i X Y a (v x) nin pos sub with eqAtom a x
-    Monotone i X Y a (v .a) nin pos sub | yes refl = sub
-    Monotone i X Y a (v x) nin pos sub | no ¬p = λ x₁ z → z
+    Monotone i X Y a (v .a) nin pos sub | yes refl
+      rewrite Same {a} {a} {Y} i refl | Same {a} {a} {X} i refl = sub
+    Monotone i X Y a (v x) nin pos sub | no ¬p
+      rewrite Ignore {x} {a} {Y} i (¬p ∘ sym) | Ignore {x} {a} {X} i (¬p ∘ sym) = λ x₁ z → z 
     Monotone i X Y a (P x) nin pos sub = λ x₁ z → z
     Monotone i X Y a (α[ a₁ ] s) nin (Alpha pos) sub =
       WFX.ComprehensionLaw {S} {𝓣 = 𝓣} (Monotone i X Y a s nin pos sub)
     Monotone i X Y a (s ⊗ s₁) nin (And {.s} {.s₁} {p₁} {p₂} {n₁} {n₂} pos pos₁) sub =
       WFX.IntersectionLaw (Monotone i X Y a s (NotInUnionLeft n₂ nin) pos sub)
                           (Monotone i X Y a s₁ (NotInUnionRight n₁ nin) pos₁ sub)
-    Monotone i X Y a (ν x s) nin (Nu pos xinp xnin) sub = {!!}
+    Monotone i X Y a (ν x s) nin (Nu pos xinp xnin) sub =
+      let res = Monotone i X Y a s nin pos sub
+      in λ x₁ x₂ → {!!}
     Monotone i X Y a (- s) nin (Not pos) sub =
       WFX.NegationLaw S (Antitone i X Y a s nin pos sub)
   
@@ -216,14 +236,17 @@ module ModalTransitionSystem (𝓣 : Transitions) where
       ⟦ φ ⟧ (i [ a ≔ Y ]) ⊆ ⟦ φ ⟧ (i [ a ≔ X ]) 
     Antitone i X Y a (v x) nip Var sub with eqAtom a x
     Antitone i X Y x (v .x) nip Var sub | yes refl = ⊥-elim $ nip here
-    Antitone i X Y a (v x) nip Var sub | no ¬p = λ x₁ z → z
+    Antitone i X Y a (v x) nip Var sub | no ¬p
+      rewrite Ignore {x} {a} {Y} i (¬p ∘ sym) | Ignore {x} {a} {X} i (¬p ∘ sym) = λ x₁ z → z 
     Antitone i X Y a (P x) nip pos sub = λ x₁ z → z
     Antitone i X Y a (α[ a₁ ] s) nip (Alpha pos) sub =
       WFX.ComprehensionLaw {S} {𝓣 = 𝓣} (Antitone i X Y a s nip pos sub)
     Antitone i X Y a (s ⊗ s₁) nip (And {.s} {.s₁} {p₁} {p₂} {n₁} {n₂} pos pos₁) sub =
       WFX.IntersectionLaw (Antitone i X Y a s (NotInUnionLeft p₂ nip) pos sub)
                           (Antitone i X Y a s₁ (NotInUnionRight p₁ nip) pos₁ sub) 
-    Antitone i X Y a (ν x s) nip (Nu pos xinp xnin) sub = {!!}
+    Antitone i X Y a (ν x s) nip (Nu pos xinp xnin) sub =
+      let (S' , p) = gfpProof x s i
+      in {!!}
     Antitone i X Y a (- s) nip (Not pos) sub =
       WFX.NegationLaw S (Monotone i X Y a s nip pos sub)
     
