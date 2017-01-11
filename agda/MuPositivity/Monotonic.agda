@@ -60,8 +60,7 @@ data Φ+ : Set where
 
 module Positivity where
   module WFAtom = FinSet.WF⊂mod Atom eqAtom
-  open WFAtom public
-  open import Four
+  open WFAtom using (_∪_)
 
   data Polarity : Φ → List Atom → List Atom → Set where
     Var : ∀ {x} → Polarity (v x) [ x ] []
@@ -77,17 +76,18 @@ module Positivity where
     Var : ∀ {x} → Polarity+ (v x) [ x ] []
     Prop : ∀ {p} → Polarity+ (P p) [] []
     Alpha : ∀ {s a p n} → Polarity+ s p n → Polarity+ (α[ a ] s) p n
-    ExistC : ∀ {s a p n m} → Polarity+ s p n → Polarity+ (α⟨ a ⟩⁅ m ⁆ s) p n
+    ExistC : ∀ {s a p n m} → Polarity+ s p n → Polarity+ (α⟨ a ⟩⁅ m ⁆ s) (p ∪ n) (p ∪ n)
     And : ∀ {s₁ s₂ p₁ p₂ n₁ n₂} → Polarity+ s₁ p₁ n₁ → Polarity+ s₂ p₂ n₂ → Polarity+ (s₁ ⊗ s₂) (p₁ ∪ p₂) (n₁ ∪ n₂)
     Not : ∀ {s p n} → Polarity+ s p n → Polarity+ (- s) n p
 
   PositiveIn+ : Atom → Φ+ → Set
   PositiveIn+ a s = ∀ {a p n} → a ∉ n → Polarity+ s p n
 
-module WFX = FinSet.WF⊂mod C eqC
-open WFX hiding (NotInUnionLeft ; NotInUnionRight)
 
 module ModalTransitionSystem (𝓣 : Transitions) where
+
+  module WFX = FinSet.WF⊂mod C eqC
+  open WFX
 
   _[_≔_] : Interpretation → Atom → Subjects → Interpretation
   (i [ X ≔ T ]) Y with eqAtom X Y
@@ -101,8 +101,8 @@ module ModalTransitionSystem (𝓣 : Transitions) where
   𝓥 : Predicate → Subjects
   𝓥 f = ⟪ s ∈ 𝓢 ∣ f s ⟫
 
-  open import MonotonicProperties X eqX
-
+  open import Relation C eqC
+  
   mutual
 
     ⟦_⟧ : Φ → (i : Interpretation) → Subjects
@@ -122,9 +122,10 @@ module ModalTransitionSystem (𝓣 : Transitions) where
 
 
   open Positivity
+  open import MonotonicProperties C eqC
   
   mutual
-
+  
     Monotone : ∀ i X Y {p n} →
       (a : Atom) → (φ : Φ) → a ∉ n → Polarity φ p n → X ⊆ Y →
       ---------------------------------------------------
@@ -134,12 +135,12 @@ module ModalTransitionSystem (𝓣 : Transitions) where
     Monotone i X Y a (v x) nin pos sub | no ¬p = λ x₁ z → z
     Monotone i X Y a (P x) nin pos sub = λ x₁ z → z
     Monotone i X Y a (α[ a₁ ] s) nin (Alpha pos) sub =
-      WFX.α[]-Monotonic {𝓢} {𝓣 = 𝓣} (Monotone i X Y a s nin pos sub)
+      α[]-Monotonic {𝓢} {𝓣 = 𝓣} (Monotone i X Y a s nin pos sub)
     Monotone i X Y a (s ⊗ s₁) nin (And {.s} {.s₁} {p₁} {p₂} {n₁} {n₂} pos pos₁) sub =
-      WFX.IntersectionLaw (Monotone i X Y a s (NotInUnionLeft n₂ nin) pos sub)
-                          (Monotone i X Y a s₁ (NotInUnionRight n₁ nin) pos₁ sub)
+      IntersectionLaw (Monotone i X Y a s (WFAtom.NotInUnionLeft n₂ nin) pos sub)
+                      (Monotone i X Y a s₁ (WFAtom.NotInUnionRight n₁ nin) pos₁ sub)
     Monotone i X Y a (- s) nin (Not pos) sub =
-      WFX.NegationLaw 𝓢 (Antitone i X Y a s nin pos sub)
+      NegationLaw 𝓢 (Antitone i X Y a s nin pos sub)
   
     Antitone : ∀ i X Y {p n} →
       (a : Atom) → (φ : Φ) → a ∉ p → Polarity φ p n → X ⊆ Y →
@@ -150,12 +151,15 @@ module ModalTransitionSystem (𝓣 : Transitions) where
     Antitone i X Y a (v x) nip Var sub | no ¬p = λ x₁ z → z 
     Antitone i X Y a (P x) nip pos sub = λ x₁ z → z
     Antitone i X Y a (α[ a₁ ] s) nip (Alpha pos) sub =
-      WFX.α[]-Monotonic {𝓢} {𝓣 = 𝓣} (Antitone i X Y a s nip pos sub)
+      α[]-Monotonic {𝓢} {𝓣 = 𝓣} (Antitone i X Y a s nip pos sub)
     Antitone i X Y a (s ⊗ s₁) nip (And {.s} {.s₁} {p₁} {p₂} {n₁} {n₂} pos pos₁) sub =
-      WFX.IntersectionLaw (Antitone i X Y a s (NotInUnionLeft p₂ nip) pos sub)
-                          (Antitone i X Y a s₁ (NotInUnionRight p₁ nip) pos₁ sub) 
+      IntersectionLaw (Antitone i X Y a s (WFAtom.NotInUnionLeft p₂ nip) pos sub)
+                          (Antitone i X Y a s₁ (WFAtom.NotInUnionRight p₁ nip) pos₁ sub) 
     Antitone i X Y a (- s) nip (Not pos) sub =
-      WFX.NegationLaw 𝓢 (Monotone i X Y a s nip pos sub)
+      NegationLaw 𝓢 (Monotone i X Y a s nip pos sub)
+
+    Stable+ : ∀ i X Y {p n} →
+      (a : Atom) → (φ ∶ Φ+) → a ∉ n → a ∉ p → Polarity+ φ p n →  
 
     Monotone+ : ∀ i X Y {p n} →
       (a : Atom) → (φ : Φ+) → a ∉ n → Polarity+ φ p n → X ⊆ Y →
@@ -166,13 +170,13 @@ module ModalTransitionSystem (𝓣 : Transitions) where
     Monotone+ i X Y a (v x) nin pos sub | no ¬p = λ x₁ z → z
     Monotone+ i X Y a (P x) nin pos sub = λ x₁ z → z
     Monotone+ i X Y a (α[ a₁ ] s) nin (Alpha pos) sub =
-      WFX.α[]-Monotonic {𝓢} {𝓣 = 𝓣} (Monotone+ i X Y a s nin pos sub)
+      α[]-Monotonic {𝓢} {𝓣 = 𝓣} (Monotone+ i X Y a s nin pos sub)
     Monotone+ i X Y a (α⟨ a₁ ⟩⁅ n ⁆ s) nin (ExistC pos) sub = {!!}
     Monotone+ i X Y a (s ⊗ s₁) nin (And {.s} {.s₁} {p₁} {p₂} {n₁} {n₂} pos pos₁) sub =
-      WFX.IntersectionLaw (Monotone+ i X Y a s (NotInUnionLeft n₂ nin) pos sub)
-                          (Monotone+ i X Y a s₁ (NotInUnionRight n₁ nin) pos₁ sub)
+      IntersectionLaw (Monotone+ i X Y a s (WFAtom.NotInUnionLeft n₂ nin) pos sub)
+                      (Monotone+ i X Y a s₁ (WFAtom.NotInUnionRight n₁ nin) pos₁ sub)
     Monotone+ i X Y a (- s) nin (Not pos) sub =
-      WFX.NegationLaw 𝓢 (Antitone+ i X Y a s nin pos sub)
+      NegationLaw 𝓢 (Antitone+ i X Y a s nin pos sub)
   
     Antitone+ : ∀ i X Y {p n} →
       (a : Atom) → (φ : Φ+) → a ∉ p → Polarity+ φ p n → X ⊆ Y →
@@ -183,11 +187,11 @@ module ModalTransitionSystem (𝓣 : Transitions) where
     Antitone+ i X Y a (v x) nip Var sub | no ¬p = λ x₁ z → z 
     Antitone+ i X Y a (P x) nip pos sub = λ x₁ z → z
     Antitone+ i X Y a (α[ a₁ ] s) nip (Alpha pos) sub =
-      WFX.α[]-Monotonic {𝓢} {𝓣 = 𝓣} (Antitone+ i X Y a s nip pos sub)
+      α[]-Monotonic {𝓢} {𝓣 = 𝓣} (Antitone+ i X Y a s nip pos sub)
     Antitone+ i X Y a (α⟨ a₁ ⟩⁅ n ⁆ s) nin (ExistC pos) sub = {!!}
     Antitone+ i X Y a (s ⊗ s₁) nip (And {.s} {.s₁} {p₁} {p₂} {n₁} {n₂} pos pos₁) sub =
-      WFX.IntersectionLaw (Antitone+ i X Y a s (NotInUnionLeft p₂ nip) pos sub)
-                          (Antitone+ i X Y a s₁ (NotInUnionRight p₁ nip) pos₁ sub) 
+      IntersectionLaw (Antitone+ i X Y a s (WFAtom.NotInUnionLeft p₂ nip) pos sub)
+                      (Antitone+ i X Y a s₁ (WFAtom.NotInUnionRight p₁ nip) pos₁ sub) 
     Antitone+ i X Y a (- s) nip (Not pos) sub =
-      WFX.NegationLaw 𝓢 (Monotone+ i X Y a s nip pos sub)
-    
+      NegationLaw 𝓢 (Monotone+ i X Y a s nip pos sub)
+  

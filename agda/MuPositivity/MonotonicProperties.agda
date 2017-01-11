@@ -22,10 +22,10 @@ open import Membership
 open import FinSet
 
 module WFX = FinSet.WF⊂mod C eqC
-open WFX 
+open WFX
 open import Database C C eqC eqC
 
-open import Relation.agda
+open import Relation C eqC
 
 α⟨⟩-Monotonic : ∀ {S A B a} {𝓣 : Transitions} → A ⊆ B → 
    ⟪ s ∈ S ∣ ∃[ t ∈ S ] ⌊ (s , a , t) ∈trans? 𝓣 ⌋ ∧ ⌊ t ∈? A ⌋ ⟫ ⊆  
@@ -45,11 +45,11 @@ open import Relation.agda
                                         (λ x → g s _ x)
                        in λ x → h _ x)
 
-
+{-
 α⟨⟩⁅⁆-Monotonic : ∀ {S A B a n} {𝓣 : Transitions} → A ⊆ B →
    ⟪ s ∈ S ∣ ⌊ 𝓒 s (𝓣 ⟨ a ⟩▹ A) ≟ℕ n ⌋ ⟫ ⊆ ⟪ s ∈ S ∣ ⌊ 𝓒 s (𝓣 ⟨ a ⟩▹ B) ≟ℕ n ⌋ ⟫
 α⟨⟩⁅⁆-Monotonic {S} {A} {B} {a} {n} {𝓣} A⊆B = {!!}
-  
+  -}
 
 α[]-Monotonic : ∀ {S A B a} {𝓣 : Transitions} → A ⊆ B →
  ⟪ s ∈ S ∣ Π[ t ∈ S ] ⌊ (s , a , t) ∈trans? 𝓣 ⌋ ⇒ ⌊ t ∈? A ⌋ ⟫ ⊆
