@@ -121,6 +121,12 @@ dedup-≈ xs eq = dedup-sound eq xs , dedup-complete eq xs
 ∣_∣⟨_⟩ : {C : Set} → List C → (eq : DecEq C) → ℕ
 ∣ S ∣⟨ eq ⟩ = length (proj₁ (dedup eq S))
 
+multiplicity : {C : Set} → (eq : DecEq C) → C → List C → ℕ
+multiplicity eq x [] = zero
+multiplicity eq x (x₁ ∷ L) with eq x x₁
+multiplicity eq x (x₁ ∷ L) | yes p = suc (multiplicity eq x L)
+multiplicity eq x (x₁ ∷ L) | no ¬p = multiplicity eq x L
+
 --open import Data.Nat
 
 _≺⟨_⟩_ : {C : Set} → List C → (eq : DecEq C) → List C → Set
@@ -146,3 +152,82 @@ S ⊂⟨ eq ⟩? T | yes p | yes p₁ = yes (p , p₁)
 S ⊂⟨ eq ⟩? T | yes p | no ¬p = no (¬p ∘ proj₂)
 S ⊂⟨ eq ⟩? T | no ¬p | res₂ = no (¬p ∘ proj₁)
 
+{-
+open import Data.Sum
+
+x∉[] : ∀ {C : Set} (x : C) → x ∉ [] 
+x∉[] x ()
+
+¬x∷T⊆[] : ∀ {C : Set} {y : C} {T} → (y ∷ T) ⊆ [] → ⊥
+¬x∷T⊆[] {_} {y} p with p y here
+¬x∷T⊆[] {_} {y} p | ()
+
+hereOrThere : ∀ {C : Set} {x y : C} {S} → x ∈ S → y ∈ (x ∷ S) → y ∈ S
+hereOrThere x∈S here = x∈S
+hereOrThere x∈S (there y∈x∷S) = y∈x∷S
+
+staysIn : ∀ {C : Set} {x y : C} {S T} →
+  x ∈ T →  y ∈ (x ∷ S) → S ⊆ T → y ∈ T
+staysIn x∈T here S⊆T = x∈T
+staysIn x∈T (there y∈x∷S) S⊆T = S⊆T _ y∈x∷S
+
+staysOut : ∀ {C : Set} {x y : C} {S T} →
+  x ∈ T → x ∉ S → S ⊆ T → ¬ T ⊆ S → ¬ (T ⊆ (x ∷ S))
+staysOut x∈T x∉S S⊆T ¬T⊆S T⊆x∷S = {!!}
+
+_⊂_ : ∀ {C : Set} (xs ys : List C) → Set
+_⊂_ {C} S T = S ⊆ T × ¬ (T ⊆ S)
+
+
+die : ∀ {C : Set} {x y : C} {S T} →
+  x ∈ T → x ∉ S → S ⊆ T → ¬ T ⊆ S → (x ∷ S) ⊂ T → ⊥ 
+die x∈T x∉S S⊆T ¬T⊆S (x∷S⊆T , ¬T⊆x∷S) = {!!} 
+
+_≲⟨_⟩_ : ∀ {C : Set} → (S : List C) → (eq : DecEq C) → (T : List C) → Dec (S ⊂ T)
+[] ≲⟨ eq ⟩ [] = no (λ z → proj₂ z (λ x x₁ → x₁))
+[] ≲⟨ eq ⟩ (x ∷ T) = yes ((λ x₁ → λ ()) , (λ x₁ → ¬x∷T⊆[] x₁))
+(x ∷ S) ≲⟨ eq ⟩ T with S ≲⟨ eq ⟩ T 
+(x ∷ S) ≲⟨ eq ⟩ T | yes (S⊆T , ¬T⊆S ) with eq2in eq x S
+(x ∷ S) ≲⟨ eq ⟩ T | yes (S⊆T , ¬T⊆S) | yes p =
+  yes ((λ x₁ x₂ → hereOrThere (S⊆T x₁ (hereOrThere p x₂)) here) ,
+       (λ x₁ → ¬T⊆S (λ x₂ x₃ → hereOrThere p (x₁ x₂ x₃))))
+(x ∷ S) ≲⟨ eq ⟩ T | yes (S⊆T , ¬T⊆S) | no ¬p with eq2in eq x T
+(x ∷ S) ≲⟨ eq ⟩ T | yes (S⊆T , ¬T⊆S) | no ¬p | yes p =
+  no (λ x₁ → {!!})
+(x ∷ S) ≲⟨ eq ⟩ T | yes (S⊆T , ¬T⊆S) | no ¬p₁ | no ¬p = {!!}
+(x ∷ S) ≲⟨ eq ⟩ T | no ¬p = {!!}
+
+-}
+
+{-
+_⊂_ : ∀ {C : Set} (xs ys : List C) → Set
+_⊂_ {C} S T = S ⊆ T × Σ[ R ∈ List C ] R ≢ [] × R ⊆ T × (∀ x → x ∈ T → x ∈ S ⊎ x ∈ R)
+
+_≲⟨_⟩_ : ∀ {C : Set} → (S : List C) → (eq : DecEq C) → (T : List C) → Dec (S ⊂ T)
+[] ≲⟨ eq ⟩ [] = no ((λ {(S⊆T , [] , R≢[] , _) → R≢[] refl ;
+                       (S⊆T , (x ∷ R) , R≢[] , sub , f) → x∉[] x (sub x here) }))
+[] ≲⟨ eq ⟩ (x ∷ T) = yes
+                       ((λ x₁ → λ ()) , x ∷ T , (λ ()) , (λ x₁ x₂ → x₂) , (λ x₁ → inj₂))
+(x ∷ S) ≲⟨ eq ⟩ T with S ≲⟨ eq ⟩ T
+(x ∷ S) ≲⟨ eq ⟩ T | yes (S⊆T , R , R≢[] , R⊆T , part ) with eq2in eq x T
+(x ∷ S) ≲⟨ eq ⟩ T | yes (S⊆T , R , R≢[] , R⊆T , part ) | res = {!!}
+(x ∷ S) ≲⟨ eq ⟩ T | no ¬p = {!!}
+-}
+{-
+[] ≲⟨ eq ⟩ [] = no (λ {(_ , _ , () , _)})
+[] ≲⟨ eq ⟩ (x ∷ T) = yes ((λ x₁ → λ ()) , x , here , (λ ()))
+(x ∷ S) ≲⟨ eq ⟩ T with eq2in eq x T
+(x ∷ S) ≲⟨ eq ⟩ T | yes p with S ≲⟨ eq ⟩ T
+(x ∷ S) ≲⟨ eq ⟩ T | yes p₁ | yes (l , y , y∈T , y∉S) = {!!}
+{-
+  yes ((λ x x₁ → oneMore x₁ p₁ l) , y , y∈T , {!!})
+  where oneMore : ∀ {C : Set} {x y : C} {S T} → x ∈ (y ∷ S) → y ∈ T → S ⊆ T → x ∈ T
+        oneMore here y∈T s⊆T = y∈T
+        oneMore (there x∈y∷S) y∈T s⊆T = s⊆T _ x∈y∷S
+        notOneMore : ∀ {C : Set} {x y : C} {S T} → y ∈ T → y ∉ S → S ⊆ T → y ∉ (y ∷ T)
+        notOneMore y∈T₁ y∉S₁ S⊆T here = {!!}
+        notOneMore y∈T₁ y∉S₁ S⊆T (there y∈y∷S) = {!!}
+        -}
+(x ∷ S) ≲⟨ eq ⟩ T | yes p | no ¬p = {!!}
+(x ∷ S) ≲⟨ eq ⟩ T | no ¬p = no (λ z → ¬p (proj₁ z x here))
+-}
