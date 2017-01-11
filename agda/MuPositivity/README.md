@@ -103,6 +103,17 @@ R ⟨ a ⟩▹ A = ⟪ τ ∈ R ∣ ⌊ eqC (prop τ) a ⌋ ∧ ⌊ (obj τ) WFC
 𝓒 s R = length (σ₁ s R)
 ~~~
 
+Using this we can extend the modal-μ calculus with the following semantics: 
+
+~~~
+⟦ α⟨ a ⟩⁅ n ⁆ φ  ⟧+ i = ⟪ s ∈ 𝓢 ∣ ⌊ 𝓒 s (𝓣 ⟨ a ⟩▹ (⟦ φ ⟧+ i)) ≟ℕ n ⌋ ⟫
+~~~
+
+We can read this as, for every transition `a`, we return the set of
+`s` at which the number of triples in the relation `𝓣` restricted to
+`⟦ φ ⟧+ i`, is equal to `n`. This is the intuitive meaning of
+cardinality as expressed in languages such as SHACL and ShEx.
+
 As it turns out, we see in the file `CounterExample.agda`, the most
 natural cardinality condition is neither monotone, nor antitone. This
 means that in the polarity we have to add the variable to both
