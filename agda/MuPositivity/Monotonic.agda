@@ -159,8 +159,22 @@ module ModalTransitionSystem (𝓣 : Transitions) where
       NegationLaw 𝓢 (Monotone i X Y a s nip pos sub)
 
     Stable+ : ∀ i X Y {p n} →
-      (a : Atom) → (φ ∶ Φ+) → a ∉ n → a ∉ p → Polarity+ φ p n →  
-
+      (a : Atom) → (φ : Φ+) → a ∉ n → a ∉ p → Polarity+ φ p n → ⟦ φ ⟧+ (i [ a ≔ X ]) ≡ ⟦ φ ⟧+ (i [ a ≔ Y ])
+    Stable+ i X Y a (v x) nin nip Var with eqAtom a x
+    Stable+ i X Y a (v .a) nin nip Var | yes refl = ⊥-elim $ nip here
+    Stable+ i X Y a (v x) nin nip Var | no ¬p = refl
+    Stable+ i X Y a (P x) nin nip Prop = refl
+    Stable+ i X Y a₁ (α[ a ] φ) nin nip (Alpha pol) with Stable+ i X Y a₁ φ nin nip pol
+    Stable+ i X Y a₁ (α[ a ] φ) nin nip (Alpha pol) | p rewrite p = refl
+    Stable+ i X Y a₁ (α⟨ a ⟩⁅ n ⁆ φ) nin nip (ExistC {_} {_} {p₁} {n₁} pol) with Stable+ i X Y a₁ φ (WFAtom.NotInUnionRight p₁ nip) (WFAtom.NotInUnionLeft n₁ nin) pol
+    Stable+ i X Y a₁ (α⟨ a ⟩⁅ n ⁆ φ) nin nip (ExistC {_} {_} {p₁} {n₁} pol) | p rewrite p = refl
+    Stable+ i X Y a (φ ⊗ φ₁) nin nip (And {_} {_} {p₁} {p₂} {n₁} {n₂} pol pol₁)
+      with Stable+ i X Y a φ (WFAtom.NotInUnionLeft n₂ nin) (WFAtom.NotInUnionLeft p₂ nip ) pol
+      | Stable+ i X Y a φ₁ (WFAtom.NotInUnionRight n₁ nin) (WFAtom.NotInUnionRight p₁ nip) pol₁
+    Stable+ i X Y a (φ ⊗ φ₁) nin nip (And pol pol₁) | p | q rewrite p | q = refl
+    Stable+ i X Y a (- φ) nin nip (Not pol) with Stable+ i X Y a φ nip nin pol
+    Stable+ i X Y a (- φ) nin nip (Not pol) | p rewrite p = refl 
+    
     Monotone+ : ∀ i X Y {p n} →
       (a : Atom) → (φ : Φ+) → a ∉ n → Polarity+ φ p n → X ⊆ Y →
       ---------------------------------------------------
@@ -171,7 +185,9 @@ module ModalTransitionSystem (𝓣 : Transitions) where
     Monotone+ i X Y a (P x) nin pos sub = λ x₁ z → z
     Monotone+ i X Y a (α[ a₁ ] s) nin (Alpha pos) sub =
       α[]-Monotonic {𝓢} {𝓣 = 𝓣} (Monotone+ i X Y a s nin pos sub)
-    Monotone+ i X Y a (α⟨ a₁ ⟩⁅ n ⁆ s) nin (ExistC pos) sub = {!!}
+    Monotone+ i X Y a (α⟨ a₁ ⟩⁅ n ⁆ s) nin (ExistC {_} {_} {p₁} {n₁} pos) sub
+      with Stable+ i X Y a s (WFAtom.NotInUnionRight p₁ nin) (WFAtom.NotInUnionLeft n₁ nin) pos
+    Monotone+ i X Y a (α⟨ a₁ ⟩⁅ n ⁆ s) nin (ExistC {_} {_} {p₁} {n₁} pos) sub | p rewrite p = λ x z → z
     Monotone+ i X Y a (s ⊗ s₁) nin (And {.s} {.s₁} {p₁} {p₂} {n₁} {n₂} pos pos₁) sub =
       IntersectionLaw (Monotone+ i X Y a s (WFAtom.NotInUnionLeft n₂ nin) pos sub)
                       (Monotone+ i X Y a s₁ (WFAtom.NotInUnionRight n₁ nin) pos₁ sub)
