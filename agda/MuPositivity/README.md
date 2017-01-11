@@ -69,17 +69,83 @@ Positive x φ ≔ Polarity φ 𝓟 𝓝 ∧ x ∉ 𝓝
 Given a positive formulae φ we can ensure monotonicity and thereby
 fixed-points.
 
-There is one further complication. We define ⟦\_⟧ as a function in
-Agda, however functions must be total for Agda to accept them. This
-means we need to know that φ is monotonic in order to show that the
-fixed points are well defined and terminating. But the proof of
-monotonicity requires the definion of ⟦\_⟧. This leads to a difficult
-circularity.
+Cardinality 
+===========
 
-We dispense with this problem by requiring that the interpretation of
-fixed points must always decrease or we give up. If the interpretation
-is not monotonic the result will be somewhat arbitrary. However if it
-is indeed monotonic then the result will have the meaning of the fixed
-point. This allows us to *assume* the monotonicity before we prove
-it, a proof which has a somewhat coinductive flavour.
+Cardinality is not present in the modal μ-Calculus but we require
+cardinality in most "Shape" languages for the semantic-web such as
+ShEx and SHACL. We can add cardinality to the Modal μ without too much
+complication. However, we need to remember that the monotonicity
+conditions must be respected in order to employ fixed points. 
+
+Cardinality here is expressed strictly in terms of equality over
+natural numbers for simplitiy, rather than a general numeric
+predicate, though a general predicate is quite easy to add and
+pressents no problems for any decidable arithmetic fragment.
+
+We define cardinality using a right restriction, written in terms of
+set comprehension (given in our various comprehension libraries). 
+
+`R ⟨ a ⟩▹ A` is the right restriction of `R` to `A` at transition `a`. 
+
+`σ₁ s R` is the selection of `s` from the restriction `R`.
+
+`𝓒 s R` is the cardinality of the selection `s` at `R`.
+
+~~~
+_⟨_⟩▹_ : ∀ (R : Transitions) (a : C) (A : List C)  → Transitions
+R ⟨ a ⟩▹ A = ⟪ τ ∈ R ∣ ⌊ eqC (prop τ) a ⌋ ∧ ⌊ (obj τ) WFC.∈? A ⌋ ⟫
+
+σ₁ : ∀ s R → Transitions
+σ₁ s R = ⟪ τ ∈ R ∣ ⌊ eqC (sub τ) s ⌋ ⟫
+
+𝓒 : ∀ s R → ℕ
+𝓒 s R = length (σ₁ s R)
+~~~
+
+As it turns out, we see in the file `CounterExample.agda`, the most
+natural cardinality condition is neither monotone, nor antitone. This
+means that in the polarity we have to add the variable to both
+positive and negative contexts (as it is essentially of a
+mixed-polarity). Utilising this restriction we can cleanly express the
+monotonicity of our calculus as is shown in the file `Monotonic.agda`.
+
+The counter example is very simple and utilises the following
+transition system:
+
+~~~
+𝓣 : Transitions
+𝓣 = (A , B , C) ∷ (A , B , D) ∷ (E , B , F) ∷ []
+~~~
+
+Given this system and the sets `X₁` and `X₂` as follows: 
+
+~~~
+X₁ : Subjects
+X₁ = C ∷ ∅
+
+Y₁ : Subjects
+Y₁ = C ∷ D ∷ ∅
+~~~
+
+We have that the formula `φ` with one free variable a and a
+cardinality of 1 off of the transition B defined as:
+
+~~~
+φ⟨_⟩ : (a : ℕ) → Φ+
+φ⟨ a ⟩ = α⟨ B ⟩⁅ 1 ⁆ (v a)
+~~~
+
+...is neither monotone nor antitone, i.e.
+
+~~~
+φNotMonotone : ∀ (a : ℕ) → 
+ ----------------------------------------------------------
+  ¬ (⟦ φ⟨ a ⟩ ⟧+ (i [ a ≔ X₁ ]) ⊆ ⟦ φ⟨ a ⟩ ⟧+ (i [ a ≔ Y₁ ]))
+
+φNotAntitone : ∀ (a : ℕ) →
+  ¬ (⟦ φ⟨ a ⟩ ⟧+ (i [ a ≔ Y₂ ]) ⊆ ⟦ φ⟨ a ⟩ ⟧+ (i [ a ≔ X₂ ]))
+~~~
+
+
 
