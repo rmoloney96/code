@@ -10,8 +10,8 @@ Monotonicity
 
 In order to show that fixed points are well defined, we need to know
 that the functions associated with formulae of a given free variable
-in the modal mu calculus are monotonic. That is for a function f on
-the the power set of a set U the following hold:
+in the modal μ-calculus are monotonic. That is for a function f on
+the the power set of a set `U` the following hold:
 
 ~~~
 
@@ -19,16 +19,19 @@ X ⊆ Y → ⟦ φ ⟧(X) ⊆ ⟦ φ ⟧(Y)
 
 ~~~
 
-With this fact we have well defined fixed points such that: 
+With this fact we have well defined fixed points (least and greatest
+respectively) such that:
 
 ~~~
 
 ⟦ μ X . φ ⟧ ≔ ⋂{ X ⊆ U | ⟦ φ ⟧(X) ⊆ X }
 
+⟦ ν X . φ ⟧ ≔ ⋃{ X ⊆ U | X ⊆ ⟦ φ ⟧(X) }
+
 ~~~ 
 
-In order to define show montonicity, we also need antitonicity as negation 
-will induce an inversion of the principle such that: 
+In order to show montonicity, we also need antitonicity as negation
+will induce an inversion of the principle such that:
 
 ~~~
 
@@ -44,10 +47,11 @@ positivity restriction states that free variables to be used in fixed
 points must be in a "positive" position in the formula. This can be
 defined inductively which we find convenient to do simultaneously with
 the definition of negatively occuring formulae with a single inductive
-relation called "Polarity". 
+relation called "Polarity".
 
-The Polarity of a term gives a set of all variables (from 𝓥) which occur 
-in a positive context and all variables in a negative context for a given term. 
+The Polarity of a term gives a set of all variables (from 𝓥) which
+occur in a positive context and all variables in a negative context
+for a given term.
 
 ~~~
 
@@ -58,7 +62,9 @@ Polarity : Φ → 𝒫(𝓥) → 𝒫(𝓥) → Set
 Since it is possible to have variables in a mixed polarity (both
 positive and negative), posivity for a free variable x can be defined
 as a polarity in which the variable is not in a negative poliarity for
-the formula.
+the formula. This also allows the variable to not be free in a
+positive position since it is not necessary to refer to a variable,
+only that it not occur negatively.
 
 ~~~
 
@@ -88,7 +94,9 @@ set comprehension (given in our various comprehension libraries).
 
 `R ⟨ a ⟩▹ A` is the right restriction of `R` to `A` at transition `a`. 
 
-`σ₁ s R` is the selection of `s` from the restriction `R`.
+`σ₁ s R` is the selection of `s` in the first element of a triple from
+the relation `R` (sometimes written by juxtaposition in mathematical
+literature: `sR`).
 
 `𝓒 s R` is the cardinality of the selection `s` at `R`.
 
@@ -129,7 +137,7 @@ transition system:
 𝓣 = (A , B , C) ∷ (A , B , D) ∷ (E , B , F) ∷ []
 ~~~
 
-Given this system and the sets `X₁` and `X₂` as follows: 
+Given this system and the sets `X₁`, `Y₁`, `X₂` and `Y₂` as follows: 
 
 ~~~
 X₁ : Subjects
@@ -137,6 +145,12 @@ X₁ = C ∷ ∅
 
 Y₁ : Subjects
 Y₁ = C ∷ D ∷ ∅
+
+X₂ : Subjects
+X₂ = C ∷ ∅
+
+Y₂ : Subjects
+Y₂ = C ∷ F ∷ ∅
 ~~~
 
 We have that the formula `φ` with one free variable a and a
@@ -146,6 +160,8 @@ cardinality of 1 off of the transition B defined as:
 φ⟨_⟩ : (a : ℕ) → Φ+
 φ⟨ a ⟩ = α⟨ B ⟩⁅ 1 ⁆ (v a)
 ~~~
+
+A `B` tranition with cardinality 1.
 
 ...is neither monotone nor antitone, i.e.
 
