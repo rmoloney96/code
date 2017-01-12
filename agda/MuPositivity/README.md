@@ -55,7 +55,12 @@ for a given term.
 
 ~~~
 
-Polarity : Φ → 𝒫(𝓥) → 𝒫(𝓥) → Set
+  data Polarity : Φ → 𝒫(𝓥) → 𝒫(𝓥) → Set where
+    Var : ∀ {x} → Polarity (v x) [ x ] []
+    Prop : ∀ {p} → Polarity (P p) [] []
+    Alpha : ∀ {s a p n} → Polarity s p n → Polarity (α[ a ] s) p n
+    And : ∀ {s₁ s₂ p₁ p₂ n₁ n₂} → Polarity s₁ p₁ n₁ → Polarity s₂ p₂ n₂ → Polarity (s₁ ⊗ s₂) (p₁ ∪ p₂) (n₁ ∪ n₂)
+    Not : ∀ {s p n} → Polarity s p n → Polarity (- s) n p
 
 ~~~
 
