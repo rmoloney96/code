@@ -60,9 +60,9 @@ for a given term.
     Prop : ∀ {p} → Polarity (P p) [] []
     Alpha : ∀ {s a p n} → Polarity s p n → Polarity (α[ a ] s) p n
     And : ∀ {s₁ s₂ p₁ p₂ n₁ n₂} → Polarity s₁ p₁ n₁ → Polarity s₂ p₂ n₂ → Polarity (s₁ ⊗ s₂) (p₁ ∪ p₂) (n₁ ∪ n₂)
-    Not : ∀ {s p n} → Polarity s p n → Polarity (- s) n p
+    Not : ∀ {s p n} → Polarity s p n → Polarity (- s) n p φ
 
-~~~
+~~~ 
 
 Since it is possible to have variables in a mixed polarity (both
 positive and negative), posivity for a free variable x can be defined

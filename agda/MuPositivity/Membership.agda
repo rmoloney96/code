@@ -7,7 +7,7 @@ open import Relation.Nullary
 open import Relation.Binary.PropositionalEquality hiding (inspect)
 open import Relation.Binary hiding (_⇒_)
 open import Data.Product
-open import Data.Nat
+open import Data.Nat hiding (_∸_)
 open import Relation.Nullary.Negation using () renaming (contradiction to _↯_)
 open import Function
 
@@ -127,7 +127,181 @@ multiplicity eq x (x₁ ∷ L) with eq x x₁
 multiplicity eq x (x₁ ∷ L) | yes p = suc (multiplicity eq x L)
 multiplicity eq x (x₁ ∷ L) | no ¬p = multiplicity eq x L
 
---open import Data.Nat
+open import Relation.Nullary.Decidable using (⌊_⌋)
+open import Data.Bool hiding (_≟_)
+
+remove : ∀ {C} (eq : DecEq C) → C → List C → List C
+remove eq x M = filter (not ∘ ⌊_⌋ ∘ (eq x)) M
+
+remove-is-gone : ∀ {C} (eq : DecEq C) x M → x ∉ remove eq x M
+remove-is-gone eq x [] = λ ()
+remove-is-gone eq x (x₁ ∷ M) with remove-is-gone eq x M
+remove-is-gone eq x (x₁ ∷ M) | res with eq x x₁
+remove-is-gone eq x (.x ∷ M) | res | yes refl = res
+remove-is-gone eq x (x₁ ∷ M) | res | no ¬p = mustbethere x x₁ _ ¬p res
+  where mustbethere : ∀ {C} (x : C) x₁ P → x ≢ x₁ → x ∉ P → x ∈ (x₁ ∷ P) → ⊥
+        mustbethere x .x P p x∉P here = p refl
+        mustbethere x x₁ P p x∉P (there x∈x₁) = x∉P x∈x₁
+
+remove-is-convervative : ∀ {C} (eq : DecEq C) x y M → x ≢ y → y ∈ M → y ∈ remove eq x M
+remove-is-convervative eq x y [] p y∈M = y∈M
+remove-is-convervative eq x y (.y ∷ M) p here with eq x y
+remove-is-convervative eq x y (.y ∷ M) p₁ here | yes p = p ↯ p₁
+remove-is-convervative eq x y (.y ∷ M) p here | no ¬p = here
+remove-is-convervative eq x y (x₁ ∷ M) p (there y∈M) with eq x x₁
+remove-is-convervative eq x₁ y (.x₁ ∷ M) p₁ (there y∈M) | yes refl =
+  remove-is-convervative eq x₁ y M p₁ y∈M
+remove-is-convervative eq x y (x₁ ∷ M) p (there y∈M) | no ¬p =
+  there (remove-is-convervative eq x y M p y∈M)
+
+open import Data.Sum
+
+remove-choice : ∀ {C} (eq : DecEq C) x y M → y ∈ M → y ∈ remove eq x M ⊎ x ≡ y
+remove-choice eq x y M y∈M with eq x y
+remove-choice eq x y M y∈M | yes p = inj₂ p
+remove-choice eq x y M y∈M | no ¬p = inj₁ (remove-is-convervative eq x y M ¬p y∈M)
+
+y∈removeM⇒y∈M : ∀ {C} (eq : DecEq C) x M → remove eq x M ⊆ M
+y∈removeM⇒y∈M eq x [] y y∈remove = y∈remove
+y∈removeM⇒y∈M eq x (x₁ ∷ M) y y∈remove with eq x x₁
+y∈removeM⇒y∈M eq x (x₁ ∷ M) y y∈remove | yes p = there (y∈removeM⇒y∈M eq x M y y∈remove)
+y∈removeM⇒y∈M eq x (x₁ ∷ M) .x₁ here | no ¬p = here
+y∈removeM⇒y∈M eq x (x₁ ∷ M) x₂ (there y∈remove) | no ¬p = there (y∈removeM⇒y∈M eq x M x₂ y∈remove)
+
+_∪_ : ∀ {C : Set} → List C → List C → List C
+S ∪ T = S ++ T
+
+InUnionLeft : ∀ {C : Set} {S : List C} S₁ {a} → a ∈ S → a ∈ (S ∪ S₁)
+InUnionLeft {_} {[]} S₁ ()
+InUnionLeft {_} {(a ∷ S)} S₁ here = here
+InUnionLeft {_} {(x ∷ S)} S₁ (there p) = there $ InUnionLeft S₁ p
+
+InUnionRight : ∀ {C : Set} (S : List C) {S₁ a} → a ∈ S₁ → a ∈ (S ∪ S₁)
+InUnionRight [] here = here
+InUnionRight [] (there p) = there $ InUnionRight [] p 
+InUnionRight (x ∷ S) p = there $ InUnionRight S p
+
+NotInUnionLeft : ∀ {C : Set} {S : List C} S₁ {a} → a ∉ (S ∪ S₁) → a ∉ S
+NotInUnionLeft {C} {S} S₁ p q = p $ InUnionLeft {C} {S} S₁ q
+
+NotInUnionRight : ∀ {C} S {S₁ : List C} {a} → a ∉ (S ∪ S₁) → a ∉ S₁
+NotInUnionRight S {S₁} p q = p $ InUnionRight S {S₁} q
+
+
+S⊆T⇒x∷S⊆x∷T : ∀ {X : Set} (S T : List X) x → S ⊆ T → (x ∷ S) ⊆ (x ∷ T)
+S⊆T⇒x∷S⊆x∷T S T x S⊆T .x here = here
+S⊆T⇒x∷S⊆x∷T S T x S⊆T x₁ (there y∈x∷S) = there (S⊆T x₁ y∈x∷S) 
+
+x∈S∪T⇒x∈S⊎x∈T : ∀ {X : Set} (S T : List X) x →
+  x ∈ (S ∪ T) → x ∈ S ⊎ x ∈ T
+x∈S∪T⇒x∈S⊎x∈T [] T x x∈S∪T = inj₂ x∈S∪T
+x∈S∪T⇒x∈S⊎x∈T (x ∷ S) T .x here = inj₁ here
+x∈S∪T⇒x∈S⊎x∈T (x ∷ S) T x₁ (there x∈S∪T) with x∈S∪T⇒x∈S⊎x∈T S T x₁ x∈S∪T
+x∈S∪T⇒x∈S⊎x∈T (x₂ ∷ S) T x₁ (there x∈S∪T) | inj₁ x = inj₁ (there x)
+x∈S∪T⇒x∈S⊎x∈T (x ∷ S) T x₁ (there x∈S∪T) | inj₂ y = inj₂ y
+
+NotInUnion : ∀ {C} S₁ S₂ (a : C) → a ∉ S₁ → a ∉ S₂ → a ∉ (S₁ ∪ S₂)
+NotInUnion S₁ S₂ a a∉S₁ a∉S₂ a∈S₁∪S₂ with x∈S∪T⇒x∈S⊎x∈T S₁ S₂ a a∈S₁∪S₂
+NotInUnion S₁ S₂ a a∉S₁ a∉S₂ a∈S₁∪S₂ | inj₁ x = a∉S₁ x
+NotInUnion S₁ S₂ a a∉S₁ a∉S₂ a∈S₁∪S₂ | inj₂ y = a∉S₂ y
+
+A∪B⊆A∪x∷B : ∀ {X : Set} (A B : List X) x →
+  (A ∪ B) ⊆ (A ∪ (x ∷ B))
+A∪B⊆A∪x∷B A B x y y∈A∪B with x∈S∪T⇒x∈S⊎x∈T A B y y∈A∪B
+A∪B⊆A∪x∷B A B x₁ y y∈A∪B | inj₁ p = InUnionLeft (x₁ ∷ B) p
+A∪B⊆A∪x∷B A B x y y∈A∪B | inj₂ p = InUnionRight A (there p)
+
+-- A generalisation of the above
+A∪B⊆S∪T⇒A∪x∷B⊆S∪x∷T : ∀ {X : Set} (A B S T : List X) x →
+  (A ∪ B) ⊆ (S ∪ T) → (A ∪ (x ∷ B)) ⊆ (S ∪ (x ∷ T))
+A∪B⊆S∪T⇒A∪x∷B⊆S∪x∷T A B S T x A∪B⊆S∪T y y∈A∪x∷B
+  with x∈S∪T⇒x∈S⊎x∈T A (x ∷ B) y y∈A∪x∷B
+A∪B⊆S∪T⇒A∪x∷B⊆S∪x∷T A B S T x A∪B⊆S∪T y y∈A∪x∷B
+  | inj₁ x₁ with A∪B⊆S∪T y (InUnionLeft B x₁)
+A∪B⊆S∪T⇒A∪x∷B⊆S∪x∷T A B S T x A∪B⊆S∪T y y∈A∪x∷B | inj₁ x₁ | y∈S∪T
+                    with x∈S∪T⇒x∈S⊎x∈T S (x ∷ T) y (A∪B⊆A∪x∷B S T x y y∈S∪T)
+A∪B⊆S∪T⇒A∪x∷B⊆S∪x∷T A B S T x A∪B⊆S∪T y y∈A∪x∷B
+  | inj₁ x₂ | y∈S∪T | inj₁ x₁ = InUnionLeft (x ∷ T) x₁
+A∪B⊆S∪T⇒A∪x∷B⊆S∪x∷T A B S T x A∪B⊆S∪T y y∈A∪x∷B
+  | inj₁ x₁ | y∈S∪T | inj₂ y₁ = InUnionRight S y₁
+A∪B⊆S∪T⇒A∪x∷B⊆S∪x∷T A B S T y A∪B⊆S∪T .y y∈A∪x∷B | inj₂ here = InUnionRight S here
+A∪B⊆S∪T⇒A∪x∷B⊆S∪x∷T A B S T x A∪B⊆S∪T y y∈A∪x∷B | inj₂ (there y₁) with A∪B⊆S∪T y (InUnionRight A y₁)
+A∪B⊆S∪T⇒A∪x∷B⊆S∪x∷T A B S T x A∪B⊆S∪T y y∈A∪x∷B | inj₂ (there y₁) | u∈S∪T = A∪B⊆A∪x∷B S T x y u∈S∪T
+
+A⊆B⇒C⊆D⇒A∪C⊆B∪D : ∀ {X : Set} {A B C D : List X} → A ⊆ B → C ⊆ D → (A ∪ C) ⊆ (B ∪ D)
+A⊆B⇒C⊆D⇒A∪C⊆B∪D {A = A} {C = C} A⊆B C⊆D x x∈A∪C with x∈S∪T⇒x∈S⊎x∈T A C _ x∈A∪C
+A⊆B⇒C⊆D⇒A∪C⊆B∪D {D = D} A⊆B C⊆D x x∈A∪C | inj₁ x₁ = InUnionLeft D (A⊆B x x₁)
+A⊆B⇒C⊆D⇒A∪C⊆B∪D {B = B} A⊆B C⊆D x x∈A∪C | inj₂ y = InUnionRight B (C⊆D x y)
+
+vennise : ∀ {X : Set} → (eq : DecEq X) → List X → List X → List X × List X × List X
+vennise eq [] M = [] , [] , M
+vennise eq (x ∷ L) M with eq2in eq x M
+vennise eq (x ∷ L) M | yes p with vennise eq L (remove eq x M)
+vennise eq (x ∷ L) M | yes p | A , B , C = A , x ∷ B , C
+vennise eq (x ∷ L) M | no ¬p with vennise eq L M
+vennise eq (x ∷ L) M | no ¬p | A , B , C = x ∷ A , B , C
+
+left : ∀ {ℓ} {A : Set ℓ} → A × A × A → A
+left = proj₁
+
+middle : ∀ {ℓ} {A : Set ℓ} → A × A × A → A
+middle = proj₁ ∘ proj₂ 
+
+right : ∀ {ℓ} {A : Set ℓ} → A × A × A → A
+right = proj₂ ∘ proj₂ 
+
+vennise-sub-left : ∀ {X : Set} → (eq : DecEq X) → ∀ (N M : List X) → ((left (vennise eq N M)) ∪ (middle (vennise eq N M))) ≈ N 
+vennise-sub-left eq [] M = (λ x x₁ → x₁) , (λ x x₁ → x₁)
+vennise-sub-left eq (x ∷ N) M with eq2in eq x M
+vennise-sub-left eq (x ∷ N) M | yes p with vennise eq N (remove eq x M) | vennise-sub-left eq N (remove eq x M)
+vennise-sub-left eq (x ∷ N) M | yes p | A , B , C | A∪B⊆N , N⊆A∪B =
+  (λ a a∈A∪x∷B → A∪B⊆S∪T⇒A∪x∷B⊆S∪x∷T A B [] N x A∪B⊆N a a∈A∪x∷B) , (λ a x∈a∷N → hereOrThere a x A B N x∈a∷N N⊆A∪B)
+  where hereOrThere : ∀ {X : Set} (a x : X) A B N → a ∈ (x ∷ N) → N ⊆ (A ∪ B) → a ∈ (A ∪ (x ∷ B))
+        hereOrThere a .a A₁ B₁ N here N⊆A∪B = InUnionRight A₁ here
+        hereOrThere a x A₁ B₁ N (there a∈x∷N) N⊆A∪B = let res = N⊆A∪B a a∈x∷N in A∪B⊆A∪x∷B A₁ B₁ x a (N⊆A∪B a a∈x∷N)
+vennise-sub-left eq (x ∷ N) M | no ¬p with vennise eq N M | vennise-sub-left eq N M
+vennise-sub-left eq (x ∷ N) M | no ¬p | A , B , C | A∪B⊆N , N⊆A∪B = (S⊆T⇒x∷S⊆x∷T (A ++ B) N x A∪B⊆N , S⊆T⇒x∷S⊆x∷T N (A ++ B) x N⊆A∪B)
+
+--- Useful due to where clauses being fussy
+here⊎there : ∀ {X : Set} (a : X) x B → a ∈ (x ∷ B) → a ≡ x ⊎ a ∈ B
+here⊎there a .a B here = inj₁ refl
+here⊎there a x B (there a∈x∷B) = inj₂ a∈x∷B
+
+vennise-sub-right : ∀ {X : Set} → (eq : DecEq X) → ∀ (N M : List X) → ((middle (vennise eq N M)) ∪ (right (vennise eq N M))) ≈ M 
+vennise-sub-right eq [] M = (λ x x₁ → x₁) , (λ x x₁ → x₁)
+vennise-sub-right eq (x ∷ N) M with eq2in eq x M
+vennise-sub-right eq (x ∷ N) M | yes p with vennise eq N (remove eq x M) | vennise-sub-right eq N (remove eq x M)
+vennise-sub-right eq (x ∷ N) M | yes p | A , B , C | A∪B⊆N , N⊆A∪B = leftSide , rightSide
+  where rightSide : ∀ a → a ∈ M → a ∈ ((x ∷ B) ∪ C)
+        rightSide a a∈M with remove-choice eq x a M a∈M
+        rightSide a a∈M | inj₁ p = let res = N⊆A∪B a p in InUnionRight [] (there (N⊆A∪B a p)) 
+        rightSide a a∈M | inj₂ p rewrite p = here
+        leftSide : ∀ a → a ∈ (x ∷ B ∪ C) → a ∈ M
+        leftSide a a∈x∷B∪C with here⊎there a x (B ∪ C) a∈x∷B∪C
+        leftSide a a∈x∷B∪C | inj₁ q rewrite q = p
+        leftSide a a∈x∷B∪C | inj₂ q = let res = A∪B⊆N a q in y∈removeM⇒y∈M eq x M a res
+vennise-sub-right eq (x ∷ N) M | no ¬p with vennise eq N M | vennise-sub-right eq N M
+vennise-sub-right eq (x ∷ N) M | no ¬p | A , B , C | A∪B⊆N , N⊆A∪B = A∪B⊆N , N⊆A∪B
+
+vennise-middle-left : ∀ {X : Set} → (eq : DecEq X) → ∀ (N M : List X) → (middle (vennise eq N M)) ⊆ N 
+vennise-middle-left eq [] M = λ x z → z
+vennise-middle-left eq (x ∷ N) M with eq2in eq x M 
+vennise-middle-left eq (x ∷ N) M | yes p with vennise eq N (remove eq x M) | vennise-middle-left eq N (remove eq x M)
+vennise-middle-left eq (x ∷ N) M | yes p | A , B , C | sub = A∪B⊆S∪T⇒A∪x∷B⊆S∪x∷T [] B [] N x sub
+vennise-middle-left eq (x ∷ N) M | no ¬p with vennise eq N (remove eq x M) | vennise-middle-left eq N M
+vennise-middle-left eq (x ∷ N) M | no ¬p | A , B , C | sub = λ α α∈NM → there (sub α α∈NM)
+
+vennise-middle-right : ∀ {X : Set} → (eq : DecEq X) → ∀ (N M : List X) → (middle (vennise eq N M)) ⊆ M
+vennise-middle-right eq [] M = λ x → λ ()
+vennise-middle-right eq (x ∷ N) M with eq2in eq x M
+vennise-middle-right eq (x ∷ N) M | yes p with vennise eq N (remove eq x M) | vennise-middle-right eq N (remove eq x M)
+vennise-middle-right eq (x ∷ N) M | yes p | A , B , C | sub = α∈M
+  where α∈M : ∀ α → α ∈ (x ∷ B) → α ∈ M
+        α∈M α α∈x∷B with here⊎there α x B α∈x∷B
+        α∈M α α∈x∷B | inj₁ q rewrite q = p 
+        α∈M α α∈x∷B | inj₂ q = y∈removeM⇒y∈M eq x M α (sub α q)                               
+vennise-middle-right eq (x ∷ N) M | no ¬p with vennise eq N (remove eq x M) | vennise-middle-right eq N M
+vennise-middle-right eq (x ∷ N) M | no ¬p | A , B , C | sub = sub
 
 _≺⟨_⟩_ : {C : Set} → List C → (eq : DecEq C) → List C → Set
 S ≺⟨ eq ⟩ T = ∣ S ∣⟨ eq ⟩ <′ ∣ T ∣⟨ eq ⟩

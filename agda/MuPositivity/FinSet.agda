@@ -94,9 +94,6 @@ module WF⊂mod (C : Set) (eq : DecEq C) where
   _∈?_ : (x : C) → (L : List C) → Dec (x ∈ L)
   x ∈? S = eq2in eq x S
 
-  _∪_ : List C → List C → List C
-  S ∪ T = ⟪ s ∈ (S ++ T) ∣ true ⟫ 
-
   _∩_ : List C → List C → List C
   S ∩ T = ⟪ s ∈ S ∣ ⌊ s ∈? T ⌋ ⟫
 
@@ -105,22 +102,6 @@ module WF⊂mod (C : Set) (eq : DecEq C) where
 
   𝓜 : C → List C → ℕ 
   𝓜 x S = multiplicity eq x S
-
-  InUnionLeft : ∀ {S} S₁ {a} → a ∈ S → a ∈ (S ∪ S₁)
-  InUnionLeft {[]} S₁ ()
-  InUnionLeft {(a ∷ S)} S₁ here = here
-  InUnionLeft {(x ∷ S)} S₁ (there p) = there $ InUnionLeft S₁ p
-
-  InUnionRight : ∀ S {S₁ a} → a ∈ S₁ → a ∈ (S ∪ S₁)
-  InUnionRight [] here = here
-  InUnionRight [] (there p) = there $ InUnionRight [] p 
-  InUnionRight (x ∷ S) p = there $ InUnionRight S p
-  
-  NotInUnionLeft : ∀ {S : List C} S₁ {a} → a ∉ (S ∪ S₁) → a ∉ S
-  NotInUnionLeft {S} S₁ p q = p $ InUnionLeft {S} S₁ q
-
-  NotInUnionRight : ∀ S {S₁ : List C} {a} → a ∉ (S ∪ S₁) → a ∉ S₁
-  NotInUnionRight S {S₁} p q = p $ InUnionRight S {S₁} q
 
   _⟶_ : ∀ (P Q : C → Bool) → Set
   P ⟶ Q = ∀ {s : C} → T (P s) → T (Q s)
@@ -182,6 +163,14 @@ module WF⊂mod (C : Set) (eq : DecEq C) where
     in let x∈B = A⊆B x x∈A
        in let x∈D = C⊆D x x∈C
            in BothIntersection x∈B x∈D 
+
+  IntersectionLeft : ∀ {A B C} → A ⊆ C → (A ∩ B) ⊆ C
+  IntersectionLeft {A} A⊆C x x∈A∩B with IntersectionBoth {A} x∈A∩B
+  IntersectionLeft A⊆C x x∈A∩B | x∈A , x∈B = A⊆C x x∈A
+
+  IntersectionRight : ∀ {A B C} → B ⊆ C → (A ∩ B) ⊆ C
+  IntersectionRight {A} B⊆C x x∈A∩B with IntersectionBoth {A} x∈A∩B
+  IntersectionRight B⊆C x x∈A∩B | x∈A , x∈B = B⊆C x x∈B
 
   BoolSub : ∀ {A B t} → A ⊆ B → T ⌊ t ∈? A ⌋ → T ⌊ t ∈? B ⌋
   BoolSub {A} {B} {t} sub t∈?A with t ∈? A

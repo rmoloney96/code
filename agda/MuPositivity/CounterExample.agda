@@ -69,6 +69,7 @@ X₂⊆Y₂ .2 here = here
 X₂⊆Y₂ x (there x∈X₂) = there (there x∈X₂)
 
 φNotAntitone : ∀ (a : ℕ) →
+ ----------------------------------------------------------
   ¬ (⟦ φ⟨ a ⟩ ⟧+ (i [ a ≔ Y₂ ]) ⊆ ⟦ φ⟨ a ⟩ ⟧+ (i [ a ≔ X₂ ]))
 φNotAntitone a sub with a ≟ a
 φNotAntitone a sub | yes p with sub 4 (there (there here))
