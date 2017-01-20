@@ -79,10 +79,6 @@ module WF⊂mod (C : Set) (eq : DecEq C) where
   Px⇒x∈S⇒x∈⟪S∣P⟫ (x ∷ S) P x₁ TPx (there x∈S) | false = Px⇒x∈S⇒x∈⟪S∣P⟫ S P x₁ TPx x∈S
   Px⇒x∈S⇒x∈⟪S∣P⟫ (x ∷ S) P x₁ TPx (there x∈S) | true = there (Px⇒x∈S⇒x∈⟪S∣P⟫ S P x₁ TPx x∈S)
   
-{-with Px⇒x∈S⇒x∈⟪S∣P⟫ S P x₁ TPx {!!}
-  Px⇒x∈S⇒x∈⟪S∣P⟫ (x ∷ S) P x₁ TPx x∈S | res = {!!}
-  -}
-  
   comprehension-syntax : ∀ (S : List C) → (P : C → Bool) → List C
   comprehension-syntax S P = proj₁ (dedup eq (comprehension-raw S P))
 

@@ -10,7 +10,7 @@ open import Data.Product
 open import Data.Nat hiding (_∸_)
 open import Relation.Nullary.Negation using () renaming (contradiction to _↯_)
 open import Function
-
+open import Data.Sum
 
 data _∈_  {C : Set} : (x : C) → (L : List C) → Set where
   here : ∀ {x L} → x ∈ (x ∷ L)
@@ -72,6 +72,21 @@ data _#_ {C} : C → List C → Set where
 
 _⊆_ : ∀ {C : Set} (xs ys : List C) → Set
 S ⊆ T = ∀ x → x ∈ S → x ∈ T
+
+{- Properties of subset -}
+⊆-trans : ∀ {C : Set} {S T U : List C} → S ⊆ T → T ⊆ U → S ⊆ U
+⊆-trans S⊆T T⊆U x x∈S = T⊆U x (S⊆T x x∈S)
+
+¬x∷S⊆T⇒x∉T⇒S⊆T : ∀ {C : Set} {S T : List C} {x} → ¬ (x ∷ S) ⊆ T → x ∈ T  → ¬ S ⊆ T
+¬x∷S⊆T⇒x∉T⇒S⊆T ¬x∷S⊆T x∈T S⊆T = ¬x∷S⊆T (λ {_ here → x∈T ; y (there y∈S) → S⊆T y y∈S})
+
+¬⊆⇒∃x : ∀ {C : Set} {S T : List C} (eq : DecEq C) → ¬ S ⊆ T → Σ[ x ∈ C ] x ∈ S × x ∉ T
+¬⊆⇒∃x {S = []} eq ¬S⊆T = ⊥-elim (¬S⊆T (λ x → λ ()))
+¬⊆⇒∃x {S = x ∷ S} {T = T} eq ¬S⊆T with eq2in eq x T
+¬⊆⇒∃x {C} {x ∷ S} eq ¬S⊆T | yes p =
+  let (x , x∈S , x∉T) = ¬⊆⇒∃x {S = S} eq (¬x∷S⊆T⇒x∉T⇒S⊆T ¬S⊆T p)
+  in x , there x∈S , x∉T
+¬⊆⇒∃x {C} {x ∷ S} eq ¬S⊆T | no ¬p = x , here , ¬p 
 
 _⊆⟨_⟩?_ : ∀ {C : Set} (xs : List C) (eq : DecEq C) (ys : List C) → Dec (xs ⊆ ys)
 [] ⊆⟨ eq ⟩? T = yes (λ x → λ ())
@@ -153,8 +168,6 @@ remove-is-convervative eq x₁ y (.x₁ ∷ M) p₁ (there y∈M) | yes refl =
   remove-is-convervative eq x₁ y M p₁ y∈M
 remove-is-convervative eq x y (x₁ ∷ M) p (there y∈M) | no ¬p =
   there (remove-is-convervative eq x y M p y∈M)
-
-open import Data.Sum
 
 remove-choice : ∀ {C} (eq : DecEq C) x y M → y ∈ M → y ∈ remove eq x M ⊎ x ≡ y
 remove-choice eq x y M y∈M with eq x y
@@ -326,3 +339,70 @@ S ⊂⟨ eq ⟩? T | yes p | yes p₁ = yes (p , p₁)
 S ⊂⟨ eq ⟩? T | yes p | no ¬p = no (¬p ∘ proj₂)
 S ⊂⟨ eq ⟩? T | no ¬p | res₂ = no (¬p ∘ proj₁)
 
+
+{-
+removeLess : ∀ {C : Set} x → (eq : DecEq C) → (S : List C) →
+  x ∈ S → ∣ remove eq x S ∣⟨ eq ⟩ <′ ∣ S ∣⟨ eq ⟩
+removeLess x eq [] ()
+removeLess x eq (.x ∷ S) here = {!!}
+removeLess x eq (x₁ ∷ S) (there x∈S) with removeLess S
+removeLess x eq (x₁ ∷ S) (there x∈S) | res = ?
+-}
+
+{-
+oneLess : ∀ {C : Set} x → (eq : DecEq C) → (S T : List C) →
+  dedup eq S ⊆ dedup eq T → ∣ S ∣⟨ eq ⟩ <′ ∣ x ∷ T ∣⟨ eq ⟩ → ∣ remove eq x S ∣⟨ eq ⟩ <′ ∣ T ∣⟨ eq ⟩
+oneLess x eq S T S⊆T S<T = {!!}
+-}
+
+{-
+countEm : ∀ {C : Set} → (eq : DecEq C) → (S T : List C) → NoDup S → NoDup T →
+  S ⊆ T → ¬ (∣ S ∣⟨ eq ⟩ <′ ∣ T ∣⟨ eq ⟩) → T ⊆ S 
+countEm eq NS .[] S [] S⊆T ¬count x () 
+countEm eq NS _ S (x₁ ∷ T) S⊆T ¬count x here = {!!}
+countEm eq NS _ S (x₂ ∷ T) S⊆T ¬count x₁ (there x∈T) = {!!}
+-}
+
+{-
+¬S⊂T⇒S⊆T⇒T⊆S : ∀ {C : Set} → (eq : DecEq C) → (S T : List C) → ¬ (S ⊂⟨ eq ⟩ T) → S ⊆ T → T ⊆ S
+¬S⊂T⇒S⊆T⇒T⊆S eq S T ¬S⊂T S⊆T with T ⊆⟨ eq ⟩? S
+¬S⊂T⇒S⊆T⇒T⊆S eq S T ¬S⊂T S⊆T | yes p = p
+¬S⊂T⇒S⊆T⇒T⊆S eq S T ¬S⊂T S⊆T | no ¬p =
+  let (y , y∈L , y∉R) = ¬⊆⇒∃x eq ¬p
+  in ⊥-elim (¬p (λ x x₁ → {!!})) -- (¬S⊂T (S⊆T , {!!}))
+-}
+
+--S < T 
+{-
+
+¬S⊂T⇒S⊆T⊎T⊆S : ∀ : {C : Set} → (eq : DecEq C) → (S T : List C) → ¬ (S ⊂⟨ eq ⟩ T) → (¬ (S ⊆ T)) ⊎ ∣ S ∣⟨ eq ⟩ <′ ∣ T 
+¬S⊂T⇒S⊆T⊎T⊆S eq S T ¬S⊂T  
+
+¬S⊂T⇒S⊆T⇒T⊆S : ∀ {C : Set} → (eq : DecEq C) → (S T : List C) → ¬ (S ⊂⟨ eq ⟩ T) → S ⊆ T → T ⊆ S
+¬S⊂T⇒S⊆T⇒T⊆S eq S T p q y y∈T = {!!}
+-}
+
+{-
+
+
+
+¬S⊂T∧¬S⊆T : ∀ {C : Set} → (eq : DecEq C) → (S T : List C) → S ⊂⟨ eq ⟩ T → S ⊆ T → S ≈ T
+¬S⊂T∧¬S⊆T eq S T ¬S⊂T with S ⊂⟨ eq ⟩? T 
+¬S⊂T∧¬S⊆T eq S T ¬S⊂T | yes (S⊆T , ∣S∣<∣T∣) = {!!}
+¬S⊂T∧¬S⊆T eq S T ¬S⊂T | no ¬p = {!!}
+-}
+
+{-
+¬⊂→∃x : ∀ {C : Set} {S T : List C} (eq : DecEq C) → ¬ S ⊂⟨ eq ⟩ T → Σ[ x ∈ C ] x ∈ S × x ∉ T
+¬⊂→∃x {S = []} eq ¬S⊂⟨eq⟩T = ⊥-elim (¬S⊂⟨eq⟩T {!!})
+¬⊂→∃x {S = x ∷ S} eq ¬S⊂⟨eq⟩T = {!!}
+
+¬S⊂T∧S⊆T⇒¬¬T⊆S : ∀ {C : Set} → (eq : DecEq C) → (S T : List C) → ¬ S ⊂⟨ eq ⟩ T → S ⊆ T → ¬ ¬ T ⊆ S
+¬S⊂T∧S⊆T⇒¬¬T⊆S eq [] [] ¬S⊂T S⊆T ¬T⊆S = ¬T⊆S (λ x z → z)
+¬S⊂T∧S⊆T⇒¬¬T⊆S eq [] (x ∷ T) ¬S⊂T S⊆T ¬T⊆S with ∣ [] ∣⟨ eq ⟩ <? ∣ (x ∷ T) ∣⟨ eq ⟩ 
+¬S⊂T∧S⊆T⇒¬¬T⊆S eq [] (x ∷ T) ¬S⊂T S⊆T ¬T⊆S | yes p = ¬S⊂T (S⊆T , p)
+¬S⊂T∧S⊆T⇒¬¬T⊆S eq [] (x ∷ T) ¬S⊂T S⊆T ¬T⊆S | no ¬p = ¬p {!!}
+¬S⊂T∧S⊆T⇒¬¬T⊆S eq (x ∷ S) T ¬S⊂T S⊆T ¬T⊆S = {!!}
+
+res : ∀ X Y → Y ⊂ X → X ⊆ Y → ¬ Y ⊆ X
+-}

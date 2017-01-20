@@ -22,7 +22,7 @@ open import Data.Bool hiding (_≟_)
 open import Data.List
 open import Induction.WellFounded
 open import Data.Nat renaming (_≟_ to _≟ℕ_)
-open import Data.Unit
+open import Data.Unit hiding (_≤_)
 open import Data.Empty
 open import FinSet
 open import Membership
@@ -262,14 +262,17 @@ module ModalTransitionSystem (𝓣 : Transitions) where
     ν : ∀ (a : Atom) (φ : Φ+) → ∀ {_ : T ⌊ isPositiveIn+ a φ ⌋} → νΦ
     νν : ∀ (a : Atom) → νΦ → νΦ
 
-  fixApprox : (Subjects → Subjects) → (S : Subjects) → (Acc _⊂_ S) → Subjects
-  fixApprox f X ac with f X
-  fixApprox f X ac | S with S ⊂? X
-  fixApprox f X (acc rs) | S | yes p = fixApprox f S (rs S p)
-  fixApprox f X ac | S | no ¬p = S 
+  _̂_ : (Subjects → Subjects) → ℕ → Subjects → Subjects
+  f ̂ ℕ.zero = λ x → x
+  f ̂ (ℕ.suc n) = f ∘ (f ̂ n)
+
+  fixApprox : (f : Subjects → Subjects) → (n : ℕ) → (Acc _⊂_ ((f ̂ n) 𝓢)) → Subjects × ℕ
+  fixApprox f n ac with (f ̂ (1 + n)) 𝓢 ⊂? (f ̂ n) 𝓢
+  fixApprox f n (acc rs) | yes p = fixApprox f (1 + n) (rs ((f ̂ (1 + n)) 𝓢) p)
+  fixApprox f n ac | no ¬p = (f ̂ n) 𝓢 , n
   
   fix : (Subjects → Subjects) → Subjects
-  fix f = fixApprox f 𝓢 (wf⊂ 𝓢)
+  fix f = proj₁ (fixApprox f 0 (wf⊂ 𝓢))
 
   ⟦_⟧ν : νΦ → Interpretation → Subjects
   ⟦ ν a φ ⟧ν i = fix (λ X → ⟦ φ ⟧+ (i [ a ≔ X ]))
@@ -293,34 +296,50 @@ module ModalTransitionSystem (𝓣 : Transitions) where
   BoundedByS i (α⟨ a ⟩⁅ x ⁆ φ) iB = ⟪S∣P⟫⊆S 𝓢 _
   BoundedByS i (- φ) iB = ⟪S∣P⟫⊆S 𝓢 _
 
-  _̂_ : (Subjects → Subjects) → ℕ → Subjects → Subjects
-  f ̂ ℕ.zero = λ x → x
-  f ̂ (ℕ.suc n) = f ∘ (f ̂ n)
-
   -- f is bounded below S
   _↓_ : (Subjects → Subjects) → Subjects → Set
   f ↓ S = ∀ X → X ⊆ S → f X ⊆ S
 
-  nth-approx-shrinks : ∀ f n → Monotonic f → f ↓ 𝓢 → ((f ̂ (1 + n)) 𝓢) ⊆ ((f ̂ n) 𝓢)
-  nth-approx-shrinks f ℕ.zero mf f↓𝓢 = f↓𝓢 𝓢 (λ x z → z)
-  nth-approx-shrinks f (ℕ.suc n) mf f↓𝓢 = mf (nth-approx-shrinks f n mf f↓𝓢)
+  approx-shrinks : ∀ f n → Monotonic f → f ↓ 𝓢 → ((f ̂ (1 + n)) 𝓢) ⊆ ((f ̂ n) 𝓢)
+  approx-shrinks f ℕ.zero mf f↓𝓢 = f↓𝓢 𝓢 (λ x z → z)
+  approx-shrinks f (ℕ.suc n) mf f↓𝓢 = mf (approx-shrinks f n mf f↓𝓢)
 
-
-{-
-  fDecreases : ∀ f → Monotonic f → ∀ X → (wf : Acc _⊂_ X) → fixApprox f X wf ⊆ X
-  fDecreases f mf X wf with f X ⊂? X  
-  fDecreases f mf X (acc rs) | yes p with fDecreases f mf (f X) (rs (f X) p)
-  fDecreases f mf X (acc rs) | yes p | fX⊆X = λ x x₁ →
-    let res = fX⊆X x x₁ in {!!}
-  fDecreases f mf X ac | no ¬p = {!let mf !}
-  -}
+  fn-below : ∀ f n → Monotonic f → f ↓ 𝓢 → ((f ̂ n) 𝓢) ⊆ 𝓢
+  fn-below f ℕ.zero mf f↓𝓢 = λ x z → z
+  fn-below f (ℕ.suc n) mf f↓𝓢 = ⊆-trans (approx-shrinks f n mf f↓𝓢) (fn-below f n mf f↓𝓢)
   
---  fixIsGreatest : ∀ f X Y → (g : Y ⊆ 𝓢) → Y ⊆ f X →  
+  nth-approx-shrinks : ∀ f n m →
+    Monotonic f → f ↓ 𝓢  → n ≤ m →
+    --------------------------------
+      ((f ̂ m) 𝓢) ⊆ ((f ̂ n) 𝓢)
+  nth-approx-shrinks f .0 m mf f↓𝓢 z≤n = fn-below f m mf f↓𝓢
+  nth-approx-shrinks f _ _ mf f↓𝓢 (s≤s n≤m) = mf (nth-approx-shrinks f _ _ mf f↓𝓢 n≤m)
+
+  isFixed : ∀ f n →
+    Monotonic f → f ↓ 𝓢 → ((f ̂ n) 𝓢) ⊆ ((f ̂ (1 + n)) 𝓢) →
+    ----------------------------------------------------------------
+              ((f ̂ n) 𝓢) ≈ ((f ̂ (1 + n)) 𝓢)
+  isFixed f n mf f↓𝓢 fn⊆fsn = fn⊆fsn , approx-shrinks f n mf f↓𝓢 
+
+  fixStrong : ∀ (f : Subjects → Subjects) → Monotonic f → f ↓ 𝓢  → (n : ℕ) → (Acc _⊂_ ((f ̂ n) 𝓢)) →
+    Σ[ m ∈ ℕ ] (f ̂ m) 𝓢 ≈ ((f ̂ (1 + m)) 𝓢)
+  fixStrong f mf f↓𝓢 n ac with (f ̂ (1 + n)) 𝓢 ⊂? (f ̂ n) 𝓢
+  fixStrong f mf f↓𝓢 n (acc rs) | yes p = fixStrong f mf f↓𝓢 (1 + n) (rs ((f ̂ (1 + n)) 𝓢) p)
+  fixStrong f mf f↓𝓢 n ac | no ¬p = {!!}
 
 {-
-Monotone+ : ∀ i X Y {p n} →
-      (a : Atom) → (φ : Φ+) → a ∉ n → Polarity+ φ p n → X ⊆ Y →
-      ---------------------------------------------------
-            ⟦ φ ⟧+ (i [ a ≔ X ]) ⊆ ⟦ φ ⟧+ (i [ a ≔ Y ]) 
-    
+  with (f ̂ n) 𝓢 ⊆⟨ eqC ⟩? (f ̂ (1 + n)) 𝓢 
+  fixStrong f mf f↓𝓢 n ac | no ¬p | yes p = n , (p , approx-shrinks f n mf f↓𝓢)
+  fixStrong f mf f↓𝓢 n ac | no ¬p₁ | no ¬p =
+    let fSn⊆fn = approx-shrinks f n mf f↓𝓢
+        (y , y∈L , y∉R) = ¬⊆⇒∃x eqC ¬p
+    in ⊥-elim (¬p {!!}) -- ⊥-elim (¬p₁ (fSn⊆fn , {!!}))
 -}
+
+--∣ f ̂ (n + 1) ∣⟨ eq ⟩  < ∣ f ̂ n ∣⟨ eq ⟩
+
+{-
+let lower = approx-shrinks f n mf f↓𝓢
+    in {!!}
+-}
+--n , {!isFixed!} , {!isFixed!} -- (f ̂ n) 𝓢 , n
