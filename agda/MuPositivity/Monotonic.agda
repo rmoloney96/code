@@ -316,30 +316,28 @@ module ModalTransitionSystem (𝓣 : Transitions) where
   nth-approx-shrinks f _ _ mf f↓𝓢 (s≤s n≤m) = mf (nth-approx-shrinks f _ _ mf f↓𝓢 n≤m)
 
   isFixed : ∀ f n →
-    Monotonic f → f ↓ 𝓢 → ((f ̂ n) 𝓢) ⊆ ((f ̂ (1 + n)) 𝓢) →
-    ----------------------------------------------------------------
+          Monotonic f → f ↓ 𝓢 → ((f ̂ n) 𝓢) ⊆ ((f ̂ (1 + n)) 𝓢) →
+         ----------------------------------------------------------
               ((f ̂ n) 𝓢) ≈ ((f ̂ (1 + n)) 𝓢)
   isFixed f n mf f↓𝓢 fn⊆fsn = fn⊆fsn , approx-shrinks f n mf f↓𝓢 
 
+  notLower⊆ : ∀ f n → Monotonic f → f ↓ 𝓢 → ¬ (f ̂ (1 + n)) 𝓢 ⊂ (f ̂ n) 𝓢 →
+             ---------------------------------------------------------
+                        (f ̂ n) 𝓢 ⊆ (f ̂ (1 + n)) 𝓢
+  notLower⊆ f n mf f↓𝓢 ¬fsn⊂fn with ¬X⊂Y⇒¬X⊆Y⊎∣X∣<∣Y∣ ¬fsn⊂fn
+  notLower⊆ f n mf f↓𝓢 ¬fsn⊂fn | inj₁ ¬p = ⊥-elim ((approx-shrinks f n mf f↓𝓢) ↯ ¬p)
+  notLower⊆ f n mf f↓𝓢 ¬fsn⊂fn | inj₂ ¬q =
+    X⊆Y⇒∣Y∣<∣X∣⇒Y⊆X ((f ̂ (1 + n)) 𝓢) ((f ̂ n) 𝓢) (approx-shrinks f n mf f↓𝓢) ¬q
+  
   fixStrong : ∀ (f : Subjects → Subjects) → Monotonic f → f ↓ 𝓢  → (n : ℕ) → (Acc _⊂_ ((f ̂ n) 𝓢)) →
     Σ[ m ∈ ℕ ] (f ̂ m) 𝓢 ≈ ((f ̂ (1 + m)) 𝓢)
   fixStrong f mf f↓𝓢 n ac with (f ̂ (1 + n)) 𝓢 ⊂? (f ̂ n) 𝓢
   fixStrong f mf f↓𝓢 n (acc rs) | yes p = fixStrong f mf f↓𝓢 (1 + n) (rs ((f ̂ (1 + n)) 𝓢) p)
-  fixStrong f mf f↓𝓢 n ac | no ¬p = {!!}
+  fixStrong f mf f↓𝓢 n ac | no ¬p = n , notLower⊆ f n mf f↓𝓢 ¬p , (approx-shrinks f n mf f↓𝓢)
 
-{-
-  with (f ̂ n) 𝓢 ⊆⟨ eqC ⟩? (f ̂ (1 + n)) 𝓢 
-  fixStrong f mf f↓𝓢 n ac | no ¬p | yes p = n , (p , approx-shrinks f n mf f↓𝓢)
-  fixStrong f mf f↓𝓢 n ac | no ¬p₁ | no ¬p =
-    let fSn⊆fn = approx-shrinks f n mf f↓𝓢
-        (y , y∈L , y∉R) = ¬⊆⇒∃x eqC ¬p
-    in ⊥-elim (¬p {!!}) -- ⊥-elim (¬p₁ (fSn⊆fn , {!!}))
--}
-
---∣ f ̂ (n + 1) ∣⟨ eq ⟩  < ∣ f ̂ n ∣⟨ eq ⟩
-
-{-
-let lower = approx-shrinks f n mf f↓𝓢
-    in {!!}
--}
---n , {!isFixed!} , {!isFixed!} -- (f ̂ n) 𝓢 , n
+  fixStrongIsfixApprox : ∀ (f : Subjects → Subjects) → (mf : Monotonic f) → (f↓𝓢 : f ↓ 𝓢) → (n : ℕ) → (ac : (Acc _⊂_ ((f ̂ n) 𝓢))) →  
+    (proj₁ (fixStrong f mf f↓𝓢 n ac)) ≡ proj₂ (fixApprox f n ac)
+  fixStrongIsfixApprox f mf f↓𝓢 n ac with (f ̂ (1 + n)) 𝓢 ⊂? (f ̂ n) 𝓢
+  fixStrongIsfixApprox f mf f↓𝓢 n (acc rs) | yes p =
+    fixStrongIsfixApprox f mf f↓𝓢 (1 + n) (rs ((f ̂ (1 + n)) 𝓢) p)    
+  fixStrongIsfixApprox f mf f↓𝓢 n ac | no ¬p = refl

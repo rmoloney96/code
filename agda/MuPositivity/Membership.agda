@@ -52,6 +52,11 @@ data _#_ {C} : C → List C → Set where
 ∉⇒# eq (x ∷ xs) x₁ p | no ¬p with ∉⇒# eq xs x₁ (λ z → p (there z))
 ∉⇒# eq (x ∷ xs) x₁ p | no ¬p | q = snoc# q (¬p ∘ sym)
 
+∈∧#⇒⊥ : ∀ {C} {xs} {x : C} → x # xs → x ∈ xs → ⊥ 
+∈∧#⇒⊥ []# ()
+∈∧#⇒⊥ (snoc# x#L x₁) here = x₁ refl
+∈∧#⇒⊥ (snoc# x#L x₁) (there x∈xs) = ∈∧#⇒⊥ x#L x∈xs
+
 #-lemma : ∀ {C} → (eq : DecEq C) → ∀ (x y : C) xs → y ∉ xs → y ∈ (x ∷ xs) → x # xs → x ≡ y
 #-lemma eq x y xs p q r with ∉⇒# eq xs y p
 #-lemma eq y .y xs p here r | res = refl
@@ -130,6 +135,13 @@ dedup-complete eq (x ∷ xs) y (there y∈xs) | S , P | Q | yes p = there (Q y�
 dedup-complete eq (y ∷ xs) .y here | S , P | Q | no ¬p = ¬#⇒∈ eq S y ¬p
 dedup-complete eq (x ∷ xs) y (there y∈xs) | S , P | Q | no ¬p = Q y∈xs
 
+dedup-idem : ∀ {C} → (eq : DecEq C) → ∀ xs → NoDup xs → proj₁ (dedup eq xs) ≡ xs
+dedup-idem eq .[] [] = refl
+dedup-idem eq (_ ∷ L) (x₁ ∷ ndxs) with dedup eq L | dedup-idem eq L ndxs 
+dedup-idem eq (x ∷ L) (x₁ ∷ ndxs) | A , ndA | dedup-eq with #? eq x A
+dedup-idem eq (x ∷ .A) (x₁ ∷ ndxs) | A , ndA | refl | (yes p) = refl
+dedup-idem eq (x ∷ L) (x₁ ∷ ndxs) | A , ndA | refl | (no ¬p) = ⊥-elim (¬p x₁)
+
 dedup-≈ : ∀ {C} → ∀ xs (eq : DecEq C) → proj₁ (dedup eq xs) ≈ xs
 dedup-≈ xs eq = dedup-sound eq xs , dedup-complete eq xs 
 
@@ -169,6 +181,42 @@ remove-is-convervative eq x₁ y (.x₁ ∷ M) p₁ (there y∈M) | yes refl =
 remove-is-convervative eq x y (x₁ ∷ M) p (there y∈M) | no ¬p =
   there (remove-is-convervative eq x y M p y∈M)
 
+remove⇒appart : ∀ {C} (eq : DecEq C) x L → x # remove eq x L
+remove⇒appart eq x [] = []#
+remove⇒appart eq x (y ∷ L) with eq x y
+remove⇒appart eq x (.x ∷ L) | yes refl = remove⇒appart eq x L
+remove⇒appart eq x (y ∷ L) | no ¬p = snoc# (remove⇒appart eq x L) (¬p ∘ sym)
+
+remove-appart-stable : ∀ {C} (eq : DecEq C) {x L} → x # L → L ≡ remove eq x L
+remove-appart-stable eq []# = refl
+remove-appart-stable eq {a} (snoc# {C} {x} {y} x#L x₁) with eq a x
+remove-appart-stable eq {x} (snoc# {.x} {y} {L} x#L x₁) | yes p = sym p ↯ x₁
+remove-appart-stable eq {x} (snoc# {.x} {y} {L} x#L x₁) | no ¬p =
+  cong₂ _∷_ refl (remove-appart-stable eq x#L)
+
+remove-is-#-convervative : ∀ {C} (eq : DecEq C) x y L → y # L → y # remove eq x L
+remove-is-#-convervative eq x y .[] []# = []#
+remove-is-#-convervative eq x y .(_ ∷ _) (snoc# {_} {y'} y#L x₁) with eq x y'
+remove-is-#-convervative eq x y₁ .(x ∷ _) (snoc# {.y₁} {.x} y#L x₁) | yes refl = remove-is-#-convervative eq x y₁ _ y#L 
+remove-is-#-convervative eq x y₁ .(y ∷ _) (snoc# {.y₁} {y} y#L x₁) | no ¬p = snoc# (remove-is-#-convervative eq x y₁ _ y#L ) x₁
+
+remove-nodup-stable : ∀ {C} (eq : DecEq C) x {M} → NoDup M → NoDup (remove eq x M)
+remove-nodup-stable eq x [] = []
+remove-nodup-stable eq x (_∷_ {y} y#L ndM) with eq x y
+remove-nodup-stable eq x (y#L ∷ ndM) | yes refl = 
+  let nodup-remove = remove-nodup-stable eq x ndM
+      L≡removexL = remove-appart-stable eq y#L
+  in subst (λ r → NoDup r) L≡removexL ndM
+remove-nodup-stable eq x₁ (_∷_ {x} {L} x#L ndM) | no ¬p =
+  let ndx∷M = remove-nodup-stable eq x₁ ndM
+      x#removeyL = remove-is-#-convervative eq x₁ x L x#L 
+  in x#removeyL ∷ ndx∷M
+
+add-remove-nodup-stable : ∀ {C} (eq : DecEq C) x {M} →
+  NoDup M → NoDup (x ∷ (remove eq x M))
+add-remove-nodup-stable eq x {M} ndM =
+  remove⇒appart eq x M ∷ remove-nodup-stable eq x ndM
+
 remove-choice : ∀ {C} (eq : DecEq C) x y M → y ∈ M → y ∈ remove eq x M ⊎ x ≡ y
 remove-choice eq x y M y∈M with eq x y
 remove-choice eq x y M y∈M | yes p = inj₂ p
@@ -200,10 +248,15 @@ NotInUnionLeft {C} {S} S₁ p q = p $ InUnionLeft {C} {S} S₁ q
 NotInUnionRight : ∀ {C} S {S₁ : List C} {a} → a ∉ (S ∪ S₁) → a ∉ S₁
 NotInUnionRight S {S₁} p q = p $ InUnionRight S {S₁} q
 
-
 S⊆T⇒x∷S⊆x∷T : ∀ {X : Set} (S T : List X) x → S ⊆ T → (x ∷ S) ⊆ (x ∷ T)
 S⊆T⇒x∷S⊆x∷T S T x S⊆T .x here = here
 S⊆T⇒x∷S⊆x∷T S T x S⊆T x₁ (there y∈x∷S) = there (S⊆T x₁ y∈x∷S) 
+
+x∷S⊆x∷T⇒S⊆T : ∀ {X : Set} {S T : List X} {x} →
+  NoDup (x ∷ S) → NoDup (x ∷ T) → (x ∷ S) ⊆ (x ∷ T) → S ⊆ T 
+x∷S⊆x∷T⇒S⊆T (y#S ∷ ndS) ndT x∷S⊆x∷T y y∈S with x∷S⊆x∷T y (there y∈S)
+x∷S⊆x∷T⇒S⊆T (y#S ∷ ndS) (x₂ ∷ ndT) x∷S⊆x∷T y y∈S | here = ⊥-elim (∈∧#⇒⊥ y#S y∈S)
+x∷S⊆x∷T⇒S⊆T (y#S ∷ ndS) (x₂ ∷ ndT) x∷S⊆x∷T y y∈S | there res = res
 
 x∈S∪T⇒x∈S⊎x∈T : ∀ {X : Set} (S T : List X) x →
   x ∈ (S ∪ T) → x ∈ S ⊎ x ∈ T
@@ -338,6 +391,7 @@ S ⊂⟨ eq ⟩? T with S ⊆⟨ eq ⟩? T | ∣ S ∣⟨ eq ⟩ <? ∣ T ∣⟨
 S ⊂⟨ eq ⟩? T | yes p | yes p₁ = yes (p , p₁)
 S ⊂⟨ eq ⟩? T | yes p | no ¬p = no (¬p ∘ proj₂)
 S ⊂⟨ eq ⟩? T | no ¬p | res₂ = no (¬p ∘ proj₁)
+
 
 
 {-

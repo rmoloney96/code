@@ -26,6 +26,21 @@ n≤m⇒1+n≤1+m n₁ _ (≤′-step p) | res = ≤′-step res
 1+n≤1+m⇒n≤m n zero (≤′-step ())
 1+n≤1+m⇒n≤m n (suc m) (≤′-step p) = ≤′-step (1+n≤1+m⇒n≤m n m p) 
 
+n≤m∧m≤n⇒n≡m : ∀ n m → n ≤ m → m ≤ n → n ≡ m
+n≤m∧m≤n⇒n≡m zero .0 n≤m z≤n = refl
+n≤m∧m≤n⇒n≡m (suc n) zero () z≤n
+n≤m∧m≤n⇒n≡m (suc n) (suc m) (s≤s n≤m) (s≤s m≤n) = cong suc (n≤m∧m≤n⇒n≡m n m n≤m m≤n)
+
+¬n<m⇒m≤n : ∀ n m → ¬ (n < m) → m ≤ n
+¬n<m⇒m≤n zero zero ¬n<m = z≤n
+¬n<m⇒m≤n zero (suc m) ¬n<m with ¬n<m (s≤s z≤n)
+¬n<m⇒m≤n zero (suc m) ¬n<m | ()
+¬n<m⇒m≤n (suc n) zero ¬n<m = z≤n
+¬n<m⇒m≤n (suc n) (suc m) ¬n<m = s≤s (¬n<m⇒m≤n n m (λ x → ¬n<m (s≤s x)))
+
+sn≡sm⇒n≡m : ∀ {n m} → suc n ≡ suc m → n ≡ m
+sn≡sm⇒n≡m refl = refl 
+
 infix 6 _⇒_
 _⇒_ : Bool → Bool → Bool
 P ⇒ Q = not P ∨ Q
