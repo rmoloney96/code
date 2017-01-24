@@ -335,8 +335,10 @@ module ModalTransitionSystem (𝓣 : Transitions) where
   fixStrong f mf f↓𝓢 n (acc rs) | yes p = fixStrong f mf f↓𝓢 (1 + n) (rs ((f ̂ (1 + n)) 𝓢) p)
   fixStrong f mf f↓𝓢 n ac | no ¬p = n , notLower⊆ f n mf f↓𝓢 ¬p , (approx-shrinks f n mf f↓𝓢)
 
-  fixStrongIsfixApprox : ∀ (f : Subjects → Subjects) → (mf : Monotonic f) → (f↓𝓢 : f ↓ 𝓢) → (n : ℕ) → (ac : (Acc _⊂_ ((f ̂ n) 𝓢))) →  
-    (proj₁ (fixStrong f mf f↓𝓢 n ac)) ≡ proj₂ (fixApprox f n ac)
+  fixStrongIsfixApprox :
+    ∀ (f : Subjects → Subjects) → (mf : Monotonic f) → (f↓𝓢 : f ↓ 𝓢) → (n : ℕ) → (ac : (Acc _⊂_ ((f ̂ n) 𝓢))) →
+    ------------------------------------------------------------------------------------------------------------
+                 (proj₁ (fixStrong f mf f↓𝓢 n ac)) ≡ proj₂ (fixApprox f n ac)
   fixStrongIsfixApprox f mf f↓𝓢 n ac with (f ̂ (1 + n)) 𝓢 ⊂? (f ̂ n) 𝓢
   fixStrongIsfixApprox f mf f↓𝓢 n (acc rs) | yes p =
     fixStrongIsfixApprox f mf f↓𝓢 (1 + n) (rs ((f ̂ (1 + n)) 𝓢) p)    
