@@ -73,7 +73,7 @@ Proof.
 Defined.
 
 Lemma or_inr : forall (a b c : Prop) (f : a -> c) (g : b -> c) (x : a),  
-  case a b c (inl b x) f g = f x.
+  case a b c (inr b x) f g = g x.
 Proof.
   unfold case.
   unfold inl. auto.

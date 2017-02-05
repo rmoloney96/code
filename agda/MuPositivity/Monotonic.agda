@@ -209,8 +209,10 @@ module ModalTransitionSystem (𝓣 : Transitions) where
     Stable+ i X Y a (P x) nin nip Prop = refl
     Stable+ i X Y a₁ (α[ a ] φ) nin nip (Alpha pol) with Stable+ i X Y a₁ φ nin nip pol
     Stable+ i X Y a₁ (α[ a ] φ) nin nip (Alpha pol) | p rewrite p = refl
-    Stable+ i X Y a₁ (α⟨ a ⟩⁅ n ⁆ φ) nin nip (ExistC {_} {_} {p₁} {n₁} pol) with Stable+ i X Y a₁ φ (NotInUnionRight p₁ nip) (NotInUnionLeft n₁ nin) pol
-    Stable+ i X Y a₁ (α⟨ a ⟩⁅ n ⁆ φ) nin nip (ExistC {_} {_} {p₁} {n₁} pol) | p rewrite p = refl
+    Stable+ i X Y a₁ (α⟨ a ⟩⁅ n ⁆ φ) nin nip (ExistC {_} {_} {p₁} {n₁} pol)
+      with Stable+ i X Y a₁ φ (NotInUnionRight p₁ nip) (NotInUnionLeft n₁ nin) pol
+    Stable+ i X Y a₁ (α⟨ a ⟩⁅ n ⁆ φ) nin nip (ExistC {_} {_} {p₁} {n₁} pol)
+      | p rewrite p = refl
     Stable+ i X Y a (φ ⊗ φ₁) nin nip (And {_} {_} {p₁} {p₂} {n₁} {n₂} pol pol₁)
       with Stable+ i X Y a φ (NotInUnionLeft n₂ nin) (NotInUnionLeft p₂ nip ) pol
       | Stable+ i X Y a φ₁ (NotInUnionRight n₁ nin) (NotInUnionRight p₁ nip) pol₁
@@ -230,7 +232,8 @@ module ModalTransitionSystem (𝓣 : Transitions) where
       α[]-Monotonic {𝓢} {𝓣 = 𝓣} (Monotone+ i X Y a s nin pos sub)
     Monotone+ i X Y a (α⟨ a₁ ⟩⁅ n ⁆ s) nin (ExistC {_} {_} {p₁} {n₁} pos) sub
       with Stable+ i X Y a s (NotInUnionRight p₁ nin) (NotInUnionLeft n₁ nin) pos
-    Monotone+ i X Y a (α⟨ a₁ ⟩⁅ n ⁆ s) nin (ExistC {_} {_} {p₁} {n₁} pos) sub | p rewrite p = λ x z → z
+    Monotone+ i X Y a (α⟨ a₁ ⟩⁅ n ⁆ s) nin (ExistC {_} {_} {p₁} {n₁} pos) sub
+      | p rewrite p = λ x z → z
     Monotone+ i X Y a (s ⊗ s₁) nin (And {.s} {.s₁} {p₁} {p₂} {n₁} {n₂} pos pos₁) sub =
       IntersectionLaw (Monotone+ i X Y a s (NotInUnionLeft n₂ nin) pos sub)
                       (Monotone+ i X Y a s₁ (NotInUnionRight n₁ nin) pos₁ sub)
