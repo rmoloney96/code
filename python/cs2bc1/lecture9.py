@@ -56,6 +56,7 @@ class ShoppingCart:
     def checkout(self):
         if len(self.shopping_cart) > 0:
             print "we will bill you now"
+            "Code goes here...."
         else:
             print "You have nothing in your cart"
 
@@ -117,3 +118,12 @@ class Customer:
         else:
             print "Not logged in"
             return False
+
+if __name__ == "__main__":
+    server = Server()
+    catalogue = Catalogue()
+    customer = Customer(catalogue,server)
+    customer.register("me","pass")
+    customer.login("me","pass")
+    customer.browse()
+    customer.select('t-shirt')
