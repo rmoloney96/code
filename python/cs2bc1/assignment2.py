@@ -22,7 +22,7 @@ world = [[{'terrain' : 'grass',
            'items' : []}],
          [{'terrain' : 'grass',
            'coordinate' : (1,0),
-           'items' : ['sword of damacles']},
+           'items' : ['sword of damocles']},
           {'terrain' : 'water',
            'coordinate' : (1,1),
            'items' : []},
@@ -43,7 +43,7 @@ def find_location(location):
     for row in world:
         for elt in row:
             hsh = hashlib.md5()
-            hsh.update(str(elt))
+            hsh.update(str(elt).encode('utf-8'))
             digest = hsh.hexdigest()
             if location['location'] == digest:
                 return elt
@@ -61,7 +61,7 @@ def server(request,location=None,items=[]):
     if request == 'get_coordinates':
         record = get_location(location)
         hsh = hashlib.md5()
-        hsh.update(str(record))            
+        hsh.update(str(record).encode('utf-8'))
         record['location'] = hsh.hexdigest()
         return record
     elif request == 'go_west':
@@ -75,7 +75,7 @@ def server(request,location=None,items=[]):
             if new_record['terrain'] == 'water':
                 return {'error' : "drowning",
                         'msg' : "You will drown now that you walked into terribly deep water"}
-            hsh.update(str(new_record))
+            hsh.update(str(new_record).encode('utf-8'))
             new_record['location'] = hsh.hexdigest()
             return new_record
         else:
@@ -92,7 +92,7 @@ def server(request,location=None,items=[]):
             if new_record['terrain'] == 'water':
                 return {'error' : "drowning",
                         'msg' : "You will drown now that you walked into terribly deep water"}
-            hsh.update(str(new_record))
+            hsh.update(str(new_record).encode('utf-8'))
             new_record['location'] = hsh.hexdigest()
             return new_record
         else:
@@ -109,7 +109,7 @@ def server(request,location=None,items=[]):
             if new_record['terrain'] == 'water':
                 return {'error' : "drowning",
                         'msg' : "You will drown now that you walked into terribly deep water"}
-            hsh.update(str(new_record))
+            hsh.update(str(new_record).encode('utf-8'))
             new_record['location'] = hsh.hexdigest()
             return new_record
         else:
@@ -126,7 +126,7 @@ def server(request,location=None,items=[]):
             if new_record['terrain'] == 'water':
                 return {'error' : "drowning",
                         'msg' : "You will drown now that you walked into terribly deep water"}
-            hsh.update(str(new_record))
+            hsh.update(str(new_record).encode('utf-8'))
             new_record['location'] = hsh.hexdigest()
             return new_record
         else:
@@ -135,24 +135,24 @@ def server(request,location=None,items=[]):
     elif request == 'pick_up':
         record = get_location(location)
         items = record['items']
-        if items > 0:
+        if len(items) > 0:
             item = items[0]
             hsh = hashlib.md5()
-            hsh.update(item)
+            hsh.update(item.encode('utf-8'))
             return hsh.hexdigest()
         else:
             return {'error' : "Nothing here",
                     'msg' : "There is nothing here to pick up"}
     elif request == 'slice' :
         hsh = hashlib.md5()
-        hsh.update('gordian knot')
+        hsh.update('gordian knot'.encode('utf-8'))
         a = hsh.hexdigest()
         hsh = hashlib.md5()
-        hsh.update('sword of damacles')
+        hsh.update('sword of damocles'.encode('utf-8'))
         b = hsh.hexdigest()
         if (a in items and b in items):
             return {'success' : "Congragulations",
-                    'msg' : "One way or another, you have successfully slides the Gordian knot"}
+                    'msg' : "One way or another, you have successfully sliced the Gordian knot"}
         else:
             return {'error' : "incomplete",
                     'msg' : "You don't have all the necessary items"}
@@ -181,7 +181,7 @@ if __name__ == "__main__":
     ------------------------------------------------
     coordinates = server('get_coordinates')
     coordinates = server('go_east',location=coordinates)
-    coordinates
+    print(coordinates)
     ------------------------------------------------
     """
     
