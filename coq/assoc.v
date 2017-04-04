@@ -32,7 +32,7 @@ Proof.
   intros ; apply IHl.
 Defined.
 
-Print assoc'.    
+Extraction assoc'.    
 
 (* prints out: 
 assoc' = 
@@ -44,6 +44,16 @@ list_rec (fun _ : list (A * B) => option B) None
    | right n => fun _ : eq_dec x (fst a) = right (x = fst a) n => IHl
    end (eq_refl (eq_dec x (fst a)))) l
      : A -> list (A * B) -> option B
+
+(** val assoc' : a -> (a, b) prod list -> b option **)
+
+let rec assoc' x = function
+| Nil -> None
+| Cons (y, l0) ->
+  (match eq_dec x (fst y) with
+   | Left -> Some (snd y)
+   | Right -> assoc' x l0)
+
 *)
 
 (* 

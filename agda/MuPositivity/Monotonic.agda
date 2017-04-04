@@ -5,7 +5,6 @@ open import Relation.Nullary.Decidable
 open import Level
 
 module Monotonic
-  (Atom : Set)
   (C : Set)
   (Atom : Set)
   (eqAtom : DecEq Atom)

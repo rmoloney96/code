@@ -8,17 +8,31 @@ Parameter eq_dec : forall (x:A) (y:A),{x=y}+{x<>y}.
 Lemma assoc : forall (x:A) (l: assoc_list),
   {y | In (x,y) l} + {forall (y:B), ~In (x,y) l}.
 Proof. 
-  intros ; induction l ; firstorder.
-  case (eq_dec x (fst a)).
-  intros. left. exists (snd a). rewrite e. 
-  cut ((fst a,snd a) = a). intros.  rewrite H. 
-  firstorder.
-  destruct a ; auto.
-  intros. right. intros. unfold not. intros. 
-  simpl in H.
-  inversion H. unfold not in n. apply n. 
-  rewrite H0. auto.
-  firstorder.
+  intros x l. induction l.
+    (* nil *)
+    right. auto.
+    (* cons *)
+    case (eq_dec x (fst a)).
+      (* x = fst p *)
+      intros eq.
+      left. exists (snd a). rewrite eq.
+      case a. firstorder.
+      (* x <> fst a *)
+      intros neq.
+      case IHl.
+        (* subcase left *)
+        intro leftcase.
+        left. inversion leftcase. exists x0.
+        apply or_intror. auto.
+        (* subcase right *)
+        intro rightcase.
+        right.
+        intros y NotIn.
+        apply (rightcase y).
+        inversion NotIn ; auto.
+        rewrite H in neq.
+        contradiction neq. auto.
 Defined. 
 
-Extraction  assoc.
+Extraction assoc.
+Print assoc.
