@@ -7,6 +7,11 @@ if __name__ == "__main__":
     Fill in your server communication code here...
 
     example: 
+    ------------------------------------------------
+    coordinates = server('get_coordinates')
+    coordinates = server('go_east',location=coordinates)
+    print(coordinates)
+    ------------------------------------------------
     """
 
     pass
