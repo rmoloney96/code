@@ -164,7 +164,26 @@ def server(request,location=None,items=[]):
 if __name__ == "__main__":
     """
     Fill in your server communication code here...
-
+    
+    coordinates = server('get_coordinates')
+    new_coordinates = server('go_east', location=coordinates)
+    coordinates = server('get_coordinates')
+    sword = server('pick_up', location=coordinates)
+    coordinates = server('get_coordinates')
+    new_coordinates = server('go_west', location=coordinates)
+    coordinates = server('get_coordinates')
+    new_coordinates = server('go_north', location=coordinates)
+    coordinates = server('get_coordinates')
+    new_coordinates = server('go_north', location=coordinates)
+    coordinates = server('get_coordinates')
+    new_coordinates = server('go_east', location=coordinates)
+    coordinates = server('get_coordinates')
+    new_coordinates = server('go_east', location=coordinates)
+    coordinates = server('get_coordinates')
+    knot = server('pick_up', location=coordinates)
+    coordinates = server('get_coordinates')
+    success = server('slice', items=[sword,knot])
+    
     example: 
     """
 
